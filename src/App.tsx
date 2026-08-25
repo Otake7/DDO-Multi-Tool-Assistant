@@ -169,6 +169,33 @@ export default function App() {
     localStorage.setItem('ddon_planned_quests', JSON.stringify(plannedQuests));
   }, [plannedQuests]);
 
+  // Sync state to Aiven PostgreSQL if logged in
+  useEffect(() => {
+    if (!currentUser || currentUser.isGuest) return;
+
+    const timer = setTimeout(() => {
+      fetch('/api/auth/sync-progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          progressData: {
+            gameVersion,
+            selectedVocation,
+            currentLevel,
+            currentXp,
+            targetLevel,
+            boosters,
+            completedTrials,
+            plannedQuests
+          }
+        })
+      }).catch((e) => console.warn('[Sync] Progress sync deferred:', e));
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [currentUser, gameVersion, selectedVocation, currentLevel, currentXp, targetLevel, boosters, completedTrials, plannedQuests]);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
@@ -330,6 +357,16 @@ export default function App() {
     setIsSessionStarted(true);
     if (user.mainVocation) {
       setSelectedVocation(user.mainVocation);
+    }
+    if (user.progress) {
+      if (user.progress.gameVersion) setGameVersion(user.progress.gameVersion);
+      if (user.progress.selectedVocation) setSelectedVocation(user.progress.selectedVocation);
+      if (typeof user.progress.currentLevel === 'number') setCurrentLevel(user.progress.currentLevel);
+      if (typeof user.progress.currentXp === 'number') setCurrentXp(user.progress.currentXp);
+      if (typeof user.progress.targetLevel === 'number') setTargetLevel(user.progress.targetLevel);
+      if (user.progress.boosters) setBoosters(user.progress.boosters);
+      if (user.progress.completedTrials) setCompletedTrials(user.progress.completedTrials);
+      if (user.progress.plannedQuests) setPlannedQuests(user.progress.plannedQuests);
     }
     showToast(`Welcome back, Arisen ${user.characterName || user.username}!`);
   };

@@ -89,6 +89,8 @@ export const WelcomeAuthScreen: React.FC<WelcomeAuthScreenProps> = ({
     });
   };
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   // Stored accounts for fast switching
   const [storedAccounts, setStoredAccounts] = useState<UserProfile[]>(() => {
     const saved = localStorage.getItem('ddon_saved_accounts');
@@ -102,33 +104,74 @@ export const WelcomeAuthScreen: React.FC<WelcomeAuthScreenProps> = ({
     return [];
   });
 
-  // Handle Login
-  const handlePerformLogin = (e?: React.FormEvent) => {
+  // Handle Login (STRICT: only permits previously created accounts)
+  const handlePerformLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setLoginError(null);
 
-    const cleanUser = loginUsername.trim().toLowerCase();
+    const cleanUser = loginUsername.trim();
     if (!cleanUser) {
       setLoginError('Please enter your Arisen username or character name.');
       return;
     }
 
-    // Check existing accounts in localStorage
+    setIsLoading(true);
+
+    try {
+      // 1. Attempt server-side login (backed by Aiven PostgreSQL if configured)
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: cleanUser,
+          password: loginPassword.trim()
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const user: UserProfile = data.user;
+
+        // Cache locally for fast switching
+        const saved = localStorage.getItem('ddon_saved_accounts');
+        let accounts: UserProfile[] = saved ? JSON.parse(saved) : [];
+        const existingIdx = accounts.findIndex((a) => a.id === user.id || a.username.toLowerCase() === user.username.toLowerCase());
+        if (existingIdx >= 0) {
+          accounts[existingIdx] = user;
+        } else {
+          accounts.push(user);
+        }
+        localStorage.setItem('ddon_saved_accounts', JSON.stringify(accounts));
+        localStorage.setItem('ddon_current_user', JSON.stringify(user));
+
+        onLogin(user);
+        return;
+      } else if (res.status === 404 || res.status === 401 || res.status === 400) {
+        const errData = await res.json().catch(() => ({}));
+        setLoginError(errData.error || 'Account not found. Please click "Register New Arisen" to create an account first.');
+        return;
+      }
+    } catch (networkErr) {
+      console.warn('[Auth] Server unreachable, checking local registered accounts:', networkErr);
+    } finally {
+      setIsLoading(false);
+    }
+
+    // 2. Client-side local storage check fallback (STRICT: no auto-creation)
     const saved = localStorage.getItem('ddon_saved_accounts');
     let accounts: UserProfile[] = saved ? JSON.parse(saved) : [];
-
     const found = accounts.find(
-      (a) => a.username.toLowerCase() === cleanUser || a.characterName.toLowerCase() === cleanUser
+      (a) =>
+        a.username.toLowerCase() === cleanUser.toLowerCase() ||
+        a.characterName.toLowerCase() === cleanUser.toLowerCase()
     );
 
     if (found) {
-      // If account has a password, verify
       if (found.password && found.password !== loginPassword.trim()) {
         setLoginError('Incorrect password or PIN. Please try again.');
         return;
       }
 
-      // Update lastLoginAt
       const updatedUser: UserProfile = {
         ...found,
         lastLoginAt: Date.now()
@@ -140,35 +183,14 @@ export const WelcomeAuthScreen: React.FC<WelcomeAuthScreenProps> = ({
 
       onLogin(updatedUser);
     } else {
-      // Auto-create friendly account if it doesn't exist yet, or notify
-      const newUser: UserProfile = {
-        id: `arisen-${Date.now()}`,
-        username: loginUsername.trim(),
-        characterName: loginUsername.trim(),
-        password: loginPassword.trim() || undefined,
-        mainVocation: 'fighter',
-        mainVocations: ['fighter'],
-        servers: ['Rising'],
-        title: 'New Arisen',
-        clanTag: '',
-        bio: 'Arisen on the Dogma Rising server.',
-        avatarIcon: 'flame',
-        avatarColor: 'amber',
-        isGuest: false,
-        createdAt: Date.now(),
-        lastLoginAt: Date.now()
-      };
-
-      accounts.push(newUser);
-      localStorage.setItem('ddon_saved_accounts', JSON.stringify(accounts));
-      localStorage.setItem('ddon_current_user', JSON.stringify(newUser));
-
-      onLogin(newUser);
+      setLoginError(
+        `Account "${cleanUser}" does not exist. Please click "Register New Arisen" to create your account first.`
+      );
     }
   };
 
   // Handle Registration
-  const handlePerformRegister = (e: React.FormEvent) => {
+  const handlePerformRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegError(null);
 
@@ -180,16 +202,9 @@ export const WelcomeAuthScreen: React.FC<WelcomeAuthScreenProps> = ({
       return;
     }
 
-    const saved = localStorage.getItem('ddon_saved_accounts');
-    let accounts: UserProfile[] = saved ? JSON.parse(saved) : [];
+    setIsLoading(true);
 
-    if (accounts.some((a) => a.username.toLowerCase() === cleanUser.toLowerCase())) {
-      setRegError(`Username "${cleanUser}" is already taken on this device. Please log in or choose another.`);
-      return;
-    }
-
-    const newUser: UserProfile = {
-      id: `arisen-${Date.now()}`,
+    const payload = {
       username: cleanUser,
       characterName: cleanChar,
       password: regPassword.trim() || undefined,
@@ -197,10 +212,54 @@ export const WelcomeAuthScreen: React.FC<WelcomeAuthScreenProps> = ({
       mainVocations: regVocations.length > 0 ? regVocations : ['fighter'],
       servers: regServers.length > 0 ? regServers : ['Rising'],
       clanTag: regClanTag.trim(),
-      title: regTitle.trim() || 'Arisen of Lestania',
+      title: regTitle.trim() || 'Dragonforged Arisen',
       bio: regBio.trim() || 'Leveling & exploring the world of Dragon\'s Dogma Online.',
       avatarIcon: 'flame',
-      avatarColor: 'amber',
+      avatarColor: 'amber'
+    };
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const newUser: UserProfile = data.user;
+
+        const saved = localStorage.getItem('ddon_saved_accounts');
+        let accounts: UserProfile[] = saved ? JSON.parse(saved) : [];
+        accounts.push(newUser);
+        localStorage.setItem('ddon_saved_accounts', JSON.stringify(accounts));
+        localStorage.setItem('ddon_current_user', JSON.stringify(newUser));
+
+        onLogin(newUser);
+        return;
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setRegError(errData.error || 'Failed to create account.');
+        return;
+      }
+    } catch (networkErr) {
+      console.warn('[Auth] Server registration unreachable, registering locally:', networkErr);
+    } finally {
+      setIsLoading(false);
+    }
+
+    // Local fallback registration
+    const saved = localStorage.getItem('ddon_saved_accounts');
+    let accounts: UserProfile[] = saved ? JSON.parse(saved) : [];
+
+    if (accounts.some((a) => a.username.toLowerCase() === cleanUser.toLowerCase())) {
+      setRegError(`Username "${cleanUser}" is already taken. Please choose another.`);
+      return;
+    }
+
+    const newUser: UserProfile = {
+      id: `arisen-${Date.now()}`,
+      ...payload,
       isGuest: false,
       createdAt: Date.now(),
       lastLoginAt: Date.now()
@@ -391,10 +450,17 @@ export const WelcomeAuthScreen: React.FC<WelcomeAuthScreenProps> = ({
             <div className="pt-2 flex flex-col gap-2">
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+                disabled={isLoading}
+                className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
               >
-                <span>Enter Arisen Realm</span>
-                <ArrowRight className="w-4 h-4" />
+                {isLoading ? (
+                  <span>Authenticating Arisen...</span>
+                ) : (
+                  <>
+                    <span>Enter Arisen Realm</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
 
               <button
@@ -577,10 +643,17 @@ export const WelcomeAuthScreen: React.FC<WelcomeAuthScreenProps> = ({
             <div className="pt-2 flex flex-col gap-2">
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+                disabled={isLoading}
+                className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
               >
-                <Check className="w-4 h-4" />
-                <span>Create & Launch Profile</span>
+                {isLoading ? (
+                  <span>Registering Arisen...</span>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Create & Launch Profile</span>
+                  </>
+                )}
               </button>
 
               <button

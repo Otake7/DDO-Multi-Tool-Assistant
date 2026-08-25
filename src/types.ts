@@ -373,6 +373,16 @@ export interface UserProfile {
   avatarIcon?: string; // 'flame' | 'shield' | 'swords' | 'crown' | 'sparkles' | 'compass' | 'wand' | 'trophy'
   avatarColor?: string; // 'amber' | 'emerald' | 'cyan' | 'purple' | 'rose' | 'blue'
   currentLevel?: number;
+  progress?: {
+    gameVersion?: GameVersion;
+    selectedVocation?: VocationType;
+    currentLevel?: number;
+    currentXp?: number;
+    targetLevel?: number;
+    boosters?: BoosterSettings;
+    completedTrials?: Record<string, boolean>;
+    plannedQuests?: PlannedQuest[];
+  };
   isGuest: boolean;
   createdAt: number;
   lastLoginAt: number;

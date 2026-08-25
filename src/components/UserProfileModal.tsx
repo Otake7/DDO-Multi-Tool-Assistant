@@ -100,7 +100,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     });
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
 
@@ -116,6 +116,30 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       password: password.trim() || undefined,
       isGuest: false // If guest edits and saves, upgrades to local account
     };
+
+    // Sync to PostgreSQL backend if online
+    if (!currentUser.isGuest) {
+      try {
+        fetch('/api/auth/update-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: updated.id,
+            characterName: updated.characterName,
+            mainVocation: updated.mainVocation,
+            mainVocations: updated.mainVocations,
+            servers: updated.servers,
+            clanTag: updated.clanTag,
+            title: updated.title,
+            bio: updated.bio,
+            avatarIcon: updated.avatarIcon,
+            avatarColor: updated.avatarColor,
+          })
+        }).catch((err) => console.warn('[Profile Update] Backend sync skipped:', err));
+      } catch (e) {
+        // ignore
+      }
+    }
 
     // Update in localStorage
     localStorage.setItem('ddon_current_user', JSON.stringify(updated));
