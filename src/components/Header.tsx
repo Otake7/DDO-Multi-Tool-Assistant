@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Shield, Flame, RotateCcw, Award, Swords, Layers, Map, PackageCheck, BookOpen, HelpCircle, Compass, Trophy, User, Coffee } from 'lucide-react';
+import { Sparkles, Shield, Flame, RotateCcw, Award, Swords, Layers, Map, PackageCheck, BookOpen, HelpCircle, Compass, Trophy, User, Coffee, PanelLeft, PanelTop, Skull, Library } from 'lucide-react';
 import { BoosterSettings, GameVersion, UserProfile } from '../types';
 import { GAME_VERSIONS, getMaxLevelForVersion, XP_RING_CAP_LEVEL } from '../data/levelTable';
 
@@ -16,6 +16,8 @@ interface HeaderProps {
   plannedCount: number;
   currentUser?: UserProfile | null;
   onOpenProfileModal?: () => void;
+  navLayout?: 'top' | 'sidebar';
+  onToggleNavLayout?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -30,7 +32,9 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   plannedCount,
   currentUser,
-  onOpenProfileModal
+  onOpenProfileModal,
+  navLayout = 'top',
+  onToggleNavLayout
 }) => {
   const isRingActiveAtCurrentLevel = boosters.useExpRing50 && currentLevel < XP_RING_CAP_LEVEL;
   const maxLevel = getMaxLevelForVersion(gameVersion);
@@ -86,13 +90,35 @@ export const Header: React.FC<HeaderProps> = ({
                     </button>
                   )}
                 </div>
-                <p className="text-xs text-slate-400">
-                  Leveling & Quest Planner, Item Library, Interactive Guides & Multi Tool Assistant (Season {gameVersion} Cap Lv {maxLevel})
-                </p>
+                <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                  <p className="text-xs text-slate-400">
+                    Leveling & Quest Planner, Item Library, Interactive Guides & Multi Tool Assistant (Season {gameVersion} Cap Lv {maxLevel})
+                  </p>
+                  {onToggleNavLayout && (
+                    <button
+                      id="btn-toggle-nav-layout-subtitle"
+                      onClick={onToggleNavLayout}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-400 text-amber-300 hover:text-amber-200 text-xs font-semibold transition-all shadow-sm cursor-pointer group"
+                      title={`Switch menu style between Top Bar and Left Sidebar (Currently: ${navLayout === 'sidebar' ? 'Left Sidebar View' : 'Top Bar View'})`}
+                    >
+                      {navLayout === 'sidebar' ? (
+                        <>
+                          <PanelTop className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+                          <span>Switch to Top Menu View</span>
+                        </>
+                      ) : (
+                        <>
+                          <PanelLeft className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+                          <span>Switch to Left Sidebar View</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Mobile Reset & Quick Ring Button */}
+            {/* Mobile View Toggle, Reset & Quick Ring Button */}
             <div className="flex md:hidden items-center gap-2">
               <button
                 onClick={onOpenProfileModal}
@@ -126,6 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex flex-col items-center md:items-end gap-2 w-full md:w-auto">
             {/* Top Row: Version Selector, 50% Ring, Level Range */}
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center md:justify-end">
+
               {/* Game Version Selector */}
               <div className="flex items-center gap-1.5 bg-slate-950/80 border border-slate-800 px-2.5 py-1.5 rounded-xl text-xs">
                 <Layers className="w-3.5 h-3.5 text-amber-400" />
@@ -209,159 +236,187 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar border-t border-slate-800 pt-2 pb-2 text-sm font-medium">
-          <button
-            id="tab-calculator"
-            onClick={() => setActiveTab('calculator')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-              activeTab === 'calculator'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span>Level Progress & Goal</span>
-          </button>
+        {/* Navigation Tabs (Displayed when in top menu mode) */}
+        {navLayout === 'top' && (
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar border-t border-slate-800 pt-2 pb-2 text-sm font-medium">
+            <button
+              id="tab-calculator"
+              onClick={() => setActiveTab('calculator')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'calculator'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Shield className="w-4 h-4" />
+              <span>Level Progress & Goal</span>
+            </button>
 
-          <button
-            id="tab-vocations"
-            onClick={() => setActiveTab('vocations')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-              activeTab === 'vocations'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Swords className="w-4 h-4" />
-            <span>Vocations & Job Targets</span>
-          </button>
+            <button
+              id="tab-vocations"
+              onClick={() => setActiveTab('vocations')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'vocations'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Swords className="w-4 h-4" />
+              <span>Vocations & Job Targets</span>
+            </button>
 
-          <button
-            id="tab-quests"
-            onClick={() => setActiveTab('quests')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-              activeTab === 'quests'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Flame className="w-4 h-4" />
-            <span>Quest Database</span>
-          </button>
+            <button
+              id="tab-quests"
+              onClick={() => setActiveTab('quests')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'quests'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Flame className="w-4 h-4" />
+              <span>Quest Database</span>
+            </button>
 
-          <button
-            id="tab-planner"
-            onClick={() => setActiveTab('planner')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 relative ${
-              activeTab === 'planner'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Award className="w-4 h-4" />
-            <span>Quest Planner</span>
-            {plannedCount > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+            <button
+              id="tab-planner"
+              onClick={() => setActiveTab('planner')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 relative ${
                 activeTab === 'planner'
-                  ? 'bg-slate-950 text-amber-300'
-                  : 'bg-amber-500 text-slate-950'
-              }`}>
-                {plannedCount}
-              </span>
-            )}
-          </button>
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Award className="w-4 h-4" />
+              <span>Quest Planner</span>
+              {plannedCount > 0 && (
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                  activeTab === 'planner'
+                    ? 'bg-slate-950 text-amber-300'
+                    : 'bg-amber-500 text-slate-950'
+                }`}>
+                  {plannedCount}
+                </span>
+              )}
+            </button>
 
-          <button
-            id="tab-leaderboard"
-            onClick={() => setActiveTab('leaderboard')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-              activeTab === 'leaderboard'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Trophy className="w-4 h-4" />
-            <span>Leaderboard</span>
-          </button>
+            <button
+              id="tab-leaderboard"
+              onClick={() => setActiveTab('leaderboard')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'leaderboard'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Trophy className="w-4 h-4" />
+              <span>Leaderboard</span>
+            </button>
 
-          <button
-            id="tab-journal"
-            onClick={() => setActiveTab('journal')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-              activeTab === 'journal'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <HelpCircle className="w-4 h-4" />
-            <span>Ask the Assistant</span>
-          </button>
+            <button
+              id="tab-journal"
+              onClick={() => setActiveTab('journal')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'journal'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span>Ask the Assistant</span>
+            </button>
 
-          <button
-            id="tab-map"
-            onClick={() => setActiveTab('map')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-              activeTab === 'map'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Map className="w-4 h-4" />
-            <span>Find resources and enemies</span>
-          </button>
+            <button
+              id="tab-map"
+              onClick={() => setActiveTab('map')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'map'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Map className="w-4 h-4" />
+              <span>Find resources and enemies</span>
+            </button>
 
-          <button
-            id="tab-items"
-            onClick={() => setActiveTab('items')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-              activeTab === 'items'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <PackageCheck className="w-4 h-4" />
-            <span>Item Library</span>
-          </button>
+            <button
+              id="tab-items"
+              onClick={() => setActiveTab('items')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'items'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <PackageCheck className="w-4 h-4" />
+              <span>Item Library</span>
+            </button>
 
-          <button
-            id="tab-fast-routes"
-            onClick={() => setActiveTab('fast_routes')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-              activeTab === 'fast_routes'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Compass className="w-4 h-4" />
-            <span>Fast Routes & Guide</span>
-          </button>
+            <button
+              id="tab-knowledge"
+              onClick={() => setActiveTab('knowledge')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'knowledge'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Library className="w-4 h-4" />
+              <span>Knowledge Library</span>
+            </button>
 
-          <button
-            id="tab-guides"
-            onClick={() => setActiveTab('guides')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-              activeTab === 'guides'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Guides</span>
-          </button>
+            <button
+              id="tab-bestiary"
+              onClick={() => setActiveTab('bestiary')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'bestiary'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Skull className="w-4 h-4" />
+              <span>Bestiary</span>
+            </button>
 
-          <button
-            id="tab-table"
-            onClick={() => setActiveTab('table')}
-            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
-              activeTab === 'table'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <span>Lv 1–{maxLevel} Table</span>
-          </button>
-        </div>
+            <button
+              id="tab-fast-routes"
+              onClick={() => setActiveTab('fast_routes')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'fast_routes'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Compass className="w-4 h-4" />
+              <span>Fast Routes & Guide</span>
+            </button>
+
+            <button
+              id="tab-guides"
+              onClick={() => setActiveTab('guides')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'guides'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Guides</span>
+            </button>
+
+            <button
+              id="tab-table"
+              onClick={() => setActiveTab('table')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'table'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <span>Lv 1–{maxLevel} Table</span>
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

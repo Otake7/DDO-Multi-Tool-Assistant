@@ -11,6 +11,8 @@ import { DogmaRisingGuides } from './components/DogmaRisingGuides';
 import { AdventureGuides } from './components/AdventureGuides';
 import { AskTheJournal } from './components/AskTheJournal';
 import { Leaderboards } from './components/Leaderboards';
+import { Bestiary } from './components/Bestiary';
+import { KnowledgeLibrary } from './components/KnowledgeLibrary';
 import { CustomQuestModal } from './components/CustomQuestModal';
 import { WelcomeAuthScreen } from './components/WelcomeAuthScreen';
 import { UserProfileModal } from './components/UserProfileModal';
@@ -19,7 +21,7 @@ import { BoosterSettings, CommunityFarmSpot, GameVersion, PlannedQuest, Quest, S
 import { LEVELING_PRESETS } from './data/levelingPresets';
 import { ALL_QUESTS } from './data/quests';
 import { getMaxLevelForVersion } from './data/levelTable';
-import { Check, Sparkles, AlertCircle, Coffee } from 'lucide-react';
+import { Check, Sparkles, AlertCircle, Coffee, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, PackageCheck, Compass, BookOpen, Table, PanelTop, PanelLeft, Skull, Library } from 'lucide-react';
 
 export default function App() {
   // --- Account & User Profile State ---
@@ -42,6 +44,19 @@ export default function App() {
   });
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+
+  // Navigation Layout State ('top' bar or 'sidebar' left menu)
+  const [navLayout, setNavLayout] = useState<'top' | 'sidebar'>(() => {
+    const saved = localStorage.getItem('ddon_nav_layout');
+    return saved === 'sidebar' ? 'sidebar' : 'top';
+  });
+
+  const handleToggleNavLayout = () => {
+    const next = navLayout === 'top' ? 'sidebar' : 'top';
+    setNavLayout(next);
+    localStorage.setItem('ddon_nav_layout', next);
+    showToast(`Switched navigation view to ${next === 'sidebar' ? 'Left Sidebar' : 'Top Bar'}`);
+  };
 
   // --- Persistent State ---
   const [gameVersion, setGameVersion] = useState<GameVersion>(() => {
@@ -443,10 +458,217 @@ export default function App() {
         onSelectVersion={handleSelectVersion}
         currentUser={currentUser}
         onOpenProfileModal={() => setIsProfileModalOpen(true)}
+        navLayout={navLayout}
+        onToggleNavLayout={handleToggleNavLayout}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Main Body with Dynamic Top/Sidebar Flex Layout */}
+      <div className={`flex-1 flex ${navLayout === 'sidebar' ? 'flex-col md:flex-row' : 'flex-col'}`}>
+        
+        {/* Left Sidebar Navigation (Rendered when navLayout === 'sidebar') */}
+        {navLayout === 'sidebar' && (
+          <aside className="w-full md:w-64 shrink-0 bg-slate-900/90 border-b md:border-b-0 md:border-r border-amber-500/20 p-3 md:p-4 space-y-1.5 md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:overflow-y-auto z-30">
+            <div className="flex items-center justify-between px-3 py-2 text-[11px] font-mono uppercase tracking-wider text-slate-400 border-b border-slate-800/80 mb-2">
+              <span className="flex items-center gap-1.5 text-amber-300 font-bold">
+                <PanelLeft className="w-3.5 h-3.5 text-amber-400" />
+                <span>Pages Menu</span>
+              </span>
+              <button
+                onClick={handleToggleNavLayout}
+                className="text-amber-400 hover:text-amber-300 flex items-center gap-1 text-[10px] lowercase font-sans cursor-pointer hover:underline"
+                title="Switch back to top bar"
+              >
+                <PanelTop className="w-3 h-3" />
+                <span>top bar</span>
+              </button>
+            </div>
+
+            <nav className="space-y-1">
+              <button
+                id="sidebar-tab-calculator"
+                onClick={() => setActiveTab('calculator')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'calculator'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Shield className="w-4 h-4 shrink-0" />
+                <span className="truncate">Level Progress & Goal</span>
+              </button>
+
+              <button
+                id="sidebar-tab-vocations"
+                onClick={() => setActiveTab('vocations')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'vocations'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Swords className="w-4 h-4 shrink-0" />
+                <span className="truncate">Vocations & Job Targets</span>
+              </button>
+
+              <button
+                id="sidebar-tab-quests"
+                onClick={() => setActiveTab('quests')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'quests'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Flame className="w-4 h-4 shrink-0" />
+                <span className="truncate">Quest Database</span>
+              </button>
+
+              <button
+                id="sidebar-tab-planner"
+                onClick={() => setActiveTab('planner')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between gap-3 transition-all cursor-pointer text-left relative ${
+                  activeTab === 'planner'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-3 truncate">
+                  <Award className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Quest Planner</span>
+                </div>
+                {plannedQuests.length > 0 && (
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold shrink-0 ${
+                    activeTab === 'planner'
+                      ? 'bg-slate-950 text-amber-300'
+                      : 'bg-amber-500 text-slate-950'
+                  }`}>
+                    {plannedQuests.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                id="sidebar-tab-leaderboard"
+                onClick={() => setActiveTab('leaderboard')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'leaderboard'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Trophy className="w-4 h-4 shrink-0" />
+                <span className="truncate">Leaderboard</span>
+              </button>
+
+              <button
+                id="sidebar-tab-journal"
+                onClick={() => setActiveTab('journal')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'journal'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <HelpCircle className="w-4 h-4 shrink-0" />
+                <span className="truncate">Ask the Assistant</span>
+              </button>
+
+              <button
+                id="sidebar-tab-map"
+                onClick={() => setActiveTab('map')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'map'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Map className="w-4 h-4 shrink-0" />
+                <span className="truncate">Find resources & enemies</span>
+              </button>
+
+              <button
+                id="sidebar-tab-items"
+                onClick={() => setActiveTab('items')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'items'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <PackageCheck className="w-4 h-4 shrink-0" />
+                <span className="truncate">Item Library</span>
+              </button>
+
+              <button
+                id="sidebar-tab-knowledge"
+                onClick={() => setActiveTab('knowledge')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'knowledge'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Library className="w-4 h-4 shrink-0" />
+                <span className="truncate">Knowledge Library</span>
+              </button>
+
+              <button
+                id="sidebar-tab-bestiary"
+                onClick={() => setActiveTab('bestiary')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'bestiary'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Skull className="w-4 h-4 shrink-0" />
+                <span className="truncate">Bestiary & Enemies</span>
+              </button>
+
+              <button
+                id="sidebar-tab-fast-routes"
+                onClick={() => setActiveTab('fast_routes')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'fast_routes'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Compass className="w-4 h-4 shrink-0" />
+                <span className="truncate">Fast Routes & Guide</span>
+              </button>
+
+              <button
+                id="sidebar-tab-guides"
+                onClick={() => setActiveTab('guides')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'guides'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <BookOpen className="w-4 h-4 shrink-0" />
+                <span className="truncate">Guides</span>
+              </button>
+
+              <button
+                id="sidebar-tab-table"
+                onClick={() => setActiveTab('table')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'table'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Table className="w-4 h-4 shrink-0" />
+                <span className="truncate">Lv 1–{getMaxLevelForVersion(gameVersion)} Table</span>
+              </button>
+            </nav>
+          </aside>
+        )}
+
+        {/* Main Content Area */}
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
         {/* Toast Notification */}
         {toastMessage && (
@@ -589,7 +811,21 @@ export default function App() {
           />
         )}
 
-        {/* Tab 8: Interactive Guides Compendium & Sub-Pages Creator */}
+        {/* Tab 8: Bestiary & Monster Compendium */}
+        {activeTab === 'bestiary' && (
+          <Bestiary
+            onNavigateToTab={(tab) => setActiveTab(tab)}
+          />
+        )}
+
+        {/* Tab 9: Knowledge Library */}
+        {activeTab === 'knowledge' && (
+          <KnowledgeLibrary
+            onNavigateToTab={(tab) => setActiveTab(tab)}
+          />
+        )}
+
+        {/* Tab 10: Interactive Guides Compendium & Sub-Pages Creator */}
         {activeTab === 'guides' && (
           <AdventureGuides
             onNavigateToTab={(tab) => setActiveTab(tab)}
@@ -620,6 +856,7 @@ export default function App() {
           />
         )}
       </main>
+      </div>
 
       {/* Custom Quest / Mob Grind Modal */}
       <CustomQuestModal

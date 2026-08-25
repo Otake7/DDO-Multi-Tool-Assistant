@@ -367,6 +367,8 @@ export interface UserProfile {
   mainVocation: VocationId; // Primary vocation (backward compatible)
   mainVocations: VocationId[]; // Up to 3 main vocations
   servers: string[]; // ['Rising', 'Revival', 'Legacy', 'Others']
+  role?: 'user' | 'moderator' | 'owner';
+  roles?: ('user' | 'moderator' | 'owner')[];
   clanTag?: string;
   title?: string; // e.g. "Veteran Arisen", "Dragonforged Master", "Rift Explorer"
   bio?: string;

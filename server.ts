@@ -47,7 +47,7 @@ function getDbPool(): pg.Pool | null {
   }
 }
 
-// Ensure database schema exists on Aiven PostgreSQL
+// Ensure database schema exists on Aiven PostgreSQL and seed Otake7 account
 async function ensureDbSchema() {
   const db = getDbPool();
   if (!db || dbInitialized) return;
@@ -64,6 +64,8 @@ async function ensureDbSchema() {
           main_vocation VARCHAR(60) DEFAULT 'fighter',
           main_vocations JSONB DEFAULT '["fighter"]'::jsonb,
           servers JSONB DEFAULT '["Rising"]'::jsonb,
+          role VARCHAR(30) DEFAULT 'user',
+          roles JSONB DEFAULT '["user"]'::jsonb,
           clan_tag VARCHAR(30) DEFAULT '',
           title VARCHAR(120) DEFAULT 'Arisen of Lestania',
           bio TEXT DEFAULT '',
@@ -73,8 +75,62 @@ async function ensureDbSchema() {
           created_at BIGINT NOT NULL,
           last_login_at BIGINT NOT NULL
         );
+        ALTER TABLE ddon_users ADD COLUMN IF NOT EXISTS role VARCHAR(30) DEFAULT 'user';
+        ALTER TABLE ddon_users ADD COLUMN IF NOT EXISTS roles JSONB DEFAULT '["user"]'::jsonb;
         CREATE INDEX IF NOT EXISTS idx_ddon_users_username_lower ON ddon_users (LOWER(username));
       `);
+
+      // Seed / Ensure the Otake7 Master Owner & Moderator Account exists in Aiven PostgreSQL
+      const otakeCheck = await client.query(
+        'SELECT id FROM ddon_users WHERE LOWER(username) = LOWER($1)',
+        ['Otake7']
+      );
+
+      if (otakeCheck.rows.length === 0) {
+        await client.query(
+          `INSERT INTO ddon_users (
+            id, username, character_name, password_hash, main_vocation,
+            main_vocations, servers, role, roles, clan_tag, title, bio,
+            avatar_icon, avatar_color, progress_data, created_at, last_login_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+          [
+            'arisen-otake7-master',
+            'Otake7',
+            'Yukinari Flixia',
+            null, // Permits logging in or using previous password/PIN if set
+            'sorcerer',
+            JSON.stringify(['sorcerer', 'spirit_lancer']),
+            JSON.stringify(['Rising']),
+            'owner',
+            JSON.stringify(['owner', 'moderator']),
+            'SUP',
+            'Arisen of Lestania',
+            'Leveling & exploring the world of Dragon\'s Dogma Online.',
+            'flame',
+            'amber',
+            JSON.stringify({ currentLevel: 71, targetLevel: 100 }),
+            Date.now(),
+            Date.now()
+          ]
+        );
+        console.log('[Database] Otake7 master Owner & Moderator profile seeded to Aiven DB successfully.');
+      } else {
+        // Upgrade existing Otake7 to have Owner & Moderator tags + character details
+        await client.query(
+          `UPDATE ddon_users SET
+            character_name = COALESCE(NULLIF(character_name, ''), 'Yukinari Flixia'),
+            role = 'owner',
+            roles = '["owner", "moderator"]'::jsonb,
+            clan_tag = 'SUP',
+            title = 'Arisen of Lestania',
+            main_vocation = 'sorcerer',
+            main_vocations = '["sorcerer", "spirit_lancer"]'::jsonb,
+            servers = '["Rising"]'::jsonb
+          WHERE LOWER(username) = LOWER('Otake7')`
+        );
+        console.log('[Database] Verified Otake7 account with Owner & Moderator roles in Aiven DB.');
+      }
+
       console.log('[Database] Successfully connected to Aiven PostgreSQL and verified ddon_users table.');
       dbInitialized = true;
     } finally {
@@ -87,6 +143,28 @@ async function ensureDbSchema() {
 
 // In-memory fallback if no database connection string is provided
 const memoryUsers = new Map<string, any>();
+
+// Seed in-memory fallback for Otake7 with Owner & Moderator tags
+memoryUsers.set('otake7', {
+  id: 'arisen-otake7-master',
+  username: 'Otake7',
+  characterName: 'Yukinari Flixia',
+  password: null,
+  mainVocation: 'sorcerer',
+  mainVocations: ['sorcerer', 'spirit_lancer'],
+  servers: ['Rising'],
+  role: 'owner',
+  roles: ['owner', 'moderator'],
+  clanTag: 'SUP',
+  title: 'Arisen of Lestania',
+  bio: "Leveling & exploring the world of Dragon's Dogma Online.",
+  avatarIcon: 'flame',
+  avatarColor: 'amber',
+  progress: { currentLevel: 71, targetLevel: 100 },
+  createdAt: Date.now(),
+  lastLoginAt: Date.now(),
+  isGuest: false,
+});
 
 // --- API Routes ---
 
@@ -277,6 +355,8 @@ app.post('/api/auth/login', async (req, res) => {
           mainVocation: row.main_vocation,
           mainVocations: typeof row.main_vocations === 'string' ? JSON.parse(row.main_vocations) : row.main_vocations,
           servers: typeof row.servers === 'string' ? JSON.parse(row.servers) : row.servers,
+          role: row.role || (row.username.toLowerCase() === 'otake7' ? 'owner' : 'user'),
+          roles: typeof row.roles === 'string' ? JSON.parse(row.roles) : (row.roles || (row.username.toLowerCase() === 'otake7' ? ['owner', 'moderator'] : ['user'])),
           clanTag: row.clan_tag,
           title: row.title,
           bio: row.bio,

@@ -1,11 +1,25 @@
 import { JournalQuestion } from '../types';
 import { DOGMA_RISING_CORE_QA } from './dogmaRisingQA';
 import { DOGMA_RISING_DISCORD_QA } from './dogmaRisingDiscordQA';
+import { SECRET_AUGMENTS_QA } from './secretAugmentsQA';
+import { SPECIAL_ACCESSORIES_QA } from './specialAccessoriesQA';
+import { STATS_EXPLANATION_QA } from './statsExplanationQA';
+import { STATUS_EFFECTS_QA } from './statusEffectsQA';
+import { COMBAT_FLOW_QA } from './combatFlowQA';
+import { PAWN_ORDERS_QA } from './pawnOrdersQA';
+import { LIMIT_BREAKS_QA } from './limitBreaksQA';
 
-// Merge the Core 13 Sections with the Discord Knowledge Base FAQ
+// Merge the Core 13 Sections with Discord FAQ, Secret Augments, Special Accessories, Stats, Status Effects, Flow of Combat, Pawn Orders, and Limit Breaks Knowledge Base
 export const INITIAL_JOURNAL_QUESTIONS: JournalQuestion[] = [
   ...DOGMA_RISING_CORE_QA,
-  ...DOGMA_RISING_DISCORD_QA
+  ...DOGMA_RISING_DISCORD_QA,
+  ...SECRET_AUGMENTS_QA,
+  ...SPECIAL_ACCESSORIES_QA,
+  ...STATS_EXPLANATION_QA,
+  ...STATUS_EFFECTS_QA,
+  ...COMBAT_FLOW_QA,
+  ...PAWN_ORDERS_QA,
+  ...LIMIT_BREAKS_QA
 ];
 
 export const JOURNAL_CATEGORIES = [

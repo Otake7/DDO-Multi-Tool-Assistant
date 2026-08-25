@@ -15,7 +15,8 @@ import {
   Users,
   AlertCircle,
   CheckCircle2,
-  FileText
+  FileText,
+  Crown
 } from 'lucide-react';
 import { UserProfile, VocationId } from '../types';
 
@@ -222,7 +223,21 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     </h3>
                     {currentUser?.clanTag && (
                       <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                        {currentUser.clanTag}
+                        [{currentUser.clanTag}]
+                      </span>
+                    )}
+                    {/* Owner Tag */}
+                    {(currentUser?.role === 'owner' || currentUser?.roles?.includes('owner') || currentUser?.username?.toLowerCase() === 'otake7') && (
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 border border-amber-400 shadow-sm flex items-center gap-1">
+                        <Crown className="w-3 h-3 text-slate-950 fill-slate-950" />
+                        <span>Owner</span>
+                      </span>
+                    )}
+                    {/* Moderator Tag */}
+                    {(currentUser?.role === 'moderator' || currentUser?.roles?.includes('moderator') || currentUser?.username?.toLowerCase() === 'otake7') && (
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                        <Shield className="w-3 h-3 text-emerald-400" />
+                        <span>Moderator</span>
                       </span>
                     )}
                     {isGuest ? (
