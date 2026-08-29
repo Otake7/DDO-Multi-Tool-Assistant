@@ -1,5 +1,9 @@
 import React from 'react';
-import { Sparkles, Shield, Flame, RotateCcw, Award, Swords, Layers, Map, PackageCheck, BookOpen, HelpCircle, Compass, Trophy, User, Coffee, PanelLeft, PanelTop, Skull, Library } from 'lucide-react';
+import { 
+  Sparkles, Shield, Flame, RotateCcw, Award, Swords, Layers, Map, 
+  PackageCheck, BookOpen, HelpCircle, Compass, Trophy, User, Coffee, 
+  PanelLeft, PanelTop, Skull, Library, Menu, X, Smartphone, Monitor 
+} from 'lucide-react';
 import { BoosterSettings, GameVersion, UserProfile } from '../types';
 import { GAME_VERSIONS, getMaxLevelForVersion, XP_RING_CAP_LEVEL } from '../data/levelTable';
 
@@ -18,6 +22,10 @@ interface HeaderProps {
   onOpenProfileModal?: () => void;
   navLayout?: 'top' | 'sidebar';
   onToggleNavLayout?: () => void;
+  uiMode: 'desktop' | 'mobile';
+  onToggleUiMode: () => void;
+  isMobileMenuOpen: boolean;
+  onToggleMobileMenu: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -34,24 +42,154 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   onOpenProfileModal,
   navLayout = 'top',
-  onToggleNavLayout
+  onToggleNavLayout,
+  uiMode,
+  onToggleUiMode,
+  isMobileMenuOpen,
+  onToggleMobileMenu,
 }) => {
   const isRingActiveAtCurrentLevel = boosters.useExpRing50 && currentLevel < XP_RING_CAP_LEVEL;
   const maxLevel = getMaxLevelForVersion(gameVersion);
 
+  const getActiveTabTitle = (tab: string) => {
+    switch (tab) {
+      case 'calculator': return 'Level Progress & Goal';
+      case 'vocations': return 'Vocations & Targets';
+      case 'quests': return 'Quest Database';
+      case 'planner': return `Planner (${plannedCount})`;
+      case 'map': return 'Find Spots & Monsters';
+      case 'items': return 'Item Library';
+      case 'knowledge': return 'Knowledge Library';
+      case 'bestiary': return 'Bestiary & Enemies';
+      case 'fast_routes': return 'Fast Routes';
+      case 'guides': return 'Guides & Notes';
+      case 'journal': return 'Ask Assistant';
+      case 'leaderboard': return 'Leaderboard';
+      case 'table': return `Lv 1–${maxLevel} Table`;
+      default: return 'Assistant';
+    }
+  };
+
+  // --- Render Mobile Header Layout when uiMode === 'mobile' ---
+  if (uiMode === 'mobile') {
+    return (
+      <header className="bg-slate-900 border-b border-amber-500/30 text-slate-100 sticky top-0 z-40 shadow-xl backdrop-blur-md bg-slate-900/95">
+        <div className="px-1.5 sm:px-3 py-2 w-full max-w-full">
+          <div className="flex items-center justify-between gap-1.5">
+            
+            {/* Left Edge: 3-Bars Hamburger Button right against the top-left edge */}
+            <div className="flex items-center gap-1.5">
+              <button
+                id="btn-mobile-hamburger-menu"
+                onClick={onToggleMobileMenu}
+                className={`p-2.5 rounded-xl border flex items-center justify-center transition-all cursor-pointer shadow-md ${
+                  isMobileMenuOpen
+                    ? 'bg-amber-500 text-slate-950 border-amber-300 font-bold ring-2 ring-amber-400/50'
+                    : 'bg-slate-800/95 text-amber-400 border-amber-500/50 hover:bg-slate-700 active:scale-95'
+                }`}
+                title={isMobileMenuOpen ? 'Close pages menu' : 'Open all pages menu (3 bars)'}
+                aria-label="Navigation Menu"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+
+              {/* Tap-to-Change Page Badge Indicator */}
+              <button
+                onClick={onToggleMobileMenu}
+                className="flex flex-col text-left cursor-pointer group max-w-[130px] sm:max-w-[200px]"
+                title="Tap to change page"
+              >
+                <span className="text-[10px] font-mono text-amber-400/90 font-bold uppercase tracking-wider flex items-center gap-1">
+                  <span>Page (Tap)</span>
+                </span>
+                <span className="text-xs font-bold text-slate-100 truncate group-hover:text-amber-300 transition-colors">
+                  {getActiveTabTitle(activeTab)}
+                </span>
+              </button>
+            </div>
+
+            {/* Right: Mobile/Desktop UI Switcher Button + Profile / Ring Quick Actions */}
+            <div className="flex items-center gap-1.5">
+              
+              {/* Dedicated Mobile/Desktop UI Switcher Button */}
+              <button
+                id="btn-mobile-desktop-ui-toggle-mobile-bar"
+                onClick={onToggleUiMode}
+                className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 flex items-center gap-1.5 transition-all cursor-pointer border border-amber-300 active:scale-95"
+                title="Click to switch back to Desktop UI layout"
+              >
+                <Monitor className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Desktop UI</span>
+                <span className="sm:hidden">Desktop</span>
+              </button>
+
+              {/* 50% XP Ring Quick Toggle */}
+              <button
+                onClick={onToggleRing}
+                title="Toggle 50% XP Ring"
+                className={`p-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                  boosters.useExpRing50
+                    ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                    : 'bg-slate-800 border-slate-700 text-slate-400'
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+              </button>
+
+              {/* Profile Icon */}
+              <button
+                id="btn-mobile-profile"
+                onClick={onOpenProfileModal}
+                title="Account & Profile"
+                className="p-2 rounded-xl bg-slate-800 border border-slate-700 text-amber-400 hover:text-amber-300 cursor-pointer"
+              >
+                <Flame className="w-4 h-4" />
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </header>
+    );
+  }
+
+  // --- Render Desktop Header Layout when uiMode === 'desktop' ---
   return (
     <header className="bg-slate-900 border-b border-amber-500/20 text-slate-100 sticky top-0 z-40 shadow-xl backdrop-blur-md bg-slate-900/95">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between py-3 gap-3">
           
           {/* Logo & Title */}
-          <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-start">
+            <div className="flex items-center gap-2.5">
+              {/* 3-Bars Hamburger Button placed at the very top-left edge */}
+              <button
+                id="btn-desktop-top-left-hamburger"
+                onClick={onToggleMobileMenu}
+                className={`p-2 rounded-xl border flex items-center justify-center transition-all cursor-pointer shadow-md shrink-0 ${
+                  isMobileMenuOpen
+                    ? 'bg-amber-500 text-slate-950 border-amber-300 font-bold ring-2 ring-amber-400/50'
+                    : 'bg-slate-800/95 text-amber-400 border-amber-500/50 hover:bg-slate-700 hover:text-amber-300 active:scale-95'
+                }`}
+                title={isMobileMenuOpen ? 'Close pages menu' : 'Open all pages menu (3 bars)'}
+                aria-label="Navigation Menu"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
+              </button>
+
               {/* Interactive Flame Icon Button - Opens Profile / Account Details */}
               <button
                 id="btn-open-profile-modal"
                 onClick={onOpenProfileModal}
-                className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center transition-all transform hover:scale-105 hover:shadow-amber-500/40 active:scale-95 cursor-pointer group"
+                className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center transition-all transform hover:scale-105 hover:shadow-amber-500/40 active:scale-95 cursor-pointer group shrink-0"
                 title={
                   currentUser?.isGuest
                     ? 'Guest Arisen • Click to view account info or log in'
@@ -92,7 +230,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
                 <div className="flex items-center gap-2 flex-wrap mt-0.5">
                   <p className="text-xs text-slate-400">
-                    Leveling & Quest Planner, Item Library, Interactive Guides & Multi Tool Assistant (Season {gameVersion} Cap Lv {maxLevel})
+                    Leveling & Quest Planner, Item Library, Guides & Multi Tool Assistant (Season {gameVersion} Cap Lv {maxLevel})
                   </p>
                   {onToggleNavLayout && (
                     <button
@@ -118,8 +256,17 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            {/* Mobile View Toggle, Reset & Quick Ring Button */}
+            {/* Small screen top actions */}
             <div className="flex md:hidden items-center gap-2">
+              <button
+                id="btn-mobile-desktop-ui-toggle-small"
+                onClick={onToggleUiMode}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 flex items-center gap-1 cursor-pointer"
+                title="Switch to Mobile UI"
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>Mobile UI</span>
+              </button>
               <button
                 onClick={onOpenProfileModal}
                 title="Account & Profile"
@@ -148,10 +295,21 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Controls: Game Version Selector & 50% XP Ring Toggle Bar */}
+          {/* Controls: Mobile/Desktop UI Switcher, Game Version, 50% XP Ring, Ko-fi */}
           <div className="flex flex-col items-center md:items-end gap-2 w-full md:w-auto">
-            {/* Top Row: Version Selector, 50% Ring, Level Range */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center md:justify-end">
+            {/* Top Row: Mobile/Desktop UI Button, Version Selector, 50% Ring, Level Range */}
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap justify-center md:justify-end">
+
+              {/* Dedicated Mobile/Desktop UI Switcher Button */}
+              <button
+                id="btn-toggle-ui-mode-header"
+                onClick={onToggleUiMode}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 border border-amber-300 shadow-md shadow-amber-500/20 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+                title="Toggle between Mobile UI and Desktop UI layouts"
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>Mobile/Desktop UI</span>
+              </button>
 
               {/* Game Version Selector */}
               <div className="flex items-center gap-1.5 bg-slate-950/80 border border-slate-800 px-2.5 py-1.5 rounded-xl text-xs">
@@ -421,4 +579,3 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
-

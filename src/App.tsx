@@ -19,12 +19,13 @@ import { UserProfileModal } from './components/UserProfileModal';
 import { CommunityFarmSpotsBrowser } from './components/CommunityFarmSpotsBrowser';
 import { SponsorAdBanner } from './components/SponsorAdBanner';
 import { GDPRConsentModal } from './components/GDPRConsentModal';
+import { MobileDrawerMenu } from './components/MobileDrawerMenu';
 import { BoosterSettings, CommunityFarmSpot, GameVersion, PlannedQuest, Quest, SpotSearchCategory, SpotSearchStageScope, UserProfile, VocationType } from './types';
 import { LEVELING_PRESETS } from './data/levelingPresets';
 import { ALL_QUESTS } from './data/quests';
 import { getMaxLevelForVersion } from './data/levelTable';
 import { incrementTimesPlanned } from './utils/communityStats';
-import { Check, Sparkles, AlertCircle, Coffee, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, PackageCheck, Compass, BookOpen, Table, PanelTop, PanelLeft, Skull, Library } from 'lucide-react';
+import { Check, Sparkles, AlertCircle, Coffee, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, PackageCheck, Compass, BookOpen, Table, PanelTop, PanelLeft, Skull, Library, Menu } from 'lucide-react';
 
 export default function App() {
   // --- Account & User Profile State ---
@@ -53,6 +54,23 @@ export default function App() {
     const saved = localStorage.getItem('ddon_nav_layout');
     return saved === 'sidebar' ? 'sidebar' : 'top';
   });
+
+  // UI Mode State ('desktop' | 'mobile') - As requested by user for explicit switch & mobile friendly experience
+  const [uiMode, setUiMode] = useState<'desktop' | 'mobile'>(() => {
+    const saved = localStorage.getItem('ddon_ui_mode');
+    if (saved === 'mobile' || saved === 'desktop') return saved;
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return 'mobile';
+    return 'desktop';
+  });
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+
+  const handleToggleUiMode = () => {
+    const next = uiMode === 'desktop' ? 'mobile' : 'desktop';
+    setUiMode(next);
+    localStorage.setItem('ddon_ui_mode', next);
+    showToast(`Switched to ${next === 'mobile' ? 'Mobile Friendly UI' : 'Desktop UI'}`);
+  };
 
   const handleToggleNavLayout = () => {
     const next = navLayout === 'top' ? 'sidebar' : 'top';
@@ -470,13 +488,39 @@ export default function App() {
         onOpenProfileModal={() => setIsProfileModalOpen(true)}
         navLayout={navLayout}
         onToggleNavLayout={handleToggleNavLayout}
+        uiMode={uiMode}
+        onToggleUiMode={handleToggleUiMode}
+        isMobileMenuOpen={isDrawerOpen}
+        onToggleMobileMenu={() => setIsDrawerOpen((prev) => !prev)}
+      />
+
+      {/* Mobile Drawer Menu (Pop-up with all 13 pages triggered by 3-bars button) */}
+      <MobileDrawerMenu
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        activeTab={activeTab}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          setIsDrawerOpen(false);
+        }}
+        plannedCount={plannedQuests.length}
+        uiMode={uiMode}
+        onToggleUiMode={handleToggleUiMode}
+        gameVersion={gameVersion}
+        onSelectVersion={handleSelectVersion}
+        currentLevel={currentLevel}
+        targetLevel={targetLevel}
+        boosters={boosters}
+        onToggleRing={handleToggleRing}
+        currentUser={currentUser}
+        onOpenProfileModal={() => setIsProfileModalOpen(true)}
       />
 
       {/* Main Body with Dynamic Top/Sidebar Flex Layout */}
-      <div className={`flex-1 flex ${navLayout === 'sidebar' ? 'flex-col md:flex-row' : 'flex-col'}`}>
+      <div className={`flex-1 flex ${uiMode === 'desktop' && navLayout === 'sidebar' ? 'flex-col md:flex-row' : 'flex-col'}`}>
         
-        {/* Left Sidebar Navigation (Rendered when navLayout === 'sidebar') */}
-        {navLayout === 'sidebar' && (
+        {/* Left Sidebar Navigation (Rendered ONLY in desktop mode when navLayout === 'sidebar') */}
+        {uiMode === 'desktop' && navLayout === 'sidebar' && (
           <aside className="w-full md:w-64 shrink-0 bg-slate-900/90 border-b md:border-b-0 md:border-r border-amber-500/20 p-3 md:p-4 space-y-1.5 md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:overflow-y-auto z-30">
             <div className="flex items-center justify-between px-3 py-2 text-[11px] font-mono uppercase tracking-wider text-slate-400 border-b border-slate-800/80 mb-2">
               <span className="flex items-center gap-1.5 text-amber-300 font-bold">
@@ -678,11 +722,11 @@ export default function App() {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <main className={`flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 ${uiMode === 'mobile' ? 'pb-28' : ''}`}>
         
         {/* Toast Notification */}
         {toastMessage && (
-          <div className="fixed bottom-6 right-6 z-50 bg-amber-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 border border-amber-300 animate-bounce">
+          <div className="fixed bottom-16 sm:bottom-6 right-4 sm:right-6 z-50 bg-amber-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 border border-amber-300 animate-bounce">
             <Sparkles className="w-4 h-4" />
             <span className="text-xs sm:text-sm">{toastMessage}</span>
           </div>
@@ -893,6 +937,79 @@ export default function App() {
 
       {/* First-Launch GDPR & Privacy Consent Dialog */}
       <GDPRConsentModal />
+
+      {/* Mobile Friendly Bottom Quick Action Bar (Visible exclusively in Mobile UI mode) */}
+      {uiMode === 'mobile' && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-amber-500/30 backdrop-blur-md px-2 py-1.5 flex items-center justify-around shadow-2xl safe-area-bottom">
+          <button
+            onClick={() => {
+              setActiveTab('calculator');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all cursor-pointer ${
+              activeTab === 'calculator' ? 'text-amber-400 font-bold scale-105' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Shield className="w-4 h-4" />
+            <span className="text-[10px] mt-0.5">Progress</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('vocations');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all cursor-pointer ${
+              activeTab === 'vocations' ? 'text-amber-400 font-bold scale-105' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Swords className="w-4 h-4" />
+            <span className="text-[10px] mt-0.5">Vocations</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('quests');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all cursor-pointer ${
+              activeTab === 'quests' ? 'text-amber-400 font-bold scale-105' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Flame className="w-4 h-4" />
+            <span className="text-[10px] mt-0.5">Quests</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('planner');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all cursor-pointer relative ${
+              activeTab === 'planner' ? 'text-amber-400 font-bold scale-105' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Award className="w-4 h-4" />
+            <span className="text-[10px] mt-0.5">Planner</span>
+            {plannedQuests.length > 0 && (
+              <span className="absolute top-0 right-1.5 w-4 h-4 bg-amber-500 text-slate-950 rounded-full text-[9px] font-bold flex items-center justify-center">
+                {plannedQuests.length}
+              </span>
+            )}
+          </button>
+
+          {/* 3-bars button on bottom bar to pop up all pages */}
+          <button
+            id="btn-bottom-bar-3-bars"
+            onClick={() => setIsDrawerOpen(true)}
+            className="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl bg-amber-500/20 border border-amber-500/50 text-amber-300 hover:bg-amber-500 hover:text-slate-950 font-bold transition-all cursor-pointer shadow-sm"
+            title="Open all pages menu (3 bars)"
+          >
+            <Menu className="w-4 h-4" />
+            <span className="text-[10px] mt-0.5">All Pages</span>
+          </button>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-950 text-slate-500 py-6 text-center text-xs space-y-2.5">
