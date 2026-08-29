@@ -1,0 +1,25 @@
+{
+  "short_name": "DDON Assistant",
+  "name": "Dragon's Dogma Online Multi Tool Assistant",
+  "description": "Leveling & Quest Planner, Item Library, Spot Search, and Multi Tool Assistant for Dragon's Dogma Online",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#020617",
+  "theme_color": "#f59e0b",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/"
+}
