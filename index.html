@@ -13,6 +13,21 @@
     
     <!-- Google AdSense SDK Script -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3654199409313990" crossorigin="anonymous"></script>
+
+    <!-- Web App Manifest & Mobile Configuration for Android APK Generation -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#f59e0b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Service Worker Registration for PWA / APK -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js');
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
