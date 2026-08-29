@@ -25,11 +25,18 @@ import {
   Hash,
   Image as ImageIcon,
   ZoomIn,
-  X
+  X,
+  ThumbsUp,
+  ThumbsDown,
+  MessageSquare,
+  Filter,
+  ArrowUpDown
 } from 'lucide-react';
-import { GuideSubPage, UserProfile } from '../types';
+import { GuideSubPage, UserProfile, GuideSortOption, VoteDirection } from '../types';
 import { BUILTIN_GUIDES } from '../data/guidesData';
 import { isImageUrl, normalizeImageUrl } from '../utils/imageHelper';
+import { getItemEngagementStats, getUserVotesMap, voteItem } from '../utils/communityStats';
+import { CommunityCommentsSection } from './CommunityCommentsSection';
 
 interface AdventureGuidesProps {
   onNavigateToTab?: (tab: string) => void;
@@ -45,6 +52,9 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
   const isGuest = !currentUser || currentUser.isGuest;
   const [showAuthGateModal, setShowAuthGateModal] = useState<boolean>(false);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [guideSortOption, setGuideSortOption] = useState<GuideSortOption>('top_rated');
+  const [engagementUpdateCounter, setEngagementUpdateCounter] = useState(0);
+
   // --- Persistent User Guides State ---
   const [guides, setGuides] = useState<GuideSubPage[]>(() => {
     const saved = localStorage.getItem('ddon_adventure_guides');
@@ -75,6 +85,14 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+
+  const userVotes = useMemo(() => getUserVotesMap(), [engagementUpdateCounter]);
+
+  const handleVote = (guideId: string, direction: VoteDirection, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    voteItem(guideId, direction, currentUser?.id);
+    setEngagementUpdateCounter((c) => c + 1);
+  };
   
   // Editor State
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -103,7 +121,7 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
   const categories = ['ALL', 'Progression', 'Combat & Classes', 'Pawns', 'Crafting & Gear', 'Raids & Bosses', 'Server Rules', 'Community'];
 
   const filteredGuides = useMemo(() => {
-    return guides.filter((g) => {
+    const list = guides.filter((g) => {
       const matchCat = selectedCategory === 'ALL' || g.category === selectedCategory;
       if (!matchCat) return false;
 
@@ -117,7 +135,26 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
 
       return matchTitle || matchSummary || matchContent || matchTags || matchAuthor;
     });
-  }, [guides, selectedCategory, searchQuery]);
+
+    return list.sort((a, b) => {
+      const statsA = getItemEngagementStats(a.id);
+      const statsB = getItemEngagementStats(b.id);
+
+      if (guideSortOption === 'top_rated') {
+        return statsB.score - statsA.score;
+      }
+      if (guideSortOption === 'lowest_rated') {
+        return statsA.score - statsB.score;
+      }
+      if (guideSortOption === 'newest') {
+        return (statsB.createdAt || 0) - (statsA.createdAt || 0);
+      }
+      if (guideSortOption === 'oldest') {
+        return (statsA.createdAt || 0) - (statsB.createdAt || 0);
+      }
+      return 0;
+    });
+  }, [guides, selectedCategory, searchQuery, guideSortOption, engagementUpdateCounter]);
 
   const activeGuide = useMemo(() => {
     return guides.find((g) => g.id === selectedGuideId) || filteredGuides[0] || guides[0];
@@ -519,11 +556,11 @@ Explain the strategy or farming route in detail...
 
         {/* Search and Category Filter Bar */}
         <div className="mt-5 pt-4 border-t border-slate-800/80 flex flex-col md:flex-row gap-3 items-center justify-between">
-          <div className="relative w-full md:w-96">
+          <div className="relative w-full md:w-80">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400" />
             <input
               type="text"
-              placeholder="Search guides, sub-pages, tags, authors..."
+              placeholder="Search guides, sub-pages, tags..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-10 py-2 bg-slate-950 border border-slate-800 focus:border-amber-500/60 rounded-xl text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
@@ -538,21 +575,38 @@ Explain the strategy or farming route in detail...
             )}
           </div>
 
-          {/* Category Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full md:w-auto py-1">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                  selectedCategory === cat
-                    ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                    : 'bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
-                }`}
+          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
+            {/* Guide Sorting Filter */}
+            <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1">
+              <Filter className="w-3.5 h-3.5 text-amber-400" />
+              <select
+                value={guideSortOption}
+                onChange={(e) => setGuideSortOption(e.target.value as GuideSortOption)}
+                className="bg-transparent text-amber-300 text-xs font-semibold focus:outline-none cursor-pointer"
               >
-                {cat}
-              </button>
-            ))}
+                <option value="top_rated" className="bg-slate-950 text-slate-200">⭐ Top Rated</option>
+                <option value="lowest_rated" className="bg-slate-950 text-slate-200">🔻 Lowest Rated</option>
+                <option value="newest" className="bg-slate-950 text-slate-200">✨ Newest First</option>
+                <option value="oldest" className="bg-slate-950 text-slate-200">⏳ Oldest First</option>
+              </select>
+            </div>
+
+            {/* Category Chips */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    selectedCategory === cat
+                      ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                      : 'bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -567,7 +621,9 @@ Explain the strategy or farming route in detail...
               <Layers className="w-3.5 h-3.5 text-amber-400" />
               <span>Guide Sub-Pages ({filteredGuides.length})</span>
             </h3>
-            <span className="text-[11px] text-slate-500">Click to read</span>
+            <span className="text-[11px] text-slate-500 font-mono">
+              Sorted by {guideSortOption.replace('_', ' ')}
+            </span>
           </div>
 
           <div className="space-y-2.5 max-h-[650px] overflow-y-auto pr-1 no-scrollbar">
@@ -578,6 +634,9 @@ Explain the strategy or farming route in detail...
             ) : (
               filteredGuides.map((guide) => {
                 const isSelected = activeGuide?.id === guide.id;
+                const stats = getItemEngagementStats(guide.id);
+                const userVote = userVotes[guide.id] || null;
+
                 return (
                   <div
                     key={guide.id}
@@ -617,12 +676,39 @@ Explain the strategy or farming route in detail...
                       <ChevronRight className={`w-4 h-4 flex-shrink-0 mt-1 transition-transform ${isSelected ? 'text-amber-400 translate-x-1' : 'text-slate-600 group-hover:text-slate-400'}`} />
                     </div>
 
-                    <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <User className="w-3 h-3" />
-                        <span className="truncate max-w-[100px]">{guide.author}</span>
-                      </span>
-                      <span>{guide.lastUpdated}</span>
+                    <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-2 font-mono">
+                        <button
+                          onClick={(e) => handleVote(guide.id, 'up', e)}
+                          className={`flex items-center gap-1 px-1.5 py-0.5 rounded transition-colors ${
+                            userVote === 'up'
+                              ? 'bg-emerald-500/20 text-emerald-300 font-bold'
+                              : 'text-slate-400 hover:text-emerald-400'
+                          }`}
+                          title="Upvote guide"
+                        >
+                          <ThumbsUp className="w-2.5 h-2.5" />
+                          <span>{stats.upvotes}</span>
+                        </button>
+                        <button
+                          onClick={(e) => handleVote(guide.id, 'down', e)}
+                          className={`flex items-center gap-1 px-1.5 py-0.5 rounded transition-colors ${
+                            userVote === 'down'
+                              ? 'bg-rose-500/20 text-rose-300 font-bold'
+                              : 'text-slate-400 hover:text-rose-400'
+                          }`}
+                          title="Downvote guide"
+                        >
+                          <ThumbsDown className="w-2.5 h-2.5" />
+                          <span>{stats.downvotes}</span>
+                        </button>
+                        <span className="text-slate-500 flex items-center gap-1">
+                          <MessageSquare className="w-2.5 h-2.5 text-amber-400" />
+                          <span>{stats.commentsCount}</span>
+                        </span>
+                      </div>
+
+                      <span className="text-slate-500 truncate max-w-[110px]">{guide.author}</span>
                     </div>
                   </div>
                 );
@@ -659,8 +745,41 @@ Explain the strategy or farming route in detail...
                   </h2>
                 </div>
 
-                {/* Edit, Copy, Delete Actions */}
-                <div className="flex items-center gap-2">
+                {/* Reader Toolbar: Upvote, Downvote, Edit, Copy, Delete */}
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                  {(() => {
+                    const readerStats = getItemEngagementStats(activeGuide.id);
+                    const readerVote = userVotes[activeGuide.id] || null;
+                    return (
+                      <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 rounded-xl p-1 font-mono text-xs">
+                        <button
+                          onClick={() => handleVote(activeGuide.id, 'up')}
+                          className={`px-2 py-1 rounded-lg flex items-center gap-1 transition-all cursor-pointer ${
+                            readerVote === 'up'
+                              ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40'
+                              : 'text-slate-400 hover:text-emerald-400 hover:bg-slate-800'
+                          }`}
+                          title="Upvote guide"
+                        >
+                          <ThumbsUp className="w-3.5 h-3.5" />
+                          <span>{readerStats.upvotes}</span>
+                        </button>
+                        <button
+                          onClick={() => handleVote(activeGuide.id, 'down')}
+                          className={`px-2 py-1 rounded-lg flex items-center gap-1 transition-all cursor-pointer ${
+                            readerVote === 'down'
+                              ? 'bg-rose-500/20 text-rose-300 font-bold border border-rose-500/40'
+                              : 'text-slate-400 hover:text-rose-400 hover:bg-slate-800'
+                          }`}
+                          title="Downvote guide"
+                        >
+                          <ThumbsDown className="w-3.5 h-3.5" />
+                          <span>{readerStats.downvotes}</span>
+                        </button>
+                      </div>
+                    );
+                  })()}
+
                   <button
                     onClick={() => handleCopyGuide(activeGuide.content)}
                     className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors cursor-pointer"
@@ -707,6 +826,18 @@ Explain the strategy or farming route in detail...
               {/* Rendered Guide Body */}
               <div className="prose prose-invert max-w-none">
                 {renderMarkdown(activeGuide.content)}
+              </div>
+
+              {/* Embedded Guide Community Comments & Notes */}
+              <div className="pt-6 border-t border-slate-800">
+                <CommunityCommentsSection
+                  itemId={activeGuide.id}
+                  itemTitle={activeGuide.title}
+                  itemType="guide"
+                  currentUser={currentUser}
+                  onOpenAuth={onOpenAuth}
+                  isModal={false}
+                />
               </div>
 
               {/* Reader Footer Navigation */}

@@ -1,0 +1,21 @@
+name: flutter_ad_integration
+description: "Cross-platform ad, sponsor banner and GDPR consent compliance package for Flutter across Android, iOS, Windows, Linux, and Voyant Ads SDK."
+version: 1.0.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_mobile_ads: ^5.1.0
+  voyant_ads_sdk: ^0.1.6
+  url_launcher: ^6.2.0
+  http: ^1.2.0
+  shared_preferences: ^2.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0

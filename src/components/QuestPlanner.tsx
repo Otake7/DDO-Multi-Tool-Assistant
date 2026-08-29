@@ -16,13 +16,21 @@ import {
   AlertCircle,
   Zap,
   User,
-  X
+  X,
+  ThumbsUp,
+  ThumbsDown,
+  MessageSquare,
+  Filter,
+  Flame,
+  ArrowUpDown
 } from 'lucide-react';
-import { BoosterSettings, GameVersion, PlannedQuest, Quest, UserProfile } from '../types';
+import { BoosterSettings, GameVersion, PlannedQuest, Quest, UserProfile, PlannerSortOption, VoteDirection } from '../types';
 import { ALL_QUESTS } from '../data/quests';
 import { simulateQuestPlan, getSingleQuestXp } from '../utils/calculator';
 import { LEVELING_PRESETS } from '../data/levelingPresets';
 import { XP_RING_CAP_LEVEL } from '../data/levelTable';
+import { getItemEngagementStats, getUserVotesMap, voteItem } from '../utils/communityStats';
+import { CommunityCommentsSection } from './CommunityCommentsSection';
 
 interface QuestPlannerProps {
   currentLevel: number;
@@ -64,6 +72,13 @@ export const QuestPlanner: React.FC<QuestPlannerProps> = ({
   onOpenAuth
 }) => {
   const [showAuthGateModal, setShowAuthGateModal] = useState(false);
+  const [presetSortOption, setPresetSortOption] = useState<PlannerSortOption>('most_used');
+  const [commentsModal, setCommentsModal] = useState<{
+    itemId: string;
+    itemTitle: string;
+    itemType: 'preset' | 'quest' | 'farm_spot' | 'guide';
+  } | null>(null);
+  const [engagementUpdateCounter, setEngagementUpdateCounter] = useState(0);
 
   const isGuest = !currentUser || currentUser.isGuest;
 
@@ -73,6 +88,12 @@ export const QuestPlanner: React.FC<QuestPlannerProps> = ({
     } else {
       onOpenCustomQuestModal();
     }
+  };
+
+  const handleVote = (itemId: string, direction: VoteDirection, e: React.MouseEvent) => {
+    e.stopPropagation();
+    voteItem(itemId, direction, currentUser?.id);
+    setEngagementUpdateCounter((c) => c + 1);
   };
   // Map of all available quests (including custom)
   const questMap = useMemo(() => {
@@ -98,6 +119,32 @@ export const QuestPlanner: React.FC<QuestPlannerProps> = ({
       gameVersion
     );
   }, [currentLevel, currentXp, targetLevel, plannedQuests, boosters, questMap, gameVersion]);
+
+  const userVotes = useMemo(() => getUserVotesMap(), [engagementUpdateCounter]);
+
+  const sortedPresets = useMemo(() => {
+    const list = [...LEVELING_PRESETS];
+    return list.sort((a, b) => {
+      const statsA = getItemEngagementStats(a.id);
+      const statsB = getItemEngagementStats(b.id);
+      if (presetSortOption === 'most_used') {
+        return (statsB.timesPlanned || 0) - (statsA.timesPlanned || 0);
+      }
+      if (presetSortOption === 'top_rated') {
+        return statsB.score - statsA.score;
+      }
+      if (presetSortOption === 'lowest_rated') {
+        return statsA.score - statsB.score;
+      }
+      if (presetSortOption === 'newest') {
+        return (statsB.createdAt || 0) - (statsA.createdAt || 0);
+      }
+      if (presetSortOption === 'oldest') {
+        return (statsA.createdAt || 0) - (statsB.createdAt || 0);
+      }
+      return 0;
+    });
+  }, [presetSortOption, engagementUpdateCounter]);
 
   // Total runs in plan
   const totalRuns = useMemo(() => {
@@ -308,34 +355,121 @@ export const QuestPlanner: React.FC<QuestPlannerProps> = ({
 
       {/* Preset Leveling Routes Quick Loader */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3">
-        <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
             <FileSpreadsheet className="w-4 h-4 text-amber-400" />
             <span>Fast Leveling Presets (Dogma Rising Community Routes)</span>
           </div>
-          <span className="text-[11px] text-slate-400">Click to instantly populate plan:</span>
+
+          {/* Sort Filters for Presets: Most Used, Top Rated, Lowest Rated, Newest, Oldest */}
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-slate-400 flex items-center gap-1 font-medium">
+              <Filter className="w-3 h-3 text-amber-400" />
+              <span>Sort Routes:</span>
+            </span>
+            <select
+              value={presetSortOption}
+              onChange={(e) => setPresetSortOption(e.target.value as PlannerSortOption)}
+              className="bg-slate-950 border border-slate-800 text-amber-300 text-xs font-semibold rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
+            >
+              <option value="most_used">🔥 Most Used in Planner</option>
+              <option value="top_rated">⭐ Top Rated (Highest Score)</option>
+              <option value="lowest_rated">🔻 Lowest Rated</option>
+              <option value="newest">✨ Newest First</option>
+              <option value="oldest">⏳ Oldest First</option>
+            </select>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-          {LEVELING_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              onClick={() => onLoadPreset(preset.id)}
-              className="text-left bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800/80 hover:border-amber-500/50 rounded-xl p-3 transition-all space-y-1 group"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-200 group-hover:text-amber-300">
-                  {preset.name}
-                </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                  {preset.levelRange}
-                </span>
+          {sortedPresets.map((preset) => {
+            const stats = getItemEngagementStats(preset.id);
+            const userVote = userVotes[preset.id] || null;
+
+            return (
+              <div
+                key={preset.id}
+                className="bg-slate-950/70 hover:bg-slate-900/90 border border-slate-800/80 hover:border-amber-500/50 rounded-xl p-3 transition-all space-y-2 group flex flex-col justify-between"
+              >
+                <div
+                  onClick={() => onLoadPreset(preset.id)}
+                  className="space-y-1.5 cursor-pointer"
+                  title="Click to populate this route into your quest plan"
+                >
+                  <div className="flex items-center justify-between gap-1.5">
+                    <span className="text-xs font-bold text-slate-200 group-hover:text-amber-300 transition-colors line-clamp-1">
+                      {preset.name}
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 shrink-0">
+                      {preset.levelRange}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 line-clamp-2 leading-tight">
+                    {preset.description}
+                  </p>
+                </div>
+
+                {/* Footer bar with Upvotes, Downvotes, Times Planned and Comments */}
+                <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-[11px] font-mono">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => handleVote(preset.id, 'up', e)}
+                      className={`px-1.5 py-0.5 rounded flex items-center gap-1 transition-colors cursor-pointer ${
+                        userVote === 'up'
+                          ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40'
+                          : 'text-slate-400 hover:text-emerald-400 hover:bg-slate-800'
+                      }`}
+                      title="Upvote preset"
+                    >
+                      <ThumbsUp className="w-3 h-3" />
+                      <span>{stats.upvotes}</span>
+                    </button>
+
+                    <button
+                      onClick={(e) => handleVote(preset.id, 'down', e)}
+                      className={`px-1.5 py-0.5 rounded flex items-center gap-1 transition-colors cursor-pointer ${
+                        userVote === 'down'
+                          ? 'bg-rose-500/20 text-rose-300 font-bold border border-rose-500/40'
+                          : 'text-slate-400 hover:text-rose-400 hover:bg-slate-800'
+                      }`}
+                      title="Downvote preset"
+                    >
+                      <ThumbsDown className="w-3 h-3" />
+                      <span>{stats.downvotes}</span>
+                    </button>
+
+                    <span className="text-[10px] text-slate-500 ml-1">
+                      {stats.timesPlanned > 0 && `• ${stats.timesPlanned} uses`}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() =>
+                        setCommentsModal({
+                          itemId: preset.id,
+                          itemTitle: preset.name,
+                          itemType: 'preset'
+                        })
+                      }
+                      className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-amber-300 border border-slate-800 flex items-center gap-1 transition-colors cursor-pointer"
+                      title="View & post comments"
+                    >
+                      <MessageSquare className="w-3 h-3 text-amber-400" />
+                      <span>{stats.commentsCount}</span>
+                    </button>
+
+                    <button
+                      onClick={() => onLoadPreset(preset.id)}
+                      className="px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500 hover:text-slate-950 text-amber-300 text-[10px] font-sans font-bold border border-amber-500/30 transition-all cursor-pointer"
+                    >
+                      Load
+                    </button>
+                  </div>
+                </div>
               </div>
-              <p className="text-[11px] text-slate-400 line-clamp-2 leading-tight">
-                {preset.description}
-              </p>
-            </button>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -467,6 +601,56 @@ export const QuestPlanner: React.FC<QuestPlannerProps> = ({
                         Target: <span className="text-slate-300 font-medium">{quest.targetEnemy}</span>
                       </p>
                     )}
+
+                    {/* Quest Row Community Engagement (Upvote, Downvote, Comments) */}
+                    {(() => {
+                      const qStats = getItemEngagementStats(quest.id);
+                      const qVote = userVotes[quest.id] || null;
+                      return (
+                        <div className="flex items-center gap-2 pt-1 font-mono text-[11px]">
+                          <button
+                            onClick={(e) => handleVote(quest.id, 'up', e)}
+                            className={`px-1.5 py-0.5 rounded flex items-center gap-1 transition-colors cursor-pointer ${
+                              qVote === 'up'
+                                ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40'
+                                : 'text-slate-400 hover:text-emerald-400 bg-slate-900 border border-slate-800'
+                            }`}
+                            title="Upvote quest"
+                          >
+                            <ThumbsUp className="w-2.5 h-2.5" />
+                            <span>{qStats.upvotes}</span>
+                          </button>
+
+                          <button
+                            onClick={(e) => handleVote(quest.id, 'down', e)}
+                            className={`px-1.5 py-0.5 rounded flex items-center gap-1 transition-colors cursor-pointer ${
+                              qVote === 'down'
+                                ? 'bg-rose-500/20 text-rose-300 font-bold border border-rose-500/40'
+                                : 'text-slate-400 hover:text-rose-400 bg-slate-900 border border-slate-800'
+                            }`}
+                            title="Downvote quest"
+                          >
+                            <ThumbsDown className="w-2.5 h-2.5" />
+                            <span>{qStats.downvotes}</span>
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              setCommentsModal({
+                                itemId: quest.id,
+                                itemTitle: quest.name,
+                                itemType: 'quest'
+                              })
+                            }
+                            className="px-2 py-0.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-amber-300 border border-slate-800 flex items-center gap-1 transition-colors cursor-pointer"
+                            title="Quest discussions & notes"
+                          >
+                            <MessageSquare className="w-2.5 h-2.5 text-amber-400" />
+                            <span>{qStats.commentsCount} notes</span>
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Center: Repetition Counter (Quantity Controls) */}
@@ -569,6 +753,20 @@ export const QuestPlanner: React.FC<QuestPlannerProps> = ({
           </div>
         )}
       </div>
+
+      {/* Community Comments Modal */}
+      {commentsModal && (
+        <CommunityCommentsSection
+          itemId={commentsModal.itemId}
+          itemTitle={commentsModal.itemTitle}
+          itemType={commentsModal.itemType}
+          currentUser={currentUser}
+          onOpenAuth={onOpenAuth}
+          isModal={true}
+          isOpen={true}
+          onClose={() => setCommentsModal(null)}
+        />
+      )}
 
       {/* Auth Gate Modal for Custom Spot Farm */}
       {showAuthGateModal && (

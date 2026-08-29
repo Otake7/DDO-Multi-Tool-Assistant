@@ -307,14 +307,47 @@ export interface GuideSection {
   content: string;
 }
 
+export interface CommunityComment {
+  id: string;
+  itemId: string; // questId, presetId, farmSpotId, or guideId
+  itemType: 'quest' | 'preset' | 'farm_spot' | 'guide';
+  authorId?: string;
+  authorName: string;
+  authorClan?: string;
+  authorRole?: 'user' | 'moderator' | 'owner';
+  avatarIcon?: string;
+  avatarColor?: string;
+  content: string;
+  createdAt: number;
+  upvotes?: number;
+}
+
+export type VoteDirection = 'up' | 'down';
+
+export type PlannerSortOption = 'most_used' | 'top_rated' | 'lowest_rated' | 'newest' | 'oldest';
+export type GuideSortOption = 'top_rated' | 'lowest_rated' | 'newest' | 'oldest';
+
+export interface ItemEngagementStats {
+  upvotes: number;
+  downvotes: number;
+  score: number; // upvotes - downvotes
+  timesPlanned: number; // How many times players added this quest/preset/spot into their quest planner
+  commentsCount: number;
+  createdAt: number;
+}
+
 export interface GuideSubPage {
   id: string;
   title: string;
   category: 'Progression' | 'Combat & Classes' | 'Pawns' | 'Crafting & Gear' | 'Raids & Bosses' | 'Server Rules' | 'Community';
   author: string;
+  authorClan?: string;
   summary: string;
   tags: string[];
   lastUpdated: string;
+  createdAt?: number;
+  upvotes?: number;
+  downvotes?: number;
   isBuiltIn?: boolean;
   content: string;
   sections?: GuideSection[];

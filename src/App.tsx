@@ -17,10 +17,13 @@ import { CustomQuestModal } from './components/CustomQuestModal';
 import { WelcomeAuthScreen } from './components/WelcomeAuthScreen';
 import { UserProfileModal } from './components/UserProfileModal';
 import { CommunityFarmSpotsBrowser } from './components/CommunityFarmSpotsBrowser';
+import { SponsorAdBanner } from './components/SponsorAdBanner';
+import { GDPRConsentModal } from './components/GDPRConsentModal';
 import { BoosterSettings, CommunityFarmSpot, GameVersion, PlannedQuest, Quest, SpotSearchCategory, SpotSearchStageScope, UserProfile, VocationType } from './types';
 import { LEVELING_PRESETS } from './data/levelingPresets';
 import { ALL_QUESTS } from './data/quests';
 import { getMaxLevelForVersion } from './data/levelTable';
+import { incrementTimesPlanned } from './utils/communityStats';
 import { Check, Sparkles, AlertCircle, Coffee, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, PackageCheck, Compass, BookOpen, Table, PanelTop, PanelLeft, Skull, Library } from 'lucide-react';
 
 export default function App() {
@@ -248,6 +251,7 @@ export default function App() {
   };
 
   const handleAddQuest = (questId: string, quantity = 1) => {
+    incrementTimesPlanned(questId);
     setPlannedQuests((prev) => {
       const existingIdx = prev.findIndex((p) => p.questId === questId);
       if (existingIdx >= 0) {
@@ -288,6 +292,9 @@ export default function App() {
     const preset = LEVELING_PRESETS.find((p) => p.id === presetId);
     if (!preset) return;
 
+    incrementTimesPlanned(presetId);
+    preset.quests.forEach((q) => incrementTimesPlanned(q.questId));
+
     const newPlanned: PlannedQuest[] = preset.quests.map((q) => ({
       questId: q.questId,
       quantity: q.quantity,
@@ -299,6 +306,7 @@ export default function App() {
   };
 
   const handleAddCustomQuest = (customQuest: Quest, initialQuantity: number) => {
+    incrementTimesPlanned(customQuest.id);
     setPlannedQuests((prev) => [
       ...prev,
       {
@@ -312,7 +320,9 @@ export default function App() {
   };
 
   const handleAddSpotToPlan = (spot: CommunityFarmSpot) => {
+    incrementTimesPlanned(spot.id);
     if (spot.quests && spot.quests.length > 0) {
+      spot.quests.forEach((q) => incrementTimesPlanned(q.questId));
       const newItems: PlannedQuest[] = spot.quests.map((q) => ({
         questId: q.questId,
         customQuest: {
@@ -877,6 +887,12 @@ export default function App() {
         onOpenAuthScreen={handleOpenAuthScreen}
         currentLevel={currentLevel}
       />
+
+      {/* Cross-Platform Community Sponsor / Ad Banner */}
+      <SponsorAdBanner placement="bottom_sticky" />
+
+      {/* First-Launch GDPR & Privacy Consent Dialog */}
+      <GDPRConsentModal />
 
       {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-950 text-slate-500 py-6 text-center text-xs space-y-2.5">
