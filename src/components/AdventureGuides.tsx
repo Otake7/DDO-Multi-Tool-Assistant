@@ -37,6 +37,7 @@ import { BUILTIN_GUIDES } from '../data/guidesData';
 import { isImageUrl, normalizeImageUrl } from '../utils/imageHelper';
 import { getItemEngagementStats, getUserVotesMap, voteItem } from '../utils/communityStats';
 import { CommunityCommentsSection } from './CommunityCommentsSection';
+import { fetchRemoteGuides, saveRemoteGuide, deleteRemoteGuide } from '../utils/guidesApi';
 
 interface AdventureGuidesProps {
   onNavigateToTab?: (tab: string) => void;
@@ -57,7 +58,7 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
 
   // --- Persistent User Guides State ---
   const [guides, setGuides] = useState<GuideSubPage[]>(() => {
-    const saved = localStorage.getItem('ddon_adventure_guides');
+    const saved = localStorage.getItem('ddon_adventure_guides_v2');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -106,10 +107,28 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
   const [editorTab, setEditorTab] = useState<'write' | 'preview'>('write');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Sync to local storage
+  // Sync to local storage and fetch remote guides on load
   useEffect(() => {
-    localStorage.setItem('ddon_adventure_guides', JSON.stringify(guides));
+    localStorage.setItem('ddon_adventure_guides_v2', JSON.stringify(guides));
   }, [guides]);
+
+  // Fetch guides from Aiven database on mount
+  useEffect(() => {
+    fetchRemoteGuides().then((remoteGuides) => {
+      if (remoteGuides && remoteGuides.length > 0) {
+        setGuides((prev) => {
+          const map = new Map<string, GuideSubPage>();
+          // Builtins first
+          BUILTIN_GUIDES.forEach((bg) => map.set(bg.id, bg));
+          // Remote cloud guides next
+          remoteGuides.forEach((rg) => map.set(rg.id, rg));
+          // Local customs
+          prev.filter((g) => !g.isBuiltIn).forEach((cg) => map.set(cg.id, cg));
+          return Array.from(map.values());
+        });
+      }
+    });
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -220,22 +239,22 @@ Explain the strategy or farming route in detail...
 
     if (editingGuideId) {
       // Update existing
+      const updatedGuide: GuideSubPage = {
+        id: editingGuideId,
+        title: editTitle.trim(),
+        category: editCategory,
+        author: editAuthor.trim() || 'Arisen Scholar',
+        summary: editSummary.trim() || editTitle.trim(),
+        tags: tagArray,
+        content: editContent,
+        lastUpdated: 'Recently edited',
+        isBuiltIn: false,
+      };
+
       setGuides((prev) =>
-        prev.map((g) =>
-          g.id === editingGuideId
-            ? {
-                ...g,
-                title: editTitle.trim(),
-                category: editCategory,
-                author: editAuthor.trim() || 'Arisen Scholar',
-                summary: editSummary.trim() || editTitle.trim(),
-                tags: tagArray,
-                content: editContent,
-                lastUpdated: 'Recently edited'
-              }
-            : g
-        )
+        prev.map((g) => (g.id === editingGuideId ? { ...g, ...updatedGuide } : g))
       );
+      saveRemoteGuide(updatedGuide);
       showToast(`Updated sub-page "${editTitle}"`);
     } else {
       // Create new
@@ -253,7 +272,8 @@ Explain the strategy or farming route in detail...
       };
       setGuides((prev) => [newGuide, ...prev]);
       setSelectedGuideId(newId);
-      showToast(`Created new guide sub-page "${editTitle}"`);
+      saveRemoteGuide(newGuide);
+      showToast(`Created & published new guide "${editTitle}"`);
     }
 
     setIsEditing(false);
@@ -262,6 +282,7 @@ Explain the strategy or farming route in detail...
   const handleDeleteGuide = (id: string, title: string) => {
     if (confirm(`Are you sure you want to delete the guide "${title}"?`)) {
       setGuides((prev) => prev.filter((g) => g.id !== id));
+      deleteRemoteGuide(id);
       if (selectedGuideId === id) {
         const remaining = guides.filter((g) => g.id !== id);
         setSelectedGuideId(remaining[0]?.id || '');

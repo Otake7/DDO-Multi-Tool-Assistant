@@ -78,6 +78,33 @@ async function ensureDbSchema() {
         ALTER TABLE ddon_users ADD COLUMN IF NOT EXISTS role VARCHAR(30) DEFAULT 'user';
         ALTER TABLE ddon_users ADD COLUMN IF NOT EXISTS roles JSONB DEFAULT '["user"]'::jsonb;
         CREATE INDEX IF NOT EXISTS idx_ddon_users_username_lower ON ddon_users (LOWER(username));
+
+        CREATE TABLE IF NOT EXISTS ddon_leveling_routes (
+          id VARCHAR(120) PRIMARY KEY,
+          name VARCHAR(150) NOT NULL,
+          level_range VARCHAR(50) NOT NULL,
+          region VARCHAR(80) NOT NULL,
+          description TEXT,
+          quests JSONB NOT NULL DEFAULT '[]'::jsonb,
+          author VARCHAR(100) DEFAULT 'Community Arisen',
+          created_at BIGINT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS ddon_feedback (
+          id VARCHAR(120) PRIMARY KEY,
+          author_name VARCHAR(100) NOT NULL,
+          author_clan VARCHAR(30) DEFAULT '',
+          author_role VARCHAR(30) DEFAULT 'user',
+          avatar_icon VARCHAR(60) DEFAULT 'flame',
+          avatar_color VARCHAR(60) DEFAULT 'amber',
+          type VARCHAR(40) NOT NULL,
+          rating INT DEFAULT 5,
+          title VARCHAR(200) NOT NULL,
+          content TEXT NOT NULL,
+          likes INT DEFAULT 0,
+          dislikes INT DEFAULT 0,
+          created_at BIGINT NOT NULL
+        );
       `);
 
       // Seed / Ensure the Otake7 Master Owner & Moderator Account exists in Aiven PostgreSQL
@@ -473,6 +500,181 @@ app.post('/api/auth/update-profile', async (req, res) => {
   } catch (err: any) {
     console.error('[Update Profile Error]', err);
     return res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
+// --- Community Leveling Routes API ---
+const memoryRoutes: any[] = [];
+
+app.get('/api/routes', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const db = getDbPool();
+    if (db) {
+      const result = await db.query('SELECT * FROM ddon_leveling_routes ORDER BY created_at DESC LIMIT 100');
+      const routes = result.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        levelRange: row.level_range,
+        region: row.region,
+        description: row.description,
+        quests: typeof row.quests === 'string' ? JSON.parse(row.quests) : row.quests,
+        author: row.author,
+        createdAt: Number(row.created_at),
+      }));
+      return res.json(routes);
+    }
+    return res.json(memoryRoutes);
+  } catch (err: any) {
+    console.error('[Get Routes Error]', err);
+    return res.json(memoryRoutes);
+  }
+});
+
+app.post('/api/routes', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const { id, name, levelRange, region, description, quests, author } = req.body;
+    if (!name || !quests) {
+      return res.status(400).json({ error: 'Route name and quests are required.' });
+    }
+
+    const routeId = id || `custom-route-${Date.now()}`;
+    const now = Date.now();
+    const db = getDbPool();
+
+    if (db) {
+      await db.query(
+        `INSERT INTO ddon_leveling_routes (id, name, level_range, region, description, quests, author, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         ON CONFLICT (id) DO UPDATE SET
+           name = EXCLUDED.name,
+           level_range = EXCLUDED.level_range,
+           region = EXCLUDED.region,
+           description = EXCLUDED.description,
+           quests = EXCLUDED.quests,
+           author = EXCLUDED.author`,
+        [routeId, name, levelRange || 'Lv 1 - 100', region || 'Hidell Plains', description || '', JSON.stringify(quests || []), author || 'Community Arisen', now]
+      );
+      return res.json({ success: true, id: routeId });
+    }
+
+    const routeObj = { id: routeId, name, levelRange, region, description, quests, author, createdAt: now };
+    memoryRoutes.unshift(routeObj);
+    return res.json({ success: true, id: routeId });
+  } catch (err: any) {
+    console.error('[Save Route Error]', err);
+    return res.status(500).json({ error: 'Failed to save route.' });
+  }
+});
+
+app.delete('/api/routes/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDbPool();
+    if (db) {
+      await db.query('DELETE FROM ddon_leveling_routes WHERE id = $1', [id]);
+    }
+    const idx = memoryRoutes.findIndex(r => r.id === id);
+    if (idx !== -1) memoryRoutes.splice(idx, 1);
+    return res.json({ success: true });
+  } catch (err: any) {
+    console.error('[Delete Route Error]', err);
+    return res.status(500).json({ error: 'Failed to delete route.' });
+  }
+});
+
+// --- Community Feedback API ---
+const memoryFeedback: any[] = [];
+
+app.get('/api/feedback', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const db = getDbPool();
+    if (db) {
+      const result = await db.query('SELECT * FROM ddon_feedback ORDER BY created_at DESC LIMIT 150');
+      const items = result.rows.map(row => ({
+        id: row.id,
+        authorName: row.author_name,
+        authorClan: row.author_clan,
+        authorRole: row.author_role,
+        avatarIcon: row.avatar_icon,
+        avatarColor: row.avatar_color,
+        type: row.type,
+        rating: row.rating,
+        title: row.title,
+        content: row.content,
+        likes: row.likes || 0,
+        dislikes: row.dislikes || 0,
+        createdAt: Number(row.created_at),
+      }));
+      return res.json(items);
+    }
+    return res.json(memoryFeedback);
+  } catch (err: any) {
+    console.error('[Get Feedback Error]', err);
+    return res.json(memoryFeedback);
+  }
+});
+
+app.post('/api/feedback', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const { id, authorName, authorClan, authorRole, avatarIcon, avatarColor, type, rating, title, content } = req.body;
+    if (!title || !content) {
+      return res.status(400).json({ error: 'Title and content are required.' });
+    }
+
+    const feedbackId = id || `feedback-${Date.now()}`;
+    const now = Date.now();
+    const db = getDbPool();
+
+    if (db) {
+      await db.query(
+        `INSERT INTO ddon_feedback (id, author_name, author_clan, author_role, avatar_icon, avatar_color, type, rating, title, content, likes, dislikes, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 0, 0, $11)`,
+        [feedbackId, authorName || 'Anonymous Arisen', authorClan || '', authorRole || 'user', avatarIcon || 'flame', avatarColor || 'amber', type || 'feature_request', rating || 5, title, content, now]
+      );
+      return res.json({ success: true, id: feedbackId });
+    }
+
+    const item = { id: feedbackId, authorName, authorClan, authorRole, avatarIcon, avatarColor, type, rating, title, content, likes: 0, dislikes: 0, createdAt: now };
+    memoryFeedback.unshift(item);
+    return res.json({ success: true, id: feedbackId });
+  } catch (err: any) {
+    console.error('[Submit Feedback Error]', err);
+    return res.status(500).json({ error: 'Failed to submit feedback.' });
+  }
+});
+
+app.post('/api/feedback/:id/vote', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type } = req.body; // 'like' | 'dislike'
+    const db = getDbPool();
+
+    if (db) {
+      if (type === 'like') {
+        await db.query('UPDATE ddon_feedback SET likes = likes + 1 WHERE id = $1', [id]);
+      } else {
+        await db.query('UPDATE ddon_feedback SET dislikes = dislikes + 1 WHERE id = $1', [id]);
+      }
+      const resRow = await db.query('SELECT likes, dislikes FROM ddon_feedback WHERE id = $1', [id]);
+      if (resRow.rows.length > 0) {
+        return res.json(resRow.rows[0]);
+      }
+    }
+
+    const f = memoryFeedback.find(x => x.id === id);
+    if (f) {
+      if (type === 'like') f.likes++;
+      else f.dislikes++;
+      return res.json({ likes: f.likes, dislikes: f.dislikes });
+    }
+    return res.json({ success: true });
+  } catch (err: any) {
+    console.error('[Vote Feedback Error]', err);
+    return res.status(500).json({ error: 'Vote failed.' });
   }
 });
 

@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   Sparkles, Shield, Flame, RotateCcw, Award, Swords, Layers, Map, 
   PackageCheck, BookOpen, HelpCircle, Compass, Trophy, User, Coffee, 
-  PanelLeft, PanelTop, Skull, Library, Menu, X, Smartphone, Monitor 
+  PanelLeft, PanelTop, Skull, Library, Menu, X, Smartphone, Monitor,
+  MessageSquarePlus
 } from 'lucide-react';
 import { BoosterSettings, GameVersion, UserProfile } from '../types';
 import { GAME_VERSIONS, getMaxLevelForVersion, XP_RING_CAP_LEVEL } from '../data/levelTable';
@@ -61,11 +62,12 @@ export const Header: React.FC<HeaderProps> = ({
       case 'items': return 'Item Library';
       case 'knowledge': return 'Knowledge Library';
       case 'bestiary': return 'Bestiary & Enemies';
-      case 'fast_routes': return 'Fast Routes';
+      case 'fast_routes': return 'Leveling Routes';
       case 'guides': return 'Guides & Notes';
       case 'journal': return 'Ask Assistant';
       case 'leaderboard': return 'Leaderboard';
       case 'table': return `Lv 1–${maxLevel} Table`;
+      case 'feedback': return 'Community Feedback';
       default: return 'Assistant';
     }
   };
@@ -546,7 +548,7 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <Compass className="w-4 h-4" />
-              <span>Fast Routes & Guide</span>
+              <span>Leveling Routes</span>
             </button>
 
             <button
@@ -572,6 +574,19 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <span>Lv 1–{maxLevel} Table</span>
+            </button>
+
+            <button
+              id="tab-feedback"
+              onClick={() => setActiveTab('feedback')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'feedback'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <MessageSquarePlus className="w-4 h-4" />
+              <span>Feedback</span>
             </button>
           </div>
         )}

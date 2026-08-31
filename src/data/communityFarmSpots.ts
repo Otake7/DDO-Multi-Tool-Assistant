@@ -18,7 +18,7 @@ export const SEED_COMMUNITY_FARM_SPOTS: CommunityFarmSpot[] = [
     authorName: 'Klaus_Volden',
     authorClan: '[Rising Vanguard]',
     verified: true,
-    upvotes: 42,
+    upvotes: 0,
     createdAt: Date.now() - 86400000 * 5,
     quests: [
       {
@@ -54,7 +54,7 @@ export const SEED_COMMUNITY_FARM_SPOTS: CommunityFarmSpot[] = [
     authorName: 'GrandArisen_Vanessa',
     authorClan: '[WhiteWing]',
     verified: true,
-    upvotes: 68,
+    upvotes: 0,
     createdAt: Date.now() - 86400000 * 3,
     quests: [
       {
@@ -90,7 +90,7 @@ export const SEED_COMMUNITY_FARM_SPOTS: CommunityFarmSpot[] = [
     authorName: 'RiftWalker_Rex',
     authorClan: '[Dragonforged]',
     verified: true,
-    upvotes: 95,
+    upvotes: 0,
     createdAt: Date.now() - 86400000 * 1,
     quests: [
       {
@@ -126,7 +126,7 @@ export const SEED_COMMUNITY_FARM_SPOTS: CommunityFarmSpot[] = [
     authorName: 'LestaniaOverlord',
     authorClan: '[Apex]',
     verified: true,
-    upvotes: 53,
+    upvotes: 0,
     createdAt: Date.now() - 86400000 * 2,
     quests: [
       {

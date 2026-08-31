@@ -50,7 +50,7 @@ export const CommunityFarmSpotsBrowser: React.FC<CommunityFarmSpotsBrowserProps>
 }) => {
   // Load community spots from local storage + default seeds
   const [spots, setSpots] = useState<CommunityFarmSpot[]>(() => {
-    const saved = localStorage.getItem('ddon_community_farm_spots');
+    const saved = localStorage.getItem('ddon_community_farm_spots_v2');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -65,7 +65,7 @@ export const CommunityFarmSpotsBrowser: React.FC<CommunityFarmSpotsBrowserProps>
   });
 
   const [upvotedSpots, setUpvotedSpots] = useState<Record<string, boolean>>(() => {
-    const saved = localStorage.getItem('ddon_upvoted_spots');
+    const saved = localStorage.getItem('ddon_upvoted_spots_v2');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -101,11 +101,11 @@ export const CommunityFarmSpotsBrowser: React.FC<CommunityFarmSpotsBrowserProps>
 
   // Sync spots to localStorage
   useEffect(() => {
-    localStorage.setItem('ddon_community_farm_spots', JSON.stringify(spots));
+    localStorage.setItem('ddon_community_farm_spots_v2', JSON.stringify(spots));
   }, [spots]);
 
   useEffect(() => {
-    localStorage.setItem('ddon_upvoted_spots', JSON.stringify(upvotedSpots));
+    localStorage.setItem('ddon_upvoted_spots_v2', JSON.stringify(upvotedSpots));
   }, [upvotedSpots]);
 
   const isGuest = !currentUser || currentUser.isGuest;

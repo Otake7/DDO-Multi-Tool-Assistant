@@ -7,7 +7,8 @@ import { LevelTableViewer } from './components/LevelTableViewer';
 import { VocationSkillTree } from './components/VocationSkillTree';
 import { FindResourcesAndEnemies } from './components/FindResourcesAndEnemies';
 import { ItemLibrary } from './components/ItemLibrary';
-import { DogmaRisingGuides } from './components/DogmaRisingGuides';
+import { LevelingRoutes } from './components/LevelingRoutes';
+import { FeedbackPage } from './components/FeedbackPage';
 import { AdventureGuides } from './components/AdventureGuides';
 import { AskTheJournal } from './components/AskTheJournal';
 import { Leaderboards } from './components/Leaderboards';
@@ -25,7 +26,7 @@ import { LEVELING_PRESETS } from './data/levelingPresets';
 import { ALL_QUESTS } from './data/quests';
 import { getMaxLevelForVersion } from './data/levelTable';
 import { incrementTimesPlanned } from './utils/communityStats';
-import { Check, Sparkles, AlertCircle, Coffee, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, PackageCheck, Compass, BookOpen, Table, PanelTop, PanelLeft, Skull, Library, Menu } from 'lucide-react';
+import { Check, Sparkles, AlertCircle, Coffee, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, PackageCheck, Compass, BookOpen, Table, PanelTop, PanelLeft, Skull, Library, Menu, MessageSquarePlus } from 'lucide-react';
 
 export default function App() {
   // --- Account & User Profile State ---
@@ -689,7 +690,7 @@ export default function App() {
                 }`}
               >
                 <Compass className="w-4 h-4 shrink-0" />
-                <span className="truncate">Fast Routes & Guide</span>
+                <span className="truncate">Leveling Routes</span>
               </button>
 
               <button
@@ -716,6 +717,19 @@ export default function App() {
               >
                 <Table className="w-4 h-4 shrink-0" />
                 <span className="truncate">Lv 1–{getMaxLevelForVersion(gameVersion)} Table</span>
+              </button>
+
+              <button
+                id="sidebar-tab-feedback"
+                onClick={() => setActiveTab('feedback')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'feedback'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <MessageSquarePlus className="w-4 h-4 shrink-0" />
+                <span className="truncate">Feedback</span>
               </button>
             </nav>
           </aside>
@@ -857,11 +871,14 @@ export default function App() {
           />
         )}
 
-        {/* Tab 7: Fast Routes & Guide (Dogma Rising Quick Routes) */}
+        {/* Tab 7: Leveling Routes (Community & Official Speed Guides) */}
         {activeTab === 'fast_routes' && (
-          <DogmaRisingGuides
+          <LevelingRoutes
             onLoadPreset={handleLoadPreset}
             onGoToPlanner={() => setActiveTab('planner')}
+            currentUser={currentUser}
+            onOpenAuth={handleOpenAuthScreen}
+            activePlannedQuests={plannedQuests}
           />
         )}
 
@@ -888,25 +905,33 @@ export default function App() {
           />
         )}
 
-        {/* Tab 9: Ask the Journal Knowledge Base & Q&A */}
+        {/* Tab 11: Ask the Journal Knowledge Base & Q&A */}
         {activeTab === 'journal' && (
           <AskTheJournal
             onNavigateToTab={(tab) => setActiveTab(tab)}
           />
         )}
 
-        {/* Tab 10: Speedrun Leaderboard & speedrun.com Portal */}
+        {/* Tab 12: Speedrun Leaderboard & speedrun.com Portal */}
         {activeTab === 'leaderboard' && (
           <Leaderboards />
         )}
 
-        {/* Tab 11: Level Reference Table */}
+        {/* Tab 13: Level Reference Table */}
         {activeTab === 'table' && (
           <LevelTableViewer
             currentLevel={currentLevel}
             setCurrentLevel={setCurrentLevel}
             setTargetLevel={setTargetLevel}
             gameVersion={gameVersion}
+          />
+        )}
+
+        {/* Tab 14: Public Community Feedback & Feature Requests */}
+        {activeTab === 'feedback' && (
+          <FeedbackPage
+            currentUser={currentUser}
+            onOpenAuth={handleOpenAuthScreen}
           />
         )}
       </main>

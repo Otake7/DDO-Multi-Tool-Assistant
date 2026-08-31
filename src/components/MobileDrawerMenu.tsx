@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   X, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, 
   PackageCheck, Library, Skull, Compass, BookOpen, Table, 
-  Monitor, Smartphone, User, Sparkles, Coffee, Layers, ChevronRight
+  Monitor, Smartphone, User, Sparkles, Coffee, Layers, ChevronRight,
+  MessageSquarePlus
 } from 'lucide-react';
 import { BoosterSettings, GameVersion, UserProfile } from '../types';
 import { GAME_VERSIONS, getMaxLevelForVersion, XP_RING_CAP_LEVEL } from '../data/levelTable';
@@ -115,8 +116,8 @@ export const MobileDrawerMenu: React.FC<MobileDrawerMenuProps> = ({
     },
     {
       id: 'fast_routes',
-      title: 'Fast Routes & Speed Guides',
-      subtitle: 'Fastest 1–90 sprint routes & tips',
+      title: 'Leveling Routes',
+      subtitle: 'Fastest 1–90 sprint routes & community loops',
       icon: Compass,
       color: 'text-amber-400',
       bgColor: 'bg-amber-500/10 border-amber-500/30',
@@ -152,6 +153,14 @@ export const MobileDrawerMenu: React.FC<MobileDrawerMenuProps> = ({
       icon: Table,
       color: 'text-slate-400',
       bgColor: 'bg-slate-500/10 border-slate-500/30',
+    },
+    {
+      id: 'feedback',
+      title: 'Feedback & Suggestions',
+      subtitle: 'Public community voice, likes, dislikes & ideas',
+      icon: MessageSquarePlus,
+      color: 'text-amber-400',
+      bgColor: 'bg-amber-500/10 border-amber-500/30',
     },
   ];
 
