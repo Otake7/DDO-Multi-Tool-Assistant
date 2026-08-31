@@ -166,6 +166,95 @@ On the Dogma Rising server, there is a hard level gap restriction designed to pr
 2. **Fast Clears**: Use fast AOE pawn setups (Sorcerer, Alchemist, High Scepter, Elemental Archer) to wipe mob clusters in under 60 seconds.
 3. **Turn In & Reset**: Return to the Notice Board, claim gold and XP, and re-trigger the route.
 4. **Use the Planner**: Use our **Quest Planner** tab to calculate the exact number of runs required to hit your target level.`
+  },
+  {
+    id: 'guide-pawn-build-goblin-killer',
+    title: '(TEST OG AUTHOR DR.AVEN) PAWN BUILD : GOBLIN KILLER (VERY BUDGET FRIENDLY)',
+    category: 'Pawns',
+    author: 'Dr. Aven',
+    lastUpdated: 'Season 3.4',
+    tags: ['Pawn Build', 'Budget Friendly', 'Goblin Killer', 'Leveling', 'Fighter', 'Pawns'],
+    summary: '(TEST OG AUTHOR DR.AVEN) PAWN BUILD : GOBLIN KILLER (VERY BUDGET FRIENDLY) - High efficiency leveling and boss farming pawn compendium.',
+    isBuiltIn: true,
+    content: `# (TEST OG AUTHOR DR.AVEN) PAWN BUILD : GOBLIN KILLER (VERY BUDGET FRIENDLY)
+
+> **Author**: Dr. Aven  
+> **Category**: Pawns / Leveling & Speed Farming  
+> **Budget**: Very Budget Friendly (Early to Mid-Game Accessible)
+
+---
+
+## Vocation choice (fighter)
+
+First the vocation choice. Most ppl tend to default to sorc or HS for goblin farm. It is true that Sorc does AOE damage and HS's dim slash is a real monster at multi target content.
+
+But Sorc don't spam spells and are easily annoyed by hords and there is no bell setup that's gonna be able to make your HS pawn spam dim slash.
+
+The best vocation we found was fighter, yes that forgotten vocation. With the correct bell setup and correct build, fighter is by far the best performing goblin farmer in the game. They are able to literally spam compass slash which is a decently wide AOE that does enough damage to one-skill any goblin relevent to farm.
+
+Also the thing that's interestening is that it's also super easy to build as the damage required to kill goblins is pretty low (yes, the only win of fighter is when wwe don't care about damage ...).
+
+Thus this is achievable even with gear that's not even IR105. (I'll show exemple of what type of gear i used in hardcore to illustrate my point).
+
+---
+
+## Custom Skills
+
+Copy this setup:
+
+* **Compass Slash**: Their bread and butter aoe goblin chopper. \`#spin2win\`
+* **Brave's Raid**: To help on down dps in case you need to kill a big monster (can be swapped without much consequesnces in farming context).
+* **Flowing Sword Slash**: Defensive option with counter attack, the pawn's aren't that bad at using it so it can be worth for managing some goblin aggression.
+* **Skyward Lash**: The only skill able to reach high targets.
+
+![Custom Skills Setup](https://i.imgur.com/gURmtC5.png)
+
+---
+
+## Augments
+
+All damage augments are from Fighter (no epitaph required) and all stamina augments come from Alchemist (no epitaph required either).
+
+* **Demihuman Proficiency (Fighter)**: More damage on goblins and saurians.
+* **Combat Momentum, Brave Effort & Onslaught (Fighter)**: More damage.
+* **Soul Stealer (Alchemist)**: Stamina on kill.
+* **Relaxness (Alchemist)**: Reduced stamina usage.
+
+### Optional 11 points (not required for this to work):
+* **New Attack (Secret Augment)**: Attack buff.
+* **New Defense (Secret Augment)**: Defense buff.
+* **Efficacy (Secret Augment)**: Can help with healing items in case your pawns lack defense and don't have 100 recovery limit + Self-Feedback.
+* **Self-Feedback (Elemental Archer)**: If you have 100 recovery limit.
+
+![Augments Setup](https://i.imgur.com/cUVIiC4.png)
+
+---
+
+## Bell setup
+
+We want our pawns in the fight spamming Compass Slash on every small enemies. This is a very basic setup.
+
+![Bell Setup Overview](https://i.imgur.com/2F1BLUd.png)
+
+![Bell Priorities Detail](https://i.imgur.com/uipsIKT.png)
+
+---
+
+## Gear
+
+Really, if you have a set of IR 90+ armor and weapons you should be fine. As an exemple here is my hardcore pawn gear state right now. She carried me through 930 lvls of farming without a single issue.
+
+![Hardcore Pawn Gear State](https://i.imgur.com/E31laSx.png)
+
+---
+
+## Questions & FAQ
+
+### Is it still the best build at higher investment?
+You won't kill faster, it's mostly already the fastest. But higher investment can make it more comfortable (like not needing to use healing items ever). Other thatn that i haven't found any pawns that clear faster even with min-maxed endgame gear.
+
+### Any suggestion on a green to buff & accompany them?
+Any decent EA build. But honestly your pawns won't even need any help with stamina.`
   }
 ];
 
