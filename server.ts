@@ -79,6 +79,22 @@ async function ensureDbSchema() {
         ALTER TABLE ddon_users ADD COLUMN IF NOT EXISTS roles JSONB DEFAULT '["user"]'::jsonb;
         CREATE INDEX IF NOT EXISTS idx_ddon_users_username_lower ON ddon_users (LOWER(username));
 
+        CREATE TABLE IF NOT EXISTS ddon_adventure_guides (
+          id VARCHAR(120) PRIMARY KEY,
+          title VARCHAR(200) NOT NULL,
+          category VARCHAR(60) NOT NULL DEFAULT 'Progression',
+          author VARCHAR(100) NOT NULL DEFAULT 'Arisen',
+          author_id VARCHAR(120),
+          summary TEXT,
+          tags JSONB NOT NULL DEFAULT '[]'::jsonb,
+          content TEXT NOT NULL,
+          last_updated VARCHAR(80) DEFAULT 'Season 3.4',
+          likes INT DEFAULT 0,
+          dislikes INT DEFAULT 0,
+          is_builtin BOOLEAN DEFAULT FALSE,
+          created_at BIGINT NOT NULL
+        );
+
         CREATE TABLE IF NOT EXISTS ddon_leveling_routes (
           id VARCHAR(120) PRIMARY KEY,
           name VARCHAR(150) NOT NULL,
@@ -500,6 +516,111 @@ app.post('/api/auth/update-profile', async (req, res) => {
   } catch (err: any) {
     console.error('[Update Profile Error]', err);
     return res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
+// --- Adventure Guides API ---
+const memoryGuides: any[] = [];
+
+app.get('/api/guides', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const db = getDbPool();
+    let remoteRows: any[] = [];
+    if (db) {
+      const result = await db.query('SELECT * FROM ddon_adventure_guides ORDER BY created_at DESC LIMIT 150');
+      remoteRows = result.rows.map(row => ({
+        id: row.id,
+        title: row.title,
+        category: row.category,
+        author: row.author,
+        authorId: row.author_id,
+        summary: row.summary,
+        tags: typeof row.tags === 'string' ? JSON.parse(row.tags) : row.tags,
+        content: row.content,
+        lastUpdated: row.last_updated,
+        likes: Number(row.likes) || 0,
+        dislikes: Number(row.dislikes) || 0,
+        isBuiltIn: Boolean(row.is_builtin),
+        createdAt: Number(row.created_at)
+      }));
+      return res.json(remoteRows);
+    }
+    return res.json(memoryGuides);
+  } catch (err: any) {
+    console.error('[Get Guides Error]', err);
+    return res.json(memoryGuides);
+  }
+});
+
+app.post('/api/guides', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const guide = req.body;
+    if (!guide || !guide.id || !guide.title) {
+      return res.status(400).json({ error: 'Guide ID and Title are required.' });
+    }
+
+    const now = Date.now();
+    const db = getDbPool();
+
+    // Cache in memory
+    const existingIdx = memoryGuides.findIndex(g => g.id === guide.id);
+    if (existingIdx !== -1) {
+      memoryGuides[existingIdx] = { ...memoryGuides[existingIdx], ...guide };
+    } else {
+      memoryGuides.unshift({ ...guide, createdAt: now });
+    }
+
+    if (db) {
+      await db.query(
+        `INSERT INTO ddon_adventure_guides (id, title, category, author, author_id, summary, tags, content, last_updated, is_builtin, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         ON CONFLICT (id) DO UPDATE SET
+           title = EXCLUDED.title,
+           category = EXCLUDED.category,
+           author = EXCLUDED.author,
+           author_id = COALESCE(EXCLUDED.author_id, ddon_adventure_guides.author_id),
+           summary = EXCLUDED.summary,
+           tags = EXCLUDED.tags,
+           content = EXCLUDED.content,
+           last_updated = EXCLUDED.last_updated`,
+        [
+          guide.id,
+          guide.title,
+          guide.category || 'Progression',
+          guide.author || 'Community Arisen',
+          guide.authorId || null,
+          guide.summary || '',
+          JSON.stringify(guide.tags || []),
+          guide.content || '',
+          guide.lastUpdated || 'Season 3.4',
+          Boolean(guide.isBuiltIn),
+          now
+        ]
+      );
+    }
+
+    return res.json({ success: true, guide });
+  } catch (err: any) {
+    console.error('[Save Guide Error]', err);
+    return res.status(500).json({ error: 'Failed to save guide.' });
+  }
+});
+
+app.delete('/api/guides/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDbPool();
+    if (db) {
+      await db.query('DELETE FROM ddon_adventure_guides WHERE id = $1', [id]);
+    }
+    const idx = memoryGuides.findIndex(g => g.id === id);
+    if (idx !== -1) memoryGuides.splice(idx, 1);
+    return res.json({ success: true });
+  } catch (err: any) {
+    console.error('[Delete Guide Error]', err);
+    return res.status(500).json({ error: 'Failed to delete guide.' });
   }
 });
 

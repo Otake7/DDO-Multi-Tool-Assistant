@@ -341,6 +341,7 @@ export interface GuideSubPage {
   title: string;
   category: 'Progression' | 'Combat & Classes' | 'Pawns' | 'Crafting & Gear' | 'Raids & Bosses' | 'Server Rules' | 'Community';
   author: string;
+  authorId?: string;
   authorClan?: string;
   summary: string;
   tags: string[];

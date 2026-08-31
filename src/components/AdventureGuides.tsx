@@ -107,27 +107,63 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
   const [editorTab, setEditorTab] = useState<'write' | 'preview'>('write');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Sync to local storage and fetch remote guides on load
+  // Role & Ownership Permissions Check
+  const canEditGuide = (guide: GuideSubPage): boolean => {
+    if (!currentUser || currentUser.isGuest) return false;
+    const isOwnerOrMod = 
+      currentUser.role === 'owner' || 
+      currentUser.role === 'moderator' || 
+      currentUser.roles?.includes('owner') || 
+      currentUser.roles?.includes('moderator') ||
+      currentUser.username.toLowerCase() === 'otake7';
+
+    if (isOwnerOrMod) return true;
+
+    // Built-in official compendium can only be modified by Owner/Moderators
+    if (guide.isBuiltIn) return false;
+
+    // Creators can edit their own guides
+    const authorLower = (guide.author || '').toLowerCase();
+    const userCharLower = (currentUser.characterName || '').toLowerCase();
+    const userNameLower = (currentUser.username || '').toLowerCase();
+
+    return (
+      (guide.authorId && guide.authorId === currentUser.id) ||
+      (userCharLower && authorLower.includes(userCharLower)) ||
+      (userNameLower && authorLower.includes(userNameLower))
+    );
+  };
+
+  // Sync to local storage
   useEffect(() => {
     localStorage.setItem('ddon_adventure_guides_v2', JSON.stringify(guides));
   }, [guides]);
 
-  // Fetch guides from Aiven database on mount
-  useEffect(() => {
-    fetchRemoteGuides().then((remoteGuides) => {
+  // Live polling and initial fetch from Aiven PostgreSQL database
+  const syncRemoteGuides = async () => {
+    try {
+      const remoteGuides = await fetchRemoteGuides();
       if (remoteGuides && remoteGuides.length > 0) {
         setGuides((prev) => {
           const map = new Map<string, GuideSubPage>();
           // Builtins first
           BUILTIN_GUIDES.forEach((bg) => map.set(bg.id, bg));
-          // Remote cloud guides next
+          // Remote cloud guides next (persisted on Aiven)
           remoteGuides.forEach((rg) => map.set(rg.id, rg));
-          // Local customs
-          prev.filter((g) => !g.isBuiltIn).forEach((cg) => map.set(cg.id, cg));
+          // Local custom guides that haven't synced yet
+          prev.filter((g) => !g.isBuiltIn && !map.has(g.id)).forEach((cg) => map.set(cg.id, cg));
           return Array.from(map.values());
         });
       }
-    });
+    } catch (e) {
+      console.warn('[Sync Guides Error]', e);
+    }
+  };
+
+  useEffect(() => {
+    syncRemoteGuides();
+    const interval = setInterval(syncRemoteGuides, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   const showToast = (msg: string) => {
@@ -215,6 +251,10 @@ Explain the strategy or farming route in detail...
       setShowAuthGateModal(true);
       return;
     }
+    if (!canEditGuide(guide)) {
+      showToast('You do not have permission to edit this guide. Only the original creator or moderators/owners can edit it.');
+      return;
+    }
     setEditingGuideId(guide.id);
     setEditTitle(guide.title);
     setEditCategory(guide.category);
@@ -226,7 +266,7 @@ Explain the strategy or farming route in detail...
     setEditorTab('write');
   };
 
-  const handleSaveGuide = () => {
+  const handleSaveGuide = async () => {
     if (!editTitle.trim()) {
       showToast('Please enter a guide title.');
       return;
@@ -239,31 +279,35 @@ Explain the strategy or farming route in detail...
 
     if (editingGuideId) {
       // Update existing
+      const existing = guides.find((g) => g.id === editingGuideId);
       const updatedGuide: GuideSubPage = {
         id: editingGuideId,
         title: editTitle.trim(),
         category: editCategory,
         author: editAuthor.trim() || 'Arisen Scholar',
+        authorId: existing?.authorId || currentUser?.id,
         summary: editSummary.trim() || editTitle.trim(),
         tags: tagArray,
         content: editContent,
         lastUpdated: 'Recently edited',
-        isBuiltIn: false,
+        isBuiltIn: existing?.isBuiltIn || false,
       };
 
       setGuides((prev) =>
         prev.map((g) => (g.id === editingGuideId ? { ...g, ...updatedGuide } : g))
       );
-      saveRemoteGuide(updatedGuide);
+      await saveRemoteGuide(updatedGuide);
+      syncRemoteGuides();
       showToast(`Updated sub-page "${editTitle}"`);
     } else {
       // Create new
-      const newId = `custom-guide-${Date.now()}`;
+      const newId = `custom-guide-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
       const newGuide: GuideSubPage = {
         id: newId,
         title: editTitle.trim(),
         category: editCategory,
         author: editAuthor.trim() || 'Arisen Scholar',
+        authorId: currentUser?.id,
         summary: editSummary.trim() || editTitle.trim(),
         tags: tagArray.length > 0 ? tagArray : ['Custom Guide'],
         lastUpdated: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
@@ -272,17 +316,25 @@ Explain the strategy or farming route in detail...
       };
       setGuides((prev) => [newGuide, ...prev]);
       setSelectedGuideId(newId);
-      saveRemoteGuide(newGuide);
+      await saveRemoteGuide(newGuide);
+      syncRemoteGuides();
       showToast(`Created & published new guide "${editTitle}"`);
     }
 
     setIsEditing(false);
   };
 
-  const handleDeleteGuide = (id: string, title: string) => {
+  const handleDeleteGuide = async (id: string, title: string) => {
+    const targetGuide = guides.find((g) => g.id === id);
+    if (targetGuide && !canEditGuide(targetGuide)) {
+      showToast('You do not have permission to delete this guide.');
+      return;
+    }
+
     if (confirm(`Are you sure you want to delete the guide "${title}"?`)) {
       setGuides((prev) => prev.filter((g) => g.id !== id));
-      deleteRemoteGuide(id);
+      await deleteRemoteGuide(id);
+      syncRemoteGuides();
       if (selectedGuideId === id) {
         const remaining = guides.filter((g) => g.id !== id);
         setSelectedGuideId(remaining[0]?.id || '');
@@ -809,15 +861,17 @@ Explain the strategy or farming route in detail...
                     <Copy className="w-4 h-4" />
                   </button>
 
-                  <button
-                    onClick={() => handleOpenEditModal(activeGuide)}
-                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <Edit3 className="w-3.5 h-3.5" />
-                    <span>Edit Sub-Page</span>
-                  </button>
+                  {canEditGuide(activeGuide) && (
+                    <button
+                      onClick={() => handleOpenEditModal(activeGuide)}
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>Edit Sub-Page</span>
+                    </button>
+                  )}
 
-                  {!activeGuide.isBuiltIn && (
+                  {!activeGuide.isBuiltIn && canEditGuide(activeGuide) && (
                     <button
                       onClick={() => handleDeleteGuide(activeGuide.id, activeGuide.title)}
                       className="p-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/50 transition-colors cursor-pointer"

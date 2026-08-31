@@ -15,6 +15,7 @@ export async function fetchRemoteGuides(): Promise<GuideSubPage[]> {
         title: g.title,
         category: g.category || 'Community',
         author: g.author || 'Anonymous Arisen',
+        authorId: g.author_id || g.authorId,
         lastUpdated: g.last_updated || g.lastUpdated || 'Season 3.4',
         tags: Array.isArray(g.tags) ? g.tags : typeof g.tags === 'string' ? JSON.parse(g.tags) : [],
         summary: g.summary || '',
