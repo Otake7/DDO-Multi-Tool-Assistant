@@ -68,19 +68,26 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // Fetch community routes from backend on mount
-  useEffect(() => {
-    async function loadCommunityRoutes() {
+  // Fetch community routes from backend on mount & poll every 5s for live updates
+  const syncRemoteRoutes = async () => {
+    try {
       const remote = await fetchRemoteRoutes();
       if (remote.length > 0) {
         setRoutes(prev => {
-          const ids = new Set(prev.map(r => r.id));
-          const additions = remote.filter(r => !ids.has(r.id));
-          return [...prev, ...additions];
+          const ids = new Set(remote.map(r => r.id));
+          const customs = prev.filter(r => !LEVELING_PRESETS.some(lp => lp.id === r.id) && !ids.has(r.id));
+          return [...LEVELING_PRESETS, ...remote, ...customs];
         });
       }
+    } catch (err) {
+      console.warn('Error syncing routes:', err);
     }
-    loadCommunityRoutes();
+  };
+
+  useEffect(() => {
+    syncRemoteRoutes();
+    const interval = setInterval(syncRemoteRoutes, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleVote = (routeId: string, direction: 'up' | 'down') => {

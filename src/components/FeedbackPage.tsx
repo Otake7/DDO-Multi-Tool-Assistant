@@ -43,12 +43,16 @@ export const FeedbackPage: React.FC<FeedbackPageProps> = ({
   const loadFeedback = async () => {
     setIsLoading(true);
     const data = await fetchRemoteFeedback();
-    setFeedbacks(data);
+    if (data && data.length > 0) {
+      setFeedbacks(data);
+    }
     setIsLoading(false);
   };
 
   useEffect(() => {
     loadFeedback();
+    const interval = setInterval(loadFeedback, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
