@@ -15,25 +15,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build Web Assets
-        run: npm run build
+          node-version: 22
 
       - name: Install Nativefier Packager
         run: npm install -g nativefier
 
       - name: Package Windows .EXE
-        run: nativefier "https://ddo-multi-tool-assistant.onrender.com/" --name "DDON-Multi-Tool-Assistant" --platform windows --arch x64 --single-instance --out dist-desktop
+        run: nativefier "https://ddo-multi-tool-assistant.onrender.com/" --name "DDON-Multi-Tool-Assistant" --platform windows --arch x64 --single-instance
 
       - name: Upload Windows .EXE
         uses: actions/upload-artifact@v4
         with:
           name: DDON-Assistant-Windows-x64
-          path: dist-desktop/
+          path: DDON-Multi-Tool-Assistant-win32-x64/
 
   build-linux:
     runs-on: ubuntu-latest
@@ -44,22 +38,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Build Web Assets
-        run: npm run build
+          node-version: 22
 
       - name: Install Nativefier Packager
         run: sudo npm install -g nativefier
 
       - name: Package Linux Binary
-        run: nativefier "https://ddo-multi-tool-assistant.onrender.com/" --name "DDON-Multi-Tool-Assistant" --platform linux --arch x64 --single-instance --out dist-desktop
+        run: nativefier "https://ddo-multi-tool-assistant.onrender.com/" --name "DDON-Multi-Tool-Assistant" --platform linux --arch x64 --single-instance
 
       - name: Upload Linux Binary
         uses: actions/upload-artifact@v4
         with:
           name: DDON-Assistant-Linux-x64
-          path: dist-desktop/
+          path: DDON-Multi-Tool-Assistant-linux-x64/
