@@ -3,12 +3,7 @@ import { CommunityComment, ItemEngagementStats, VoteDirection, UserProfile } fro
 const STORAGE_KEY_STATS = 'ddon_community_engagement_stats_v2';
 const STORAGE_KEY_USER_VOTES = 'ddon_community_user_votes_v2';
 const STORAGE_KEY_COMMENTS = 'ddon_community_item_comments_v2';
-
-// Clean initial stats - starts strictly at 0 for genuine user engagement
-const SEED_STATS: Record<string, Partial<ItemEngagementStats>> = {};
-
-// Clean initial comments - starts empty for genuine user comments
-const SEED_COMMENTS: CommunityComment[] = [];
+const STORAGE_KEY_COMMENT_VOTES = 'ddon_community_comment_votes_v2';
 
 // Helper to get stats map from localStorage
 export function getStatsMap(): Record<string, ItemEngagementStats> {
@@ -35,7 +30,7 @@ export function getStatsMap(): Record<string, ItemEngagementStats> {
   }
 }
 
-// Helper to get user votes map: { [itemId]: 'up' | 'down' }
+// Helper to get user item votes map: { [itemId]: 'up' | 'down' }
 export function getUserVotesMap(): Record<string, VoteDirection> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_USER_VOTES);
@@ -45,7 +40,17 @@ export function getUserVotesMap(): Record<string, VoteDirection> {
   }
 }
 
-// Helper to get all comments
+// Helper to get user comment votes map: { [commentId]: 'up' | 'down' }
+export function getUserCommentVotesMap(): Record<string, VoteDirection> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_COMMENT_VOTES);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+// Helper to get all comments from cache
 export function getAllComments(): CommunityComment[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_COMMENTS);
@@ -58,7 +63,41 @@ export function getAllComments(): CommunityComment[] {
   }
 }
 
-// Get stats for a specific item - defaults purely to 0
+// Save comments to local cache
+export function setCachedComments(comments: CommunityComment[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEY_COMMENTS, JSON.stringify(comments));
+  } catch (e) {
+    // Ignore storage quota errors
+  }
+}
+
+// Fetch comments from remote API
+export async function fetchRemoteComments(itemId?: string): Promise<CommunityComment[]> {
+  try {
+    const url = itemId ? `/api/comments?itemId=${encodeURIComponent(itemId)}` : '/api/comments';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Fetch comments failed (${res.status})`);
+    const data: CommunityComment[] = await res.json();
+    if (Array.isArray(data)) {
+      // Merge with cache
+      const cached = getAllComments();
+      const map = new Map<string, CommunityComment>();
+      cached.forEach(c => map.set(c.id, c));
+      data.forEach(c => map.set(c.id, c));
+      const merged = Array.from(map.values());
+      setCachedComments(merged);
+      return data;
+    }
+    return [];
+  } catch (e) {
+    console.warn('[Fetch Comments Warning]', e);
+    const cached = getAllComments();
+    return itemId ? cached.filter(c => c.itemId === itemId) : cached;
+  }
+}
+
+// Get stats for a specific item
 export function getItemEngagementStats(itemId: string, defaultCreatedAt?: number): ItemEngagementStats {
   const map = getStatsMap();
   const allComments = getAllComments();
@@ -145,13 +184,15 @@ export function incrementTimesPlanned(itemId: string): number {
   return nextPlanned;
 }
 
-// Add a comment to an item
-export function addCommunityComment(
+// Add a comment or reply to an item
+export async function addCommunityComment(
   itemId: string,
-  itemType: 'quest' | 'preset' | 'farm_spot' | 'guide',
+  itemType: 'quest' | 'preset' | 'farm_spot' | 'guide' | 'feedback',
   content: string,
+  parentId?: string | null,
+  parentAuthorName?: string | null,
   user?: UserProfile | null
-): CommunityComment {
+): Promise<CommunityComment> {
   const allComments = getAllComments();
   const authorName = user?.characterName || user?.username || 'Guest Arisen';
   const authorClan = user?.clanTag || undefined;
@@ -162,6 +203,8 @@ export function addCommunityComment(
   const newComment: CommunityComment = {
     id: `comm_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     itemId,
+    parentId: parentId || null,
+    parentAuthorName: parentAuthorName || null,
     itemType,
     authorId: user?.id,
     authorName,
@@ -171,30 +214,136 @@ export function addCommunityComment(
     avatarColor,
     content: content.trim(),
     createdAt: Date.now(),
-    upvotes: 1
+    upvotes: 0,
+    downvotes: 0
   };
 
   const updatedComments = [newComment, ...allComments];
-  localStorage.setItem(STORAGE_KEY_COMMENTS, JSON.stringify(updatedComments));
+  setCachedComments(updatedComments);
+
+  // Sync to remote API
+  try {
+    await fetch('/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newComment)
+    });
+  } catch (err) {
+    console.warn('[Post Comment API Warning]', err);
+  }
 
   return newComment;
 }
 
-// Delete a comment
-export function deleteCommunityComment(commentId: string): boolean {
+// Delete a comment (Reddit-style: preserve hierarchy if replies exist)
+export async function deleteCommunityComment(commentId: string): Promise<boolean> {
   const allComments = getAllComments();
-  const filtered = allComments.filter((c) => c.id !== commentId);
-  localStorage.setItem(STORAGE_KEY_COMMENTS, JSON.stringify(filtered));
+  const hasReplies = allComments.some((c) => c.parentId === commentId);
+
+  if (hasReplies) {
+    // Soft delete in local cache to keep ladder structure intact
+    const updated = allComments.map((c) => {
+      if (c.id === commentId) {
+        return {
+          ...c,
+          isDeleted: true,
+          content: '[deleted]',
+          authorName: '[deleted]',
+          authorClan: undefined,
+          authorRole: 'user' as const
+        };
+      }
+      return c;
+    });
+    setCachedComments(updated);
+  } else {
+    // Hard delete leaf comment
+    const filtered = allComments.filter((c) => c.id !== commentId);
+    setCachedComments(filtered);
+  }
+
+  try {
+    await fetch(`/api/comments/${encodeURIComponent(commentId)}`, {
+      method: 'DELETE'
+    });
+  } catch (err) {
+    console.warn('[Delete Comment API Warning]', err);
+  }
+
   return true;
 }
 
-// Upvote a comment
-export function upvoteComment(commentId: string): number {
+// Upvote or Downvote a comment (single vote per user)
+export async function voteComment(
+  commentId: string,
+  direction: VoteDirection,
+  voterId: string
+): Promise<{ upvotes: number; downvotes: number; userVote: VoteDirection | null }> {
+  const commentVotes = getUserCommentVotesMap();
+  const prevVote = commentVotes[commentId] || null;
   const allComments = getAllComments();
   const comment = allComments.find((c) => c.id === commentId);
-  if (!comment) return 0;
 
-  comment.upvotes = (comment.upvotes || 0) + 1;
-  localStorage.setItem(STORAGE_KEY_COMMENTS, JSON.stringify(allComments));
-  return comment.upvotes;
+  let curUp = comment ? (comment.upvotes || 0) : 0;
+  let curDown = comment ? (comment.downvotes || 0) : 0;
+  let nextVote: VoteDirection | null = direction;
+
+  if (prevVote === direction) {
+    // Untoggle
+    if (direction === 'up') curUp = Math.max(0, curUp - 1);
+    else curDown = Math.max(0, curDown - 1);
+    delete commentVotes[commentId];
+    nextVote = null;
+  } else if (prevVote) {
+    // Switch
+    if (direction === 'up') {
+      curUp += 1;
+      curDown = Math.max(0, curDown - 1);
+    } else {
+      curDown += 1;
+      curUp = Math.max(0, curUp - 1);
+    }
+    commentVotes[commentId] = direction;
+  } else {
+    // Fresh vote
+    if (direction === 'up') curUp += 1;
+    else curDown += 1;
+    commentVotes[commentId] = direction;
+  }
+
+  if (comment) {
+    comment.upvotes = curUp;
+    comment.downvotes = curDown;
+    setCachedComments(allComments);
+  }
+
+  try {
+    localStorage.setItem(STORAGE_KEY_COMMENT_VOTES, JSON.stringify(commentVotes));
+  } catch (e) {
+    // ignore
+  }
+
+  // Sync to remote API
+  try {
+    const res = await fetch(`/api/comments/${encodeURIComponent(commentId)}/vote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ direction, voterId })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (typeof data.upvotes === 'number') curUp = data.upvotes;
+      if (typeof data.downvotes === 'number') curDown = data.downvotes;
+      if (data.userVote !== undefined) nextVote = data.userVote;
+      if (comment) {
+        comment.upvotes = curUp;
+        comment.downvotes = curDown;
+        setCachedComments(allComments);
+      }
+    }
+  } catch (e) {
+    console.warn('[Vote Comment API Warning]', e);
+  }
+
+  return { upvotes: curUp, downvotes: curDown, userVote: nextVote };
 }

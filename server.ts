@@ -108,6 +108,7 @@ async function ensureDbSchema() {
 
         CREATE TABLE IF NOT EXISTS ddon_feedback (
           id VARCHAR(120) PRIMARY KEY,
+          author_id VARCHAR(120),
           author_name VARCHAR(100) NOT NULL,
           author_clan VARCHAR(30) DEFAULT '',
           author_role VARCHAR(30) DEFAULT 'user',
@@ -119,7 +120,50 @@ async function ensureDbSchema() {
           content TEXT NOT NULL,
           likes INT DEFAULT 0,
           dislikes INT DEFAULT 0,
+          created_at BIGINT NOT NULL,
+          updated_at BIGINT
+        );
+        ALTER TABLE ddon_feedback ADD COLUMN IF NOT EXISTS author_id VARCHAR(120);
+        ALTER TABLE ddon_feedback ADD COLUMN IF NOT EXISTS updated_at BIGINT;
+
+        CREATE TABLE IF NOT EXISTS ddon_feedback_votes (
+          feedback_id VARCHAR(120) NOT NULL,
+          voter_id VARCHAR(120) NOT NULL,
+          direction VARCHAR(10) NOT NULL,
+          created_at BIGINT NOT NULL,
+          PRIMARY KEY (feedback_id, voter_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS ddon_community_comments (
+          id VARCHAR(120) PRIMARY KEY,
+          item_id VARCHAR(150) NOT NULL,
+          parent_id VARCHAR(120),
+          parent_author_name VARCHAR(100),
+          item_type VARCHAR(60) NOT NULL DEFAULT 'guide',
+          author_id VARCHAR(120),
+          author_name VARCHAR(100) NOT NULL,
+          author_clan VARCHAR(40) DEFAULT '',
+          author_role VARCHAR(30) DEFAULT 'user',
+          avatar_icon VARCHAR(60) DEFAULT 'flame',
+          avatar_color VARCHAR(60) DEFAULT 'amber',
+          content TEXT NOT NULL,
+          upvotes INT DEFAULT 0,
+          downvotes INT DEFAULT 0,
+          is_deleted BOOLEAN DEFAULT FALSE,
           created_at BIGINT NOT NULL
+        );
+        ALTER TABLE ddon_community_comments ADD COLUMN IF NOT EXISTS parent_id VARCHAR(120);
+        ALTER TABLE ddon_community_comments ADD COLUMN IF NOT EXISTS parent_author_name VARCHAR(100);
+        ALTER TABLE ddon_community_comments ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;
+        CREATE INDEX IF NOT EXISTS idx_ddon_comments_item_id ON ddon_community_comments (item_id);
+        CREATE INDEX IF NOT EXISTS idx_ddon_comments_parent_id ON ddon_community_comments (parent_id);
+
+        CREATE TABLE IF NOT EXISTS ddon_comment_votes (
+          comment_id VARCHAR(120) NOT NULL,
+          voter_id VARCHAR(120) NOT NULL,
+          direction VARCHAR(10) NOT NULL,
+          created_at BIGINT NOT NULL,
+          PRIMARY KEY (comment_id, voter_id)
         );
       `);
 
@@ -624,6 +668,250 @@ app.delete('/api/guides/:id', async (req, res) => {
   }
 });
 
+// --- Community Comments & Discussion API ---
+const memoryComments: any[] = [];
+const memoryCommentVotes: Record<string, string> = {}; // `${commentId}_${voterId}` -> 'up' | 'down'
+
+app.get('/api/comments', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const itemId = req.query.itemId as string | undefined;
+    const db = getDbPool();
+
+    if (db) {
+      let queryText = 'SELECT * FROM ddon_community_comments';
+      const params: any[] = [];
+      if (itemId) {
+        queryText += ' WHERE item_id = $1';
+        params.push(itemId);
+      }
+      queryText += ' ORDER BY created_at DESC LIMIT 300';
+      const result = await db.query(queryText, params);
+      const comments = result.rows.map(r => ({
+        id: r.id,
+        itemId: r.item_id,
+        parentId: r.parent_id || null,
+        parentAuthorName: r.parent_author_name || null,
+        itemType: r.item_type,
+        authorId: r.author_id,
+        authorName: r.is_deleted ? '[deleted]' : r.author_name,
+        authorClan: r.is_deleted ? '' : r.author_clan,
+        authorRole: r.is_deleted ? 'user' : r.author_role,
+        avatarIcon: r.is_deleted ? 'user' : r.avatar_icon,
+        avatarColor: r.is_deleted ? 'slate' : r.avatar_color,
+        content: r.is_deleted ? '[deleted]' : r.content,
+        upvotes: Number(r.upvotes) || 0,
+        downvotes: Number(r.downvotes) || 0,
+        isDeleted: Boolean(r.is_deleted),
+        createdAt: Number(r.created_at)
+      }));
+      return res.json(comments);
+    }
+
+    const filtered = itemId ? memoryComments.filter(c => c.itemId === itemId) : memoryComments;
+    return res.json(filtered);
+  } catch (err: any) {
+    console.error('[Get Comments Error]', err);
+    return res.json(memoryComments);
+  }
+});
+
+app.post('/api/comments', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const { id, itemId, parentId, parentAuthorName, itemType, authorId, authorName, authorClan, authorRole, avatarIcon, avatarColor, content } = req.body;
+    if (!itemId || !content || !content.trim()) {
+      return res.status(400).json({ error: 'itemId and comment content are required.' });
+    }
+
+    const commentId = id || `comm_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const now = Date.now();
+    const db = getDbPool();
+
+    const commentObj = {
+      id: commentId,
+      itemId,
+      parentId: parentId || null,
+      parentAuthorName: parentAuthorName || null,
+      itemType: itemType || 'guide',
+      authorId: authorId || null,
+      authorName: authorName || 'Guest Arisen',
+      authorClan: authorClan || '',
+      authorRole: authorRole || 'user',
+      avatarIcon: avatarIcon || 'flame',
+      avatarColor: avatarColor || 'amber',
+      content: content.trim(),
+      upvotes: 0,
+      downvotes: 0,
+      createdAt: now
+    };
+
+    if (db) {
+      await db.query(
+        `INSERT INTO ddon_community_comments (id, item_id, parent_id, parent_author_name, item_type, author_id, author_name, author_clan, author_role, avatar_icon, avatar_color, content, upvotes, downvotes, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 0, 0, $13)
+         ON CONFLICT (id) DO NOTHING`,
+        [
+          commentObj.id,
+          commentObj.itemId,
+          commentObj.parentId,
+          commentObj.parentAuthorName,
+          commentObj.itemType,
+          commentObj.authorId,
+          commentObj.authorName,
+          commentObj.authorClan,
+          commentObj.authorRole,
+          commentObj.avatarIcon,
+          commentObj.avatarColor,
+          commentObj.content,
+          now
+        ]
+      );
+    }
+
+    memoryComments.unshift(commentObj);
+    return res.json({ success: true, comment: commentObj });
+  } catch (err: any) {
+    console.error('[Add Comment Error]', err);
+    return res.status(500).json({ error: 'Failed to post comment.' });
+  }
+});
+
+app.post('/api/comments/:id/vote', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const { id } = req.params;
+    const { direction, voterId } = req.body; // direction: 'up' | 'down', voterId: string
+    if (!voterId || (direction !== 'up' && direction !== 'down')) {
+      return res.status(400).json({ error: 'Valid voterId and direction (up/down) required.' });
+    }
+
+    const db = getDbPool();
+    const now = Date.now();
+
+    if (db) {
+      // Check existing vote
+      const existingVoteRes = await db.query(
+        'SELECT direction FROM ddon_comment_votes WHERE comment_id = $1 AND voter_id = $2',
+        [id, voterId]
+      );
+
+      const existingVote = existingVoteRes.rows[0]?.direction;
+
+      if (existingVote === direction) {
+        // Toggle OFF existing vote
+        await db.query('DELETE FROM ddon_comment_votes WHERE comment_id = $1 AND voter_id = $2', [id, voterId]);
+        if (direction === 'up') {
+          await db.query('UPDATE ddon_community_comments SET upvotes = GREATEST(0, upvotes - 1) WHERE id = $1', [id]);
+        } else {
+          await db.query('UPDATE ddon_community_comments SET downvotes = GREATEST(0, downvotes - 1) WHERE id = $1', [id]);
+        }
+      } else if (existingVote) {
+        // Switching vote from up -> down or down -> up
+        await db.query('UPDATE ddon_comment_votes SET direction = $1, created_at = $2 WHERE comment_id = $3 AND voter_id = $4', [direction, now, id, voterId]);
+        if (direction === 'up') {
+          await db.query('UPDATE ddon_community_comments SET upvotes = upvotes + 1, downvotes = GREATEST(0, downvotes - 1) WHERE id = $1', [id]);
+        } else {
+          await db.query('UPDATE ddon_community_comments SET downvotes = downvotes + 1, upvotes = GREATEST(0, upvotes - 1) WHERE id = $1', [id]);
+        }
+      } else {
+        // New vote
+        await db.query('INSERT INTO ddon_comment_votes (comment_id, voter_id, direction, created_at) VALUES ($1, $2, $3, $4)', [id, voterId, direction, now]);
+        if (direction === 'up') {
+          await db.query('UPDATE ddon_community_comments SET upvotes = upvotes + 1 WHERE id = $1', [id]);
+        } else {
+          await db.query('UPDATE ddon_community_comments SET downvotes = downvotes + 1 WHERE id = $1', [id]);
+        }
+      }
+
+      const updatedRow = await db.query('SELECT upvotes, downvotes FROM ddon_community_comments WHERE id = $1', [id]);
+      const comment = updatedRow.rows[0] || { upvotes: 0, downvotes: 0 };
+      const currentVoteRes = await db.query('SELECT direction FROM ddon_comment_votes WHERE comment_id = $1 AND voter_id = $2', [id, voterId]);
+      const currentVote = currentVoteRes.rows[0]?.direction || null;
+
+      return res.json({ success: true, upvotes: Number(comment.upvotes) || 0, downvotes: Number(comment.downvotes) || 0, userVote: currentVote });
+    }
+
+    // Memory fallback
+    const key = `${id}_${voterId}`;
+    const prev = memoryCommentVotes[key];
+    const c = memoryComments.find(x => x.id === id);
+    if (c) {
+      if (prev === direction) {
+        delete memoryCommentVotes[key];
+        if (direction === 'up') c.upvotes = Math.max(0, (c.upvotes || 0) - 1);
+        else c.downvotes = Math.max(0, (c.downvotes || 0) - 1);
+      } else if (prev) {
+        memoryCommentVotes[key] = direction;
+        if (direction === 'up') {
+          c.upvotes = (c.upvotes || 0) + 1;
+          c.downvotes = Math.max(0, (c.downvotes || 0) - 1);
+        } else {
+          c.downvotes = (c.downvotes || 0) + 1;
+          c.upvotes = Math.max(0, (c.upvotes || 0) - 1);
+        }
+      } else {
+        memoryCommentVotes[key] = direction;
+        if (direction === 'up') c.upvotes = (c.upvotes || 0) + 1;
+        else c.downvotes = (c.downvotes || 0) + 1;
+      }
+      return res.json({ success: true, upvotes: c.upvotes || 0, downvotes: c.downvotes || 0, userVote: memoryCommentVotes[key] || null });
+    }
+
+    return res.json({ success: true, userVote: null });
+  } catch (err: any) {
+    console.error('[Vote Comment Error]', err);
+    return res.status(500).json({ error: 'Vote failed.' });
+  }
+});
+
+app.delete('/api/comments/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = getDbPool();
+    if (db) {
+      // Check if this comment has any child replies
+      const childrenRes = await db.query('SELECT COUNT(*) as count FROM ddon_community_comments WHERE parent_id = $1', [id]);
+      const childCount = Number(childrenRes.rows[0]?.count) || 0;
+
+      if (childCount > 0) {
+        // Soft delete: keep ladder structure intact so replies remain visible
+        await db.query(
+          `UPDATE ddon_community_comments 
+           SET is_deleted = TRUE, content = '[deleted]', author_name = '[deleted]', author_clan = '', author_role = 'user'
+           WHERE id = $1`,
+          [id]
+        );
+      } else {
+        // No replies: safe to hard delete
+        await db.query('DELETE FROM ddon_comment_votes WHERE comment_id = $1', [id]);
+        await db.query('DELETE FROM ddon_community_comments WHERE id = $1', [id]);
+      }
+    }
+
+    // Memory fallback
+    const hasRepliesInMemory = memoryComments.some(c => c.parentId === id);
+    const target = memoryComments.find(c => c.id === id);
+    if (target) {
+      if (hasRepliesInMemory) {
+        target.isDeleted = true;
+        target.content = '[deleted]';
+        target.authorName = '[deleted]';
+        target.authorClan = '';
+        target.authorRole = 'user';
+      } else {
+        const idx = memoryComments.findIndex(c => c.id === id);
+        if (idx !== -1) memoryComments.splice(idx, 1);
+      }
+    }
+
+    return res.json({ success: true });
+  } catch (err: any) {
+    console.error('[Delete Comment Error]', err);
+    return res.status(500).json({ error: 'Failed to delete comment.' });
+  }
+});
+
 // --- Community Leveling Routes API ---
 const memoryRoutes: any[] = [];
 
@@ -707,6 +995,7 @@ app.delete('/api/routes/:id', async (req, res) => {
 
 // --- Community Feedback API ---
 const memoryFeedback: any[] = [];
+const memoryFeedbackVotes: Record<string, string> = {}; // `${feedbackId}_${voterId}` -> 'like' | 'dislike'
 
 app.get('/api/feedback', async (req, res) => {
   try {
@@ -716,6 +1005,7 @@ app.get('/api/feedback', async (req, res) => {
       const result = await db.query('SELECT * FROM ddon_feedback ORDER BY created_at DESC LIMIT 150');
       const items = result.rows.map(row => ({
         id: row.id,
+        authorId: row.author_id,
         authorName: row.author_name,
         authorClan: row.author_clan,
         authorRole: row.author_role,
@@ -725,9 +1015,10 @@ app.get('/api/feedback', async (req, res) => {
         rating: row.rating,
         title: row.title,
         content: row.content,
-        likes: row.likes || 0,
-        dislikes: row.dislikes || 0,
+        likes: Number(row.likes) || 0,
+        dislikes: Number(row.dislikes) || 0,
         createdAt: Number(row.created_at),
+        updatedAt: row.updated_at ? Number(row.updated_at) : undefined
       }));
       return res.json(items);
     }
@@ -741,26 +1032,44 @@ app.get('/api/feedback', async (req, res) => {
 app.post('/api/feedback', async (req, res) => {
   try {
     await ensureDbSchema();
-    const { id, authorName, authorClan, authorRole, avatarIcon, avatarColor, type, rating, title, content } = req.body;
+    const { id, authorId, authorName, authorClan, authorRole, avatarIcon, avatarColor, type, rating, title, content } = req.body;
     if (!title || !content) {
       return res.status(400).json({ error: 'Title and content are required.' });
     }
 
-    const feedbackId = id || `feedback-${Date.now()}`;
+    const feedbackId = id || `feedback-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const now = Date.now();
     const db = getDbPool();
 
     if (db) {
       await db.query(
-        `INSERT INTO ddon_feedback (id, author_name, author_clan, author_role, avatar_icon, avatar_color, type, rating, title, content, likes, dislikes, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 0, 0, $11)`,
-        [feedbackId, authorName || 'Anonymous Arisen', authorClan || '', authorRole || 'user', avatarIcon || 'flame', avatarColor || 'amber', type || 'feature_request', rating || 5, title, content, now]
+        `INSERT INTO ddon_feedback (id, author_id, author_name, author_clan, author_role, avatar_icon, avatar_color, type, rating, title, content, likes, dislikes, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 0, 0, $12)
+         ON CONFLICT (id) DO UPDATE SET
+           title = EXCLUDED.title,
+           content = EXCLUDED.content,
+           type = EXCLUDED.type,
+           rating = EXCLUDED.rating,
+           updated_at = $12`,
+        [feedbackId, authorId || null, authorName || 'Anonymous Arisen', authorClan || '', authorRole || 'user', avatarIcon || 'flame', avatarColor || 'amber', type || 'feature_request', rating || 5, title, content, now]
       );
       return res.json({ success: true, id: feedbackId });
     }
 
-    const item = { id: feedbackId, authorName, authorClan, authorRole, avatarIcon, avatarColor, type, rating, title, content, likes: 0, dislikes: 0, createdAt: now };
-    memoryFeedback.unshift(item);
+    const existingIdx = memoryFeedback.findIndex(x => x.id === feedbackId);
+    if (existingIdx !== -1) {
+      memoryFeedback[existingIdx] = {
+        ...memoryFeedback[existingIdx],
+        title,
+        content,
+        type: type || memoryFeedback[existingIdx].type,
+        rating: rating || memoryFeedback[existingIdx].rating,
+        updatedAt: now
+      };
+    } else {
+      const item = { id: feedbackId, authorId: authorId || null, authorName, authorClan, authorRole, avatarIcon, avatarColor, type, rating, title, content, likes: 0, dislikes: 0, createdAt: now };
+      memoryFeedback.unshift(item);
+    }
     return res.json({ success: true, id: feedbackId });
   } catch (err: any) {
     console.error('[Submit Feedback Error]', err);
@@ -768,31 +1077,202 @@ app.post('/api/feedback', async (req, res) => {
   }
 });
 
-app.post('/api/feedback/:id/vote', async (req, res) => {
+// Edit Feedback
+app.put('/api/feedback/:id', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const { id } = req.params;
+    const { title, content, type, rating, requesterId, requesterRole } = req.body;
+
+    if (!title || !content) {
+      return res.status(400).json({ error: 'Title and content are required.' });
+    }
+
+    const db = getDbPool();
+    const now = Date.now();
+
+    if (db) {
+      // Fetch feedback to verify authorization
+      const checkRes = await db.query('SELECT author_id, author_name, author_role FROM ddon_feedback WHERE id = $1', [id]);
+      if (checkRes.rows.length === 0) {
+        return res.status(404).json({ error: 'Feedback post not found.' });
+      }
+
+      const fb = checkRes.rows[0];
+      const isOwner = requesterRole === 'owner' || requesterId === 'arisen-otake7-master';
+      const isMod = requesterRole === 'moderator';
+      const isAuthor = fb.author_id && requesterId && fb.author_id === requesterId;
+
+      if (!isOwner && !isMod && !isAuthor) {
+        return res.status(403).json({ error: 'You are not authorized to edit this feedback post.' });
+      }
+
+      await db.query(
+        `UPDATE ddon_feedback SET
+          title = $1,
+          content = $2,
+          type = COALESCE($3, type),
+          rating = COALESCE($4, rating),
+          updated_at = $5
+        WHERE id = $6`,
+        [title.trim(), content.trim(), type || null, rating || null, now, id]
+      );
+      return res.json({ success: true });
+    }
+
+    // Memory fallback
+    const target = memoryFeedback.find(f => f.id === id);
+    if (target) {
+      target.title = title.trim();
+      target.content = content.trim();
+      if (type) target.type = type;
+      if (rating) target.rating = rating;
+      target.updatedAt = now;
+    }
+    return res.json({ success: true });
+  } catch (err: any) {
+    console.error('[Edit Feedback Error]', err);
+    return res.status(500).json({ error: 'Failed to edit feedback.' });
+  }
+});
+
+// Delete Feedback
+app.delete('/api/feedback/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { type } = req.body; // 'like' | 'dislike'
+    const { requesterId, requesterRole } = req.body || {};
     const db = getDbPool();
 
     if (db) {
-      if (type === 'like') {
-        await db.query('UPDATE ddon_feedback SET likes = likes + 1 WHERE id = $1', [id]);
-      } else {
-        await db.query('UPDATE ddon_feedback SET dislikes = dislikes + 1 WHERE id = $1', [id]);
+      // Check authorization if requester info supplied
+      if (requesterId || requesterRole) {
+        const checkRes = await db.query('SELECT author_id FROM ddon_feedback WHERE id = $1', [id]);
+        if (checkRes.rows.length > 0) {
+          const fb = checkRes.rows[0];
+          const isOwner = requesterRole === 'owner' || requesterId === 'arisen-otake7-master';
+          const isMod = requesterRole === 'moderator';
+          const isAuthor = fb.author_id && requesterId && fb.author_id === requesterId;
+
+          if (!isOwner && !isMod && !isAuthor) {
+            return res.status(403).json({ error: 'You are not authorized to delete this feedback post.' });
+          }
+        }
       }
-      const resRow = await db.query('SELECT likes, dislikes FROM ddon_feedback WHERE id = $1', [id]);
-      if (resRow.rows.length > 0) {
-        return res.json(resRow.rows[0]);
-      }
+
+      await db.query('DELETE FROM ddon_feedback_votes WHERE feedback_id = $1', [id]);
+      await db.query('DELETE FROM ddon_community_comments WHERE item_id = $1', [id]);
+      await db.query('DELETE FROM ddon_feedback WHERE id = $1', [id]);
     }
 
+    const idx = memoryFeedback.findIndex(f => f.id === id);
+    if (idx !== -1) memoryFeedback.splice(idx, 1);
+
+    return res.json({ success: true });
+  } catch (err: any) {
+    console.error('[Delete Feedback Error]', err);
+    return res.status(500).json({ error: 'Failed to delete feedback.' });
+  }
+});
+
+// Feedback Vote (Strict single vote per user, untoggle on re-click, swap vote on opposite click)
+app.post('/api/feedback/:id/vote', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const { id } = req.params;
+    const { type, voterId } = req.body; // type: 'like' | 'dislike', voterId: string
+    if (!type || (type !== 'like' && type !== 'dislike')) {
+      return res.status(400).json({ error: 'Valid type (like/dislike) required.' });
+    }
+
+    const cleanVoterId = voterId || 'anonymous_voter';
+    const db = getDbPool();
+    const now = Date.now();
+
+    if (db) {
+      // Check existing vote
+      const existingVoteRes = await db.query(
+        'SELECT direction FROM ddon_feedback_votes WHERE feedback_id = $1 AND voter_id = $2',
+        [id, cleanVoterId]
+      );
+      const existingVote = existingVoteRes.rows[0]?.direction;
+
+      if (existingVote === type) {
+        // Toggle OFF existing vote
+        await db.query('DELETE FROM ddon_feedback_votes WHERE feedback_id = $1 AND voter_id = $2', [id, cleanVoterId]);
+        if (type === 'like') {
+          await db.query('UPDATE ddon_feedback SET likes = GREATEST(0, likes - 1) WHERE id = $1', [id]);
+        } else {
+          await db.query('UPDATE ddon_feedback SET dislikes = GREATEST(0, dislikes - 1) WHERE id = $1', [id]);
+        }
+      } else if (existingVote) {
+        // Switching vote (like -> dislike or dislike -> like)
+        await db.query(
+          'UPDATE ddon_feedback_votes SET direction = $1, created_at = $2 WHERE feedback_id = $3 AND voter_id = $4',
+          [type, now, id, cleanVoterId]
+        );
+        if (type === 'like') {
+          await db.query('UPDATE ddon_feedback SET likes = likes + 1, dislikes = GREATEST(0, dislikes - 1) WHERE id = $1', [id]);
+        } else {
+          await db.query('UPDATE ddon_feedback SET dislikes = dislikes + 1, likes = GREATEST(0, likes - 1) WHERE id = $1', [id]);
+        }
+      } else {
+        // Fresh vote
+        await db.query(
+          'INSERT INTO ddon_feedback_votes (feedback_id, voter_id, direction, created_at) VALUES ($1, $2, $3, $4)',
+          [id, cleanVoterId, type, now]
+        );
+        if (type === 'like') {
+          await db.query('UPDATE ddon_feedback SET likes = likes + 1 WHERE id = $1', [id]);
+        } else {
+          await db.query('UPDATE ddon_feedback SET dislikes = dislikes + 1 WHERE id = $1', [id]);
+        }
+      }
+
+      const updatedRow = await db.query('SELECT likes, dislikes FROM ddon_feedback WHERE id = $1', [id]);
+      const fb = updatedRow.rows[0] || { likes: 0, dislikes: 0 };
+      const currentVoteRes = await db.query('SELECT direction FROM ddon_feedback_votes WHERE feedback_id = $1 AND voter_id = $2', [id, cleanVoterId]);
+      const currentVote = currentVoteRes.rows[0]?.direction || null;
+
+      return res.json({
+        success: true,
+        likes: Number(fb.likes) || 0,
+        dislikes: Number(fb.dislikes) || 0,
+        userVote: currentVote
+      });
+    }
+
+    // Memory fallback
+    const key = `${id}_${cleanVoterId}`;
+    const prev = memoryFeedbackVotes[key];
     const f = memoryFeedback.find(x => x.id === id);
     if (f) {
-      if (type === 'like') f.likes++;
-      else f.dislikes++;
-      return res.json({ likes: f.likes, dislikes: f.dislikes });
+      if (prev === type) {
+        delete memoryFeedbackVotes[key];
+        if (type === 'like') f.likes = Math.max(0, (f.likes || 0) - 1);
+        else f.dislikes = Math.max(0, (f.dislikes || 0) - 1);
+      } else if (prev) {
+        memoryFeedbackVotes[key] = type;
+        if (type === 'like') {
+          f.likes = (f.likes || 0) + 1;
+          f.dislikes = Math.max(0, (f.dislikes || 0) - 1);
+        } else {
+          f.dislikes = (f.dislikes || 0) + 1;
+          f.likes = Math.max(0, (f.likes || 0) - 1);
+        }
+      } else {
+        memoryFeedbackVotes[key] = type;
+        if (type === 'like') f.likes = (f.likes || 0) + 1;
+        else f.dislikes = (f.dislikes || 0) + 1;
+      }
+      return res.json({
+        success: true,
+        likes: f.likes || 0,
+        dislikes: f.dislikes || 0,
+        userVote: memoryFeedbackVotes[key] || null
+      });
     }
-    return res.json({ success: true });
+
+    return res.json({ success: true, userVote: null });
   } catch (err: any) {
     console.error('[Vote Feedback Error]', err);
     return res.status(500).json({ error: 'Vote failed.' });

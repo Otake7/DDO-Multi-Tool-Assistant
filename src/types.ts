@@ -309,8 +309,10 @@ export interface GuideSection {
 
 export interface CommunityComment {
   id: string;
-  itemId: string; // questId, presetId, farmSpotId, or guideId
-  itemType: 'quest' | 'preset' | 'farm_spot' | 'guide';
+  itemId: string; // questId, presetId, farmSpotId, guideId, or feedbackId
+  itemType: 'quest' | 'preset' | 'farm_spot' | 'guide' | 'feedback';
+  parentId?: string | null;
+  parentAuthorName?: string | null;
   authorId?: string;
   authorName: string;
   authorClan?: string;
@@ -320,6 +322,8 @@ export interface CommunityComment {
   content: string;
   createdAt: number;
   upvotes?: number;
+  downvotes?: number;
+  isDeleted?: boolean;
 }
 
 export type VoteDirection = 'up' | 'down';
