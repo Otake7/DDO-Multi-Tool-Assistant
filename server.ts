@@ -165,6 +165,37 @@ async function ensureDbSchema() {
           created_at BIGINT NOT NULL,
           PRIMARY KEY (comment_id, voter_id)
         );
+
+        CREATE TABLE IF NOT EXISTS ddon_deleted_items (
+          id VARCHAR(120) PRIMARY KEY,
+          item_type VARCHAR(60) NOT NULL,
+          deleted_at BIGINT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_ddon_deleted_items_type ON ddon_deleted_items (item_type);
+
+        CREATE TABLE IF NOT EXISTS ddon_farm_spots (
+          id VARCHAR(120) PRIMARY KEY,
+          name VARCHAR(150) NOT NULL,
+          region VARCHAR(80) NOT NULL,
+          server VARCHAR(50) NOT NULL,
+          min_level INT NOT NULL,
+          max_level INT NOT NULL,
+          xp_per_run INT NOT NULL,
+          gold_per_run INT NOT NULL,
+          runs_to_level INT NOT NULL,
+          target_enemies TEXT NOT NULL,
+          description TEXT NOT NULL,
+          recommended_vocations JSONB DEFAULT '[]'::jsonb,
+          quests JSONB DEFAULT '[]'::jsonb,
+          author_id VARCHAR(120),
+          author_name VARCHAR(100) NOT NULL,
+          author_clan VARCHAR(40) DEFAULT '',
+          author_role VARCHAR(30) DEFAULT 'user',
+          avatar_icon VARCHAR(60) DEFAULT 'flame',
+          avatar_color VARCHAR(60) DEFAULT 'amber',
+          upvotes INT DEFAULT 0,
+          created_at BIGINT NOT NULL
+        );
       `);
 
       // Seed / Ensure the Otake7 Master Owner & Moderator Account exists in Aiven PostgreSQL
@@ -565,14 +596,18 @@ app.post('/api/auth/update-profile', async (req, res) => {
 
 // --- Adventure Guides API ---
 const memoryGuides: any[] = [];
+const memoryDeletedItems: { id: string; itemType: string; deletedAt: number }[] = [];
 
 app.get('/api/guides', async (req, res) => {
   try {
     await ensureDbSchema();
     const db = getDbPool();
     let remoteRows: any[] = [];
+    let deletedIds: string[] = [];
     if (db) {
       const result = await db.query('SELECT * FROM ddon_adventure_guides ORDER BY created_at DESC LIMIT 150');
+      const delResult = await db.query("SELECT id FROM ddon_deleted_items WHERE item_type = 'guide'");
+      deletedIds = delResult.rows.map(r => r.id);
       remoteRows = result.rows.map(row => ({
         id: row.id,
         title: row.title,
@@ -588,12 +623,13 @@ app.get('/api/guides', async (req, res) => {
         isBuiltIn: Boolean(row.is_builtin),
         createdAt: Number(row.created_at)
       }));
-      return res.json(remoteRows);
+      return res.json({ guides: remoteRows, deletedIds });
     }
-    return res.json(memoryGuides);
+    deletedIds = memoryDeletedItems.filter(x => x.itemType === 'guide').map(x => x.id);
+    return res.json({ guides: memoryGuides, deletedIds });
   } catch (err: any) {
     console.error('[Get Guides Error]', err);
-    return res.json(memoryGuides);
+    return res.json({ guides: memoryGuides, deletedIds: [] });
   }
 });
 
@@ -643,7 +679,12 @@ app.post('/api/guides', async (req, res) => {
           now
         ]
       );
+      // Remove from deleted items if re-created
+      await db.query("DELETE FROM ddon_deleted_items WHERE id = $1 AND item_type = 'guide'", [guide.id]);
     }
+
+    const delMemIdx = memoryDeletedItems.findIndex(x => x.id === guide.id && x.itemType === 'guide');
+    if (delMemIdx !== -1) memoryDeletedItems.splice(delMemIdx, 1);
 
     return res.json({ success: true, guide });
   } catch (err: any) {
@@ -655,12 +696,23 @@ app.post('/api/guides', async (req, res) => {
 app.delete('/api/guides/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const now = Date.now();
     const db = getDbPool();
     if (db) {
       await db.query('DELETE FROM ddon_adventure_guides WHERE id = $1', [id]);
+      await db.query(
+        `INSERT INTO ddon_deleted_items (id, item_type, deleted_at)
+         VALUES ($1, 'guide', $2)
+         ON CONFLICT (id) DO UPDATE SET deleted_at = $2`,
+        [id, now]
+      );
+      await db.query('DELETE FROM ddon_community_comments WHERE item_id = $1', [id]);
     }
     const idx = memoryGuides.findIndex(g => g.id === id);
     if (idx !== -1) memoryGuides.splice(idx, 1);
+    if (!memoryDeletedItems.some(x => x.id === id && x.itemType === 'guide')) {
+      memoryDeletedItems.push({ id, itemType: 'guide', deletedAt: now });
+    }
     return res.json({ success: true });
   } catch (err: any) {
     console.error('[Delete Guide Error]', err);
@@ -868,6 +920,7 @@ app.post('/api/comments/:id/vote', async (req, res) => {
 app.delete('/api/comments/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const now = Date.now();
     const db = getDbPool();
     if (db) {
       // Check if this comment has any child replies
@@ -886,6 +939,12 @@ app.delete('/api/comments/:id', async (req, res) => {
         // No replies: safe to hard delete
         await db.query('DELETE FROM ddon_comment_votes WHERE comment_id = $1', [id]);
         await db.query('DELETE FROM ddon_community_comments WHERE id = $1', [id]);
+        await db.query(
+          `INSERT INTO ddon_deleted_items (id, item_type, deleted_at)
+           VALUES ($1, 'comment', $2)
+           ON CONFLICT (id) DO UPDATE SET deleted_at = $2`,
+          [id, now]
+        );
       }
     }
 
@@ -902,6 +961,9 @@ app.delete('/api/comments/:id', async (req, res) => {
       } else {
         const idx = memoryComments.findIndex(c => c.id === id);
         if (idx !== -1) memoryComments.splice(idx, 1);
+        if (!memoryDeletedItems.some(x => x.id === id && x.itemType === 'comment')) {
+          memoryDeletedItems.push({ id, itemType: 'comment', deletedAt: now });
+        }
       }
     }
 
@@ -965,6 +1027,7 @@ app.post('/api/routes', async (req, res) => {
            author = EXCLUDED.author`,
         [routeId, name, levelRange || 'Lv 1 - 100', region || 'Hidell Plains', description || '', JSON.stringify(quests || []), author || 'Community Arisen', now]
       );
+      await db.query("DELETE FROM ddon_deleted_items WHERE id = $1 AND item_type = 'route'", [routeId]);
       return res.json({ success: true, id: routeId });
     }
 
@@ -980,16 +1043,169 @@ app.post('/api/routes', async (req, res) => {
 app.delete('/api/routes/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const now = Date.now();
     const db = getDbPool();
     if (db) {
       await db.query('DELETE FROM ddon_leveling_routes WHERE id = $1', [id]);
+      await db.query(
+        `INSERT INTO ddon_deleted_items (id, item_type, deleted_at)
+         VALUES ($1, 'route', $2)
+         ON CONFLICT (id) DO UPDATE SET deleted_at = $2`,
+        [id, now]
+      );
+      await db.query('DELETE FROM ddon_community_comments WHERE item_id = $1', [id]);
     }
     const idx = memoryRoutes.findIndex(r => r.id === id);
     if (idx !== -1) memoryRoutes.splice(idx, 1);
+    if (!memoryDeletedItems.some(x => x.id === id && x.itemType === 'route')) {
+      memoryDeletedItems.push({ id, itemType: 'route', deletedAt: now });
+    }
     return res.json({ success: true });
   } catch (err: any) {
     console.error('[Delete Route Error]', err);
     return res.status(500).json({ error: 'Failed to delete route.' });
+  }
+});
+
+// --- Community Farm Spots API ---
+const memoryFarmSpots: any[] = [];
+
+app.get('/api/farm-spots', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const db = getDbPool();
+    if (db) {
+      const result = await db.query('SELECT * FROM ddon_farm_spots ORDER BY created_at DESC LIMIT 150');
+      const spots = result.rows.map(r => ({
+        id: r.id,
+        name: r.name,
+        region: r.region,
+        server: r.server,
+        minLevel: Number(r.min_level),
+        maxLevel: Number(r.max_level),
+        xpPerRun: Number(r.xp_per_run),
+        goldPerRun: Number(r.gold_per_run),
+        runsToLevel: Number(r.runs_to_level),
+        targetEnemies: r.target_enemies,
+        description: r.description,
+        recommendedVocations: typeof r.recommended_vocations === 'string' ? JSON.parse(r.recommended_vocations) : r.recommended_vocations,
+        quests: typeof r.quests === 'string' ? JSON.parse(r.quests) : r.quests,
+        authorId: r.author_id,
+        authorName: r.author_name,
+        authorClan: r.author_clan,
+        authorRole: r.author_role,
+        avatarIcon: r.avatar_icon,
+        avatarColor: r.avatar_color,
+        upvotes: Number(r.upvotes) || 0,
+        createdAt: Number(r.created_at)
+      }));
+      return res.json(spots);
+    }
+    return res.json(memoryFarmSpots);
+  } catch (err: any) {
+    console.error('[Get Farm Spots Error]', err);
+    return res.json(memoryFarmSpots);
+  }
+});
+
+app.post('/api/farm-spots', async (req, res) => {
+  try {
+    await ensureDbSchema();
+    const spot = req.body;
+    if (!spot || !spot.name) {
+      return res.status(400).json({ error: 'Spot name is required.' });
+    }
+
+    const spotId = spot.id || `farm-spot-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const now = Date.now();
+    const db = getDbPool();
+
+    if (db) {
+      await db.query(
+        `INSERT INTO ddon_farm_spots (
+          id, name, region, server, min_level, max_level, xp_per_run, gold_per_run,
+          runs_to_level, target_enemies, description, recommended_vocations, quests,
+          author_id, author_name, author_clan, author_role, avatar_icon, avatar_color,
+          upvotes, created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, 0, $20)
+        ON CONFLICT (id) DO UPDATE SET
+          name = EXCLUDED.name,
+          region = EXCLUDED.region,
+          server = EXCLUDED.server,
+          min_level = EXCLUDED.min_level,
+          max_level = EXCLUDED.max_level,
+          xp_per_run = EXCLUDED.xp_per_run,
+          gold_per_run = EXCLUDED.gold_per_run,
+          runs_to_level = EXCLUDED.runs_to_level,
+          target_enemies = EXCLUDED.target_enemies,
+          description = EXCLUDED.description,
+          recommended_vocations = EXCLUDED.recommended_vocations,
+          quests = EXCLUDED.quests`,
+        [
+          spotId,
+          spot.name,
+          spot.region || 'Volden Mines',
+          spot.server || 'Rising',
+          spot.minLevel || 1,
+          spot.maxLevel || 100,
+          spot.xpPerRun || 0,
+          spot.goldPerRun || 0,
+          spot.runsToLevel || 3,
+          spot.targetEnemies || '',
+          spot.description || '',
+          JSON.stringify(spot.recommendedVocations || []),
+          JSON.stringify(spot.quests || []),
+          spot.authorId || null,
+          spot.authorName || 'Community Arisen',
+          spot.authorClan || '',
+          spot.authorRole || 'user',
+          spot.avatarIcon || 'flame',
+          spot.avatarColor || 'amber',
+          now
+        ]
+      );
+      await db.query("DELETE FROM ddon_deleted_items WHERE id = $1 AND item_type = 'farm_spot'", [spotId]);
+      return res.json({ success: true, id: spotId });
+    }
+
+    const existingIdx = memoryFarmSpots.findIndex(s => s.id === spotId);
+    const spotObj = { ...spot, id: spotId, createdAt: now };
+    if (existingIdx !== -1) {
+      memoryFarmSpots[existingIdx] = spotObj;
+    } else {
+      memoryFarmSpots.unshift(spotObj);
+    }
+    return res.json({ success: true, id: spotId });
+  } catch (err: any) {
+    console.error('[Save Farm Spot Error]', err);
+    return res.status(500).json({ error: 'Failed to save farm spot.' });
+  }
+});
+
+app.delete('/api/farm-spots/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const now = Date.now();
+    const db = getDbPool();
+    if (db) {
+      await db.query('DELETE FROM ddon_farm_spots WHERE id = $1', [id]);
+      await db.query(
+        `INSERT INTO ddon_deleted_items (id, item_type, deleted_at)
+         VALUES ($1, 'farm_spot', $2)
+         ON CONFLICT (id) DO UPDATE SET deleted_at = $2`,
+        [id, now]
+      );
+      await db.query('DELETE FROM ddon_community_comments WHERE item_id = $1', [id]);
+    }
+    const idx = memoryFarmSpots.findIndex(s => s.id === id);
+    if (idx !== -1) memoryFarmSpots.splice(idx, 1);
+    if (!memoryDeletedItems.some(x => x.id === id && x.itemType === 'farm_spot')) {
+      memoryDeletedItems.push({ id, itemType: 'farm_spot', deletedAt: now });
+    }
+    return res.json({ success: true });
+  } catch (err: any) {
+    console.error('[Delete Farm Spot Error]', err);
+    return res.status(500).json({ error: 'Failed to delete farm spot.' });
   }
 });
 
@@ -1053,6 +1269,7 @@ app.post('/api/feedback', async (req, res) => {
            updated_at = $12`,
         [feedbackId, authorId || null, authorName || 'Anonymous Arisen', authorClan || '', authorRole || 'user', avatarIcon || 'flame', avatarColor || 'amber', type || 'feature_request', rating || 5, title, content, now]
       );
+      await db.query("DELETE FROM ddon_deleted_items WHERE id = $1 AND item_type = 'feedback'", [feedbackId]);
       return res.json({ success: true, id: feedbackId });
     }
 
@@ -1141,6 +1358,7 @@ app.delete('/api/feedback/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { requesterId, requesterRole } = req.body || {};
+    const now = Date.now();
     const db = getDbPool();
 
     if (db) {
@@ -1162,10 +1380,19 @@ app.delete('/api/feedback/:id', async (req, res) => {
       await db.query('DELETE FROM ddon_feedback_votes WHERE feedback_id = $1', [id]);
       await db.query('DELETE FROM ddon_community_comments WHERE item_id = $1', [id]);
       await db.query('DELETE FROM ddon_feedback WHERE id = $1', [id]);
+      await db.query(
+        `INSERT INTO ddon_deleted_items (id, item_type, deleted_at)
+         VALUES ($1, 'feedback', $2)
+         ON CONFLICT (id) DO UPDATE SET deleted_at = $2`,
+        [id, now]
+      );
     }
 
     const idx = memoryFeedback.findIndex(f => f.id === id);
     if (idx !== -1) memoryFeedback.splice(idx, 1);
+    if (!memoryDeletedItems.some(x => x.id === id && x.itemType === 'feedback')) {
+      memoryDeletedItems.push({ id, itemType: 'feedback', deletedAt: now });
+    }
 
     return res.json({ success: true });
   } catch (err: any) {

@@ -17,7 +17,8 @@ import {
   Filter,
   ArrowRight,
   Zap,
-  Globe
+  Globe,
+  Trash2
 } from 'lucide-react';
 import { CommunityFarmSpot, Region, UserProfile, VocationId } from '../types';
 import { SEED_COMMUNITY_FARM_SPOTS } from '../data/communityFarmSpots';
@@ -108,7 +109,89 @@ export const CommunityFarmSpotsBrowser: React.FC<CommunityFarmSpotsBrowserProps>
     localStorage.setItem('ddon_upvoted_spots_v2', JSON.stringify(upvotedSpots));
   }, [upvotedSpots]);
 
+  // Fetch remote spots and poll every 5s for live multi-user sync
+  const syncRemoteSpots = async () => {
+    try {
+      const res = await fetch('/api/farm-spots');
+      if (res.ok) {
+        const remote = await res.json();
+        if (Array.isArray(remote)) {
+          // Combine seeds with remote custom spots
+          const seedMap = new Map<string, CommunityFarmSpot>();
+          SEED_COMMUNITY_FARM_SPOTS.forEach(s => seedMap.set(s.id, s));
+          remote.forEach(r => {
+            const formatted: CommunityFarmSpot = {
+              id: r.id,
+              name: r.name,
+              region: r.region,
+              server: r.server,
+              levelRange: `Lv ${r.minLevel}–${r.maxLevel}`,
+              minLevel: r.minLevel,
+              maxLevel: r.maxLevel,
+              xpPerRun: r.xpPerRun,
+              goldPerRun: r.goldPerRun,
+              runsToLevel: r.runsToLevel,
+              targetEnemies: r.targetEnemies,
+              description: r.description,
+              recommendedVocations: r.recommendedVocations,
+              quests: r.quests,
+              authorId: r.authorId,
+              authorName: r.authorName,
+              authorClan: r.authorClan,
+              authorRole: r.authorRole,
+              avatarIcon: r.avatarIcon,
+              avatarColor: r.avatarColor,
+              upvotes: r.upvotes || 0,
+              createdAt: r.createdAt
+            };
+            seedMap.set(r.id, formatted);
+          });
+          setSpots(Array.from(seedMap.values()));
+        }
+      }
+    } catch (e) {
+      console.warn('[Sync Farm Spots Error]', e);
+    }
+  };
+
+  useEffect(() => {
+    syncRemoteSpots();
+    const interval = setInterval(syncRemoteSpots, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const isGuest = !currentUser || currentUser.isGuest;
+
+  const canDeleteSpot = (spot: CommunityFarmSpot): boolean => {
+    if (!currentUser || currentUser.isGuest) return false;
+    const isOwnerOrMod =
+      currentUser.role === 'owner' ||
+      currentUser.role === 'moderator' ||
+      currentUser.roles?.includes('owner') ||
+      currentUser.roles?.includes('moderator') ||
+      currentUser.username?.toLowerCase() === 'otake7';
+    if (isOwnerOrMod) return true;
+    return (
+      (spot.authorId && spot.authorId === currentUser.id) ||
+      spot.authorName === currentUser.characterName ||
+      spot.authorName === currentUser.username
+    );
+  };
+
+  const handleDeleteSpot = async (spotId: string, spotName: string) => {
+    if (!confirm(`Are you sure you want to delete the farm spot "${spotName}"? This will delete it permanently for everyone.`)) {
+      return;
+    }
+    setSpots(prev => prev.filter(s => s.id !== spotId));
+    try {
+      await fetch(`/api/farm-spots/${encodeURIComponent(spotId)}`, {
+        method: 'DELETE'
+      });
+      syncRemoteSpots();
+    } catch (e) {
+      console.error('[Delete Farm Spot Error]', e);
+    }
+  };
 
   const handleOpenUpload = () => {
     if (isGuest) {
@@ -142,12 +225,16 @@ export const CommunityFarmSpotsBrowser: React.FC<CommunityFarmSpotsBrowserProps>
     );
   };
 
-  const handleCreateSpot = (e: React.FormEvent) => {
+  const handleCreateSpot = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSpotName.trim()) return;
 
     const authorName = currentUser?.characterName || currentUser?.username || 'Arisen';
     const authorClan = currentUser?.clanTag || undefined;
+    const authorId = currentUser?.id || undefined;
+    const authorRole = currentUser?.role || 'user';
+    const avatarIcon = currentUser?.avatarIcon || 'flame';
+    const avatarColor = currentUser?.avatarColor || 'amber';
 
     const newSpot: CommunityFarmSpot = {
       id: `spot_${Date.now()}`,
@@ -163,8 +250,12 @@ export const CommunityFarmSpotsBrowser: React.FC<CommunityFarmSpotsBrowserProps>
       description: newSpotDesc.trim() || 'Player submitted leveling route and mob farm.',
       recommendedVocations: newSpotVocations.length > 0 ? newSpotVocations : undefined,
       server: newSpotServer,
+      authorId,
       authorName,
       authorClan,
+      authorRole,
+      avatarIcon,
+      avatarColor,
       verified: false,
       upvotes: 1,
       createdAt: Date.now(),
@@ -179,6 +270,19 @@ export const CommunityFarmSpotsBrowser: React.FC<CommunityFarmSpotsBrowserProps>
 
     setSpots((prev) => [newSpot, ...prev]);
     setIsUploadModalOpen(false);
+
+    // Save remotely
+    try {
+      await fetch('/api/farm-spots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newSpot)
+      });
+      syncRemoteSpots();
+    } catch (err) {
+      console.error('[Save Farm Spot Error]', err);
+    }
+
     // Reset fields
     setNewSpotName('');
     setNewSpotEnemies('');
@@ -443,13 +547,25 @@ export const CommunityFarmSpotsBrowser: React.FC<CommunityFarmSpotsBrowserProps>
                     {spot.authorClan && <span className="text-slate-400 font-medium">{spot.authorClan}</span>}
                   </div>
 
-                  <button
-                    onClick={() => onAddSpotToPlan(spot)}
-                    className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-md shadow-amber-500/20 transition-all cursor-pointer"
-                  >
-                    <Layers className="w-3.5 h-3.5" />
-                    <span>Add to Planner</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {canDeleteSpot(spot) && (
+                      <button
+                        onClick={() => handleDeleteSpot(spot.id, spot.name)}
+                        className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all cursor-pointer"
+                        title="Delete farm spot (Permanent for everyone)"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => onAddSpotToPlan(spot)}
+                      className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-md shadow-amber-500/20 transition-all cursor-pointer"
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                      <span>Add to Planner</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );

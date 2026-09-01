@@ -142,19 +142,29 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
   // Live polling and initial fetch from Aiven PostgreSQL database
   const syncRemoteGuides = async () => {
     try {
-      const remoteGuides = await fetchRemoteGuides();
-      if (remoteGuides && remoteGuides.length > 0) {
-        setGuides((prev) => {
-          const map = new Map<string, GuideSubPage>();
-          // Builtins first
-          BUILTIN_GUIDES.forEach((bg) => map.set(bg.id, bg));
-          // Remote cloud guides next (persisted on Aiven)
-          remoteGuides.forEach((rg) => map.set(rg.id, rg));
-          // Local custom guides that haven't synced yet
-          prev.filter((g) => !g.isBuiltIn && !map.has(g.id)).forEach((cg) => map.set(cg.id, cg));
-          return Array.from(map.values());
+      const { guides: remoteGuides, deletedIds } = await fetchRemoteGuides();
+      const deletedSet = new Set(deletedIds || []);
+
+      setGuides((prev) => {
+        const map = new Map<string, GuideSubPage>();
+        // Builtins first (excluding deleted)
+        BUILTIN_GUIDES.forEach((bg) => {
+          if (!deletedSet.has(bg.id)) {
+            map.set(bg.id, bg);
+          }
         });
-      }
+        // Remote cloud guides next (persisted on Aiven)
+        if (remoteGuides && remoteGuides.length > 0) {
+          remoteGuides.forEach((rg) => {
+            if (!deletedSet.has(rg.id)) {
+              map.set(rg.id, rg);
+            }
+          });
+        }
+        // Local custom guides that haven't synced yet (excluding deleted)
+        prev.filter((g) => !g.isBuiltIn && !map.has(g.id) && !deletedSet.has(g.id)).forEach((cg) => map.set(cg.id, cg));
+        return Array.from(map.values());
+      });
     } catch (e) {
       console.warn('[Sync Guides Error]', e);
     }

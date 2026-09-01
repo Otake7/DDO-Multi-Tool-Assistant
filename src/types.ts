@@ -442,8 +442,12 @@ export interface CommunityFarmSpot {
   description: string;
   recommendedVocations?: string[];
   server: string;
+  authorId?: string;
   authorName: string;
   authorClan?: string;
+  authorRole?: string;
+  avatarIcon?: string;
+  avatarColor?: string;
   verified?: boolean;
   upvotes: number;
   createdAt: number;

@@ -72,7 +72,7 @@ export function setCachedComments(comments: CommunityComment[]): void {
   }
 }
 
-// Fetch comments from remote API
+// Fetch comments from remote API (authoritative server sync)
 export async function fetchRemoteComments(itemId?: string): Promise<CommunityComment[]> {
   try {
     const url = itemId ? `/api/comments?itemId=${encodeURIComponent(itemId)}` : '/api/comments';
@@ -80,13 +80,16 @@ export async function fetchRemoteComments(itemId?: string): Promise<CommunityCom
     if (!res.ok) throw new Error(`Fetch comments failed (${res.status})`);
     const data: CommunityComment[] = await res.json();
     if (Array.isArray(data)) {
-      // Merge with cache
       const cached = getAllComments();
-      const map = new Map<string, CommunityComment>();
-      cached.forEach(c => map.set(c.id, c));
-      data.forEach(c => map.set(c.id, c));
-      const merged = Array.from(map.values());
-      setCachedComments(merged);
+      if (itemId) {
+        // Authoritative replacement for this item: remove stale local comments for this item and apply server list
+        const otherItemsComments = cached.filter(c => c.itemId !== itemId);
+        const updated = [...otherItemsComments, ...data];
+        setCachedComments(updated);
+      } else {
+        // Authoritative replacement for all comments
+        setCachedComments(data);
+      }
       return data;
     }
     return [];

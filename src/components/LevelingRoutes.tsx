@@ -72,12 +72,9 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
   const syncRemoteRoutes = async () => {
     try {
       const remote = await fetchRemoteRoutes();
-      if (remote.length > 0) {
-        setRoutes(prev => {
-          const ids = new Set(remote.map(r => r.id));
-          const customs = prev.filter(r => !LEVELING_PRESETS.some(lp => lp.id === r.id) && !ids.has(r.id));
-          return [...LEVELING_PRESETS, ...remote, ...customs];
-        });
+      if (Array.isArray(remote)) {
+        setRoutes([...LEVELING_PRESETS, ...remote]);
+        localStorage.setItem('ddon_custom_leveling_routes_v2', JSON.stringify(remote));
       }
     } catch (err) {
       console.warn('Error syncing routes:', err);

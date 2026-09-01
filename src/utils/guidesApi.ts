@@ -4,31 +4,46 @@ import { GuideSubPage } from '../types';
  * Client-side API service to communicate with our Express + Aiven database backend
  */
 
-export async function fetchRemoteGuides(): Promise<GuideSubPage[]> {
+export interface RemoteGuidesResponse {
+  guides: GuideSubPage[];
+  deletedIds: string[];
+}
+
+export async function fetchRemoteGuides(): Promise<RemoteGuidesResponse> {
   try {
     const res = await fetch('/api/guides');
     if (!res.ok) throw new Error('Failed to fetch remote guides');
     const data = await res.json();
-    if (Array.isArray(data)) {
-      return data.map((g: any) => ({
-        id: g.id,
-        title: g.title,
-        category: g.category || 'Community',
-        author: g.author || 'Anonymous Arisen',
-        authorId: g.author_id || g.authorId,
-        lastUpdated: g.last_updated || g.lastUpdated || 'Season 3.4',
-        tags: Array.isArray(g.tags) ? g.tags : typeof g.tags === 'string' ? JSON.parse(g.tags) : [],
-        summary: g.summary || '',
-        content: g.content || '',
-        likes: Number(g.likes) || 0,
-        dislikes: Number(g.dislikes) || 0,
-        isBuiltIn: Boolean(g.is_builtin || g.isBuiltIn),
-      }));
+    
+    let rawGuides: any[] = [];
+    let deletedIds: string[] = [];
+
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      rawGuides = Array.isArray(data.guides) ? data.guides : [];
+      deletedIds = Array.isArray(data.deletedIds) ? data.deletedIds : [];
+    } else if (Array.isArray(data)) {
+      rawGuides = data;
     }
-    return [];
+
+    const guides: GuideSubPage[] = rawGuides.map((g: any) => ({
+      id: g.id,
+      title: g.title,
+      category: g.category || 'Community',
+      author: g.author || 'Anonymous Arisen',
+      authorId: g.author_id || g.authorId,
+      lastUpdated: g.last_updated || g.lastUpdated || 'Season 3.4',
+      tags: Array.isArray(g.tags) ? g.tags : typeof g.tags === 'string' ? JSON.parse(g.tags) : [],
+      summary: g.summary || '',
+      content: g.content || '',
+      likes: Number(g.likes) || 0,
+      dislikes: Number(g.dislikes) || 0,
+      isBuiltIn: Boolean(g.is_builtin || g.isBuiltIn),
+    }));
+
+    return { guides, deletedIds };
   } catch (err) {
     console.warn('Could not load remote guides from database, falling back to local:', err);
-    return [];
+    return { guides: [], deletedIds: [] };
   }
 }
 
