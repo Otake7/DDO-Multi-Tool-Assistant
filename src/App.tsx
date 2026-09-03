@@ -461,12 +461,16 @@ export default function App() {
   };
 
   // If user has not logged in or chosen guest mode yet, show Welcome screen first
+  // GDPR Consent Modal is rendered here as well so consent is requested upon first opening the app
   if (!isSessionStarted) {
     return (
-      <WelcomeAuthScreen
-        onLogin={handleLogin}
-        onContinueAsGuest={handleGuest}
-      />
+      <>
+        <WelcomeAuthScreen
+          onLogin={handleLogin}
+          onContinueAsGuest={handleGuest}
+        />
+        <GDPRConsentModal />
+      </>
     );
   }
 
@@ -1047,7 +1051,7 @@ export default function App() {
         <p className="text-[10px] text-slate-500/80 max-w-3xl mx-auto px-4 leading-relaxed">
           This app is an unofficial, fan-made tool and is not affiliated with, endorsed, sponsored, or specifically approved by Capcom Co., Ltd. All game assets, trademarks, and copyright material belong to Capcom.
         </p>
-        <div className="pt-1 flex items-center justify-center">
+        <div className="pt-1 flex flex-wrap items-center justify-center gap-3">
           <a
             href="https://ko-fi.com/smutnymanga7"
             target="_blank"
@@ -1057,6 +1061,14 @@ export default function App() {
             <Coffee className="w-3.5 h-3.5 text-amber-400" />
             <span>If you want support me Buy me a Ko-fi</span>
           </a>
+
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('open_gdpr_modal'))}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 text-xs transition-colors cursor-pointer"
+          >
+            <Shield className="w-3.5 h-3.5 text-amber-400" />
+            <span>Privacy & GDPR Consent</span>
+          </button>
         </div>
       </footer>
     </div>

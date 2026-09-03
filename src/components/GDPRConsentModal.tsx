@@ -16,11 +16,30 @@ export const GDPRConsentModal: React.FC<GDPRConsentModalProps> = ({
   const [analytics, setAnalytics] = useState<boolean>(true);
 
   useEffect(() => {
-    // Check if GDPR consent was already answered
+    // Check if GDPR consent was already answered on initial load
     const consentGiven = localStorage.getItem('ddon_gdpr_consent_status');
     if (!consentGiven) {
       setIsOpen(true);
+    } else {
+      try {
+        const parsed = JSON.parse(consentGiven);
+        if (parsed.personalizedAds !== undefined) setPersonalizedAds(!!parsed.personalizedAds);
+        if (parsed.analytics !== undefined) setAnalytics(!!parsed.analytics);
+      } catch (e) {
+        // ignore parse error
+      }
     }
+
+    // Allow re-opening via custom event (e.g. from footer link)
+    const handleOpenModal = () => {
+      setIsOpen(true);
+      setShowPreferences(true);
+    };
+
+    window.addEventListener('open_gdpr_modal', handleOpenModal);
+    return () => {
+      window.removeEventListener('open_gdpr_modal', handleOpenModal);
+    };
   }, []);
 
   const handleSaveConsent = (allowAds: boolean, allowAnalytics: boolean) => {
@@ -50,18 +69,29 @@ export const GDPRConsentModal: React.FC<GDPRConsentModalProps> = ({
         className="w-full max-w-lg bg-slate-900 border border-amber-500/40 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-4 text-slate-200"
       >
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
-            <Shield className="w-5 h-5" />
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white tracking-wide">
+                Privacy & Advertising Consent
+              </h3>
+              <p className="text-xs text-amber-400/90 font-medium">
+                DDO Multi Tool Assistant
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-base font-bold text-white tracking-wide">
-              Privacy & Advertising Consent
-            </h3>
-            <p className="text-xs text-slate-400">
-              Dragon's Dogma Online: Companion & Leveling Tool
-            </p>
-          </div>
+          {localStorage.getItem('ddon_gdpr_consent_status') && (
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* Body Description */}
@@ -78,7 +108,7 @@ export const GDPRConsentModal: React.FC<GDPRConsentModalProps> = ({
               <div>
                 <strong className="text-slate-200 font-semibold block">Personalized Ads (AdMob & Voyant)</strong>
                 <span className="text-[11px] text-slate-400">
-                  Enables relevant advertising and supports the app community.
+                  Enables relevant advertising and supports the community server tools.
                 </span>
               </div>
               <input
@@ -143,6 +173,13 @@ export const GDPRConsentModal: React.FC<GDPRConsentModalProps> = ({
           >
             Accept All & Continue
           </button>
+        </div>
+
+        {/* Legal Disclaimer */}
+        <div className="pt-2 border-t border-slate-800/80 text-center">
+          <p className="text-[10px] text-slate-500 leading-relaxed">
+            This app is an unofficial, fan-made tool and is not affiliated with, endorsed, sponsored, or specifically approved by Capcom Co., Ltd. All game assets, trademarks, and copyright material belong to Capcom.
+          </p>
         </div>
       </div>
     </div>

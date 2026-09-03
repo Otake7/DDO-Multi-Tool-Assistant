@@ -712,9 +712,19 @@ export const WelcomeAuthScreen: React.FC<WelcomeAuthScreenProps> = ({
           <p className="text-[11px] text-slate-500 leading-relaxed max-w-lg mx-auto">
             This app is an unofficial, fan-made tool and is not affiliated with, endorsed, sponsored, or specifically approved by Capcom Co., Ltd. All game assets, trademarks, and copyright material belong to Capcom.
           </p>
-          <p className="text-[10px] text-slate-600">
-            Dragon's Dogma Online • Dogma Rising Season 3.4 Community Toolkit
-          </p>
+          <div className="flex items-center justify-center gap-3 pt-1">
+            <span className="text-[10px] text-slate-600">
+              DDO Multi Tool Assistant • Season 3.4 Community Toolkit
+            </span>
+            <span className="text-slate-700 text-xs">•</span>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('open_gdpr_modal'))}
+              className="text-[10px] text-amber-500/80 hover:text-amber-400 underline cursor-pointer"
+            >
+              Privacy & GDPR Settings
+            </button>
+          </div>
         </div>
       </div>
     </div>
