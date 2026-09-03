@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import pg from 'pg';
@@ -1508,6 +1509,11 @@ app.post('/api/feedback/:id/vote', async (req, res) => {
 
 // --- Vite / Static Serve ---
 async function startServer() {
+  const publicPath = path.join(process.cwd(), 'public');
+  if (fs.existsSync(publicPath)) {
+    app.use(express.static(publicPath));
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },

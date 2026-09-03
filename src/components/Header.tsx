@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Sparkles, Shield, Flame, RotateCcw, Award, Swords, Layers, Map, 
   PackageCheck, BookOpen, HelpCircle, Compass, Trophy, User, Coffee, 
   PanelLeft, PanelTop, Skull, Library, Menu, X, Smartphone, Monitor,
-  MessageSquarePlus
+  MessageSquarePlus, Download
 } from 'lucide-react';
 import { BoosterSettings, GameVersion, UserProfile } from '../types';
 import { GAME_VERSIONS, getMaxLevelForVersion, XP_RING_CAP_LEVEL } from '../data/levelTable';
+import { PWAInstallModal } from './PWAInstallModal';
 
 interface HeaderProps {
   currentLevel: number;
@@ -49,6 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
   isMobileMenuOpen,
   onToggleMobileMenu,
 }) => {
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const isRingActiveAtCurrentLevel = boosters.useExpRing50 && currentLevel < XP_RING_CAP_LEVEL;
   const maxLevel = getMaxLevelForVersion(gameVersion);
 
@@ -142,6 +144,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <Sparkles className="w-4 h-4" />
               </button>
 
+              {/* Install / Download App Button */}
+              <button
+                id="btn-mobile-install-app"
+                onClick={() => setIsInstallModalOpen(true)}
+                title="Download / Install App on Windows & Linux Desktop"
+                className="p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-amber-300 hover:border-amber-500/50 cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+
               {/* Profile Icon */}
               <button
                 id="btn-mobile-profile"
@@ -155,6 +167,12 @@ export const Header: React.FC<HeaderProps> = ({
 
           </div>
         </div>
+
+        {/* PWA Install Modal for Mobile */}
+        <PWAInstallModal
+          isOpen={isInstallModalOpen}
+          onClose={() => setIsInstallModalOpen(false)}
+        />
       </header>
     );
   }
@@ -209,7 +227,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="font-bold text-lg text-slate-100 tracking-tight flex items-center gap-2">
-                    <span>Dragon's Dogma Online Multi Tool Assistant</span>
+                    <span>DDO Multi Tool Assistant</span>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">
                       Dogma Rising
                     </span>
@@ -260,6 +278,14 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Small screen top actions */}
             <div className="flex md:hidden items-center gap-2">
+              <button
+                id="btn-header-install-app-small"
+                onClick={() => setIsInstallModalOpen(true)}
+                title="Download / Install App"
+                className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-amber-300 cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+              </button>
               <button
                 id="btn-mobile-desktop-ui-toggle-small"
                 onClick={onToggleUiMode}
@@ -382,6 +408,17 @@ export const Header: React.FC<HeaderProps> = ({
                 <Coffee className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform shrink-0" />
                 <span className="text-[11px] sm:text-xs">If you want support me Buy me a Ko-fi</span>
               </a>
+
+              {/* Install / Download App Button */}
+              <button
+                id="btn-header-install-app"
+                onClick={() => setIsInstallModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 hover:border-amber-500/50 text-slate-200 hover:text-amber-300 text-xs font-semibold transition-all shadow-sm cursor-pointer"
+                title="Download / Install DDO Multi Tool Assistant on Windows & Linux Desktop"
+              >
+                <Download className="w-3.5 h-3.5 text-amber-400" />
+                <span>Install App</span>
+              </button>
 
               {/* Reset Button */}
               <button
@@ -591,6 +628,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         )}
       </div>
+
+      {/* PWA Install Modal for Desktop */}
+      <PWAInstallModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+      />
     </header>
   );
 };

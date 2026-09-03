@@ -707,9 +707,14 @@ export const WelcomeAuthScreen: React.FC<WelcomeAuthScreenProps> = ({
           </div>
         )}
 
-        {/* Footer info note */}
-        <div className="pt-2 text-center text-[11px] text-slate-500 border-t border-slate-800/80">
-          <span>Dragon's Dogma Online • Dogma Rising Season 3.4 Community Toolkit</span>
+        {/* Legal Disclaimer */}
+        <div className="pt-3 text-center space-y-1.5 border-t border-slate-800/80">
+          <p className="text-[11px] text-slate-500 leading-relaxed max-w-lg mx-auto">
+            This app is an unofficial, fan-made tool and is not affiliated with, endorsed, sponsored, or specifically approved by Capcom Co., Ltd. All game assets, trademarks, and copyright material belong to Capcom.
+          </p>
+          <p className="text-[10px] text-slate-600">
+            Dragon's Dogma Online • Dogma Rising Season 3.4 Community Toolkit
+          </p>
         </div>
       </div>
     </div>

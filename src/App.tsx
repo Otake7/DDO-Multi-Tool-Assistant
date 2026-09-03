@@ -1037,12 +1037,15 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 text-slate-500 py-6 text-center text-xs space-y-2.5">
-        <p>
-          Dragon's Dogma Online Multi Tool Assistant • Built for Dogma Rising Private Server
+      <footer className="border-t border-slate-800/80 bg-slate-950 text-slate-500 py-6 pb-24 sm:pb-8 text-center text-xs space-y-2.5">
+        <p className="font-semibold text-slate-400">
+          DDO Multi Tool Assistant • Built for Dogma Rising Private Server
         </p>
-        <p className="text-[11px] text-slate-600">
+        <p className="text-[11px] text-slate-500">
           Season {gameVersion} configuration • Max Cap Level {getMaxLevelForVersion(gameVersion)} • 50% XP ring boost cutoff mechanics • Full Job Training Targets, Item Library & Multi Tool Assistant.
+        </p>
+        <p className="text-[10px] text-slate-500/80 max-w-3xl mx-auto px-4 leading-relaxed">
+          This app is an unofficial, fan-made tool and is not affiliated with, endorsed, sponsored, or specifically approved by Capcom Co., Ltd. All game assets, trademarks, and copyright material belong to Capcom.
         </p>
         <div className="pt-1 flex items-center justify-center">
           <a
