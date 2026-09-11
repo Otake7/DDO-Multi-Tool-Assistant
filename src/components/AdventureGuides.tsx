@@ -34,10 +34,11 @@ import {
 } from 'lucide-react';
 import { GuideSubPage, UserProfile, GuideSortOption, VoteDirection } from '../types';
 import { BUILTIN_GUIDES } from '../data/guidesData';
-import { isImageUrl, normalizeImageUrl } from '../utils/imageHelper';
+import { isImageUrl, normalizeImageUrl, isImgurAlbum } from '../utils/imageHelper';
 import { getItemEngagementStats, getUserVotesMap, voteItem } from '../utils/communityStats';
 import { CommunityCommentsSection } from './CommunityCommentsSection';
 import { fetchRemoteGuides, saveRemoteGuide, deleteRemoteGuide } from '../utils/guidesApi';
+import { GuideImageRenderer } from './GuideImageRenderer';
 
 interface AdventureGuidesProps {
   onNavigateToTab?: (tab: string) => void;
@@ -378,62 +379,26 @@ Explain the strategy or farming route in detail...
           const mdImgMatch = trimmed.match(/^!\[(.*?)\]\((https?:\/\/[^\s\)]+)\)$/i);
           if (mdImgMatch) {
             const altText = mdImgMatch[1] || 'Guide Illustration';
-            const imgUrl = normalizeImageUrl(mdImgMatch[2]);
+            const rawUrl = mdImgMatch[2];
             return (
-              <figure key={idx} className="my-4 group">
-                <div 
-                  onClick={() => setPreviewImageUrl(imgUrl)}
-                  className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/80 shadow-xl cursor-zoom-in hover:border-amber-500/50 transition-all max-w-2xl mx-auto"
-                >
-                  <img
-                    src={imgUrl}
-                    alt={altText}
-                    referrerPolicy="no-referrer"
-                    className="w-full max-h-96 object-contain bg-slate-950"
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = 'none';
-                    }}
-                  />
-                  <div className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-slate-950/80 backdrop-blur-sm border border-slate-800 text-[10px] text-amber-300 font-semibold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ZoomIn className="w-3 h-3" />
-                    <span>Enlarge</span>
-                  </div>
-                </div>
-                {altText && (
-                  <figcaption className="text-center text-xs text-slate-400 mt-2 font-medium">
-                    {altText}
-                  </figcaption>
-                )}
-              </figure>
+              <GuideImageRenderer
+                key={idx}
+                url={rawUrl}
+                altText={altText}
+                onPreview={(url) => setPreviewImageUrl(url)}
+              />
             );
           }
 
           // Direct Standalone Image URL on its own line (e.g. Imgur, PNG, JPG, BMP)
           if (trimmed.startsWith('http') && isImageUrl(trimmed)) {
-            const imgUrl = normalizeImageUrl(trimmed);
             return (
-              <figure key={idx} className="my-4 group">
-                <div 
-                  onClick={() => setPreviewImageUrl(imgUrl)}
-                  className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/80 shadow-xl cursor-zoom-in hover:border-amber-500/50 transition-all max-w-2xl mx-auto"
-                >
-                  <img
-                    src={imgUrl}
-                    alt="Guide Screenshot"
-                    referrerPolicy="no-referrer"
-                    className="w-full max-h-96 object-contain bg-slate-950"
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = 'none';
-                    }}
-                  />
-                  <div className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-slate-950/80 backdrop-blur-sm border border-slate-800 text-[10px] text-amber-300 font-semibold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ZoomIn className="w-3 h-3" />
-                    <span>Enlarge Photo</span>
-                  </div>
-                </div>
-              </figure>
+              <GuideImageRenderer
+                key={idx}
+                url={trimmed}
+                altText="Guide Screenshot"
+                onPreview={(url) => setPreviewImageUrl(url)}
+              />
             );
           }
 
@@ -520,6 +485,22 @@ Explain the strategy or farming route in detail...
       if (linkMatch) {
         const label = linkMatch[1];
         const rawUrl = linkMatch[2];
+        if (isImgurAlbum(rawUrl)) {
+          return (
+            <a
+              key={pIdx}
+              href={rawUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-950 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 rounded-lg text-xs font-semibold mx-1"
+              title="Open Imgur album in new tab"
+            >
+              <ImageIcon className="w-3 h-3 text-emerald-400" />
+              <span>{label || 'View Imgur Album'}</span>
+              <ExternalLink className="w-3 h-3 inline text-emerald-400" />
+            </a>
+          );
+        }
         if (isImageUrl(rawUrl)) {
           const imgUrl = normalizeImageUrl(rawUrl);
           return (
@@ -551,6 +532,22 @@ Explain the strategy or farming route in detail...
 
       // Standalone inline URL
       if (part.startsWith('http://') || part.startsWith('https://')) {
+        if (isImgurAlbum(part)) {
+          return (
+            <a
+              key={pIdx}
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-950 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 rounded-lg text-xs font-semibold mx-1"
+              title="Open Imgur album in new tab"
+            >
+              <ImageIcon className="w-3 h-3 text-emerald-400" />
+              <span>[Imgur Album]</span>
+              <ExternalLink className="w-3 h-3 inline text-emerald-400" />
+            </a>
+          );
+        }
         if (isImageUrl(part)) {
           const imgUrl = normalizeImageUrl(part);
           return (
@@ -1082,11 +1079,17 @@ Explain the strategy or farming route in detail...
 
               {editorTab === 'write' ? (
                 <div className="space-y-2">
-                  <div className="p-2.5 rounded-xl bg-slate-950/80 border border-amber-500/30 text-[11px] text-amber-300 flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span>
-                      <strong>Image & Imgur links supported:</strong> Paste any direct image URL (Imgur, .png, .jpg, .bmp, .webp) on its own line or using markdown <code className="text-amber-400 font-mono">![Caption](https://i.imgur.com/example.png)</code> to display images in your guide.
-                    </span>
+                  <div className="p-2.5 rounded-xl bg-slate-950/80 border border-amber-500/30 text-[11px] text-amber-300 flex items-start gap-2">
+                    <ImageIcon className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <div>
+                        <strong>Image & Imgur links supported:</strong> Use markdown <code className="text-amber-400 font-mono">![Caption](https://i.imgur.com/example.png)</code> or paste links on their own line.
+                      </div>
+                      <div className="text-[10px] text-slate-400">
+                        • <strong>Direct Image:</strong> Right-click image on Imgur &rarr; choose <em>"Copy image address"</em> (<code className="text-amber-300">https://i.imgur.com/...png</code>) for seamless in-guide photo display.<br />
+                        • <strong>Album links:</strong> Links with <code className="text-amber-300">imgur.com/a/...</code> will render using the interactive Imgur album viewer.
+                      </div>
+                    </div>
                   </div>
                   <textarea
                     rows={13}

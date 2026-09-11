@@ -26,7 +26,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Pierce',
         staminaCost: 'Low',
-        description: 'Rapid spear thrusts followed by a high-velocity forward piercing strike.',
+        description: 'Launch enemies upward with a slash.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Skeleton Night', count: 10, minEnemyLevel: 10, location: 'Volden Mine / Misriu Crypts' },
@@ -47,7 +47,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Sweeping wide-arc spear slash with heavy knockdown and wide crowd control.',
+        description: 'Swing the lance around and attack the surrounding area. Can be activated in air.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Large Lizard', count: 8, minEnemyLevel: 10, location: 'Brea Coast / Misriu' },
@@ -69,7 +69,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Conjures spiritual spears from the ground below the target in a rising burst.',
+        description: 'Gather energy and thrust forward, releasing a blast of energy. The first strike always chases an enemy.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Large Sulfur', count: 10, minEnemyLevel: 20, location: 'Volden Mine / Caverns' },
@@ -91,7 +91,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Deploys a protective spiritual ward on allies that reduces physical & magick damage and grants stagger resistance.',
+        description: 'Creates an energy pool that heals and grants Defense boost to allies who enter. Lasts a limited time.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Captain Oak', count: 4, minEnemyLevel: 30, location: 'Dow Valley Orc Camp' },
@@ -113,7 +113,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'High',
-        description: 'Spins the spirit lance violently creating a localized whirlwind vortex that pulls enemies together.',
+        description: 'Spin the lance all-around, continuously slashing forward. The last blow’s power changes according to the number of attacks made.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Damned Goblin', count: 15, minEnemyLevel: 40, location: 'Zandora / Mergoda' },
@@ -135,7 +135,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Charges spirit power and releases a concentrated beam of high-density spirit energy.',
+        description: 'Creates an orb that emits shockwaves when struck. Absorbs spirit energy from attacks. Manual detonation available both on ground and in air.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Ghost Mail', count: 5, minEnemyLevel: 50, location: 'Mergoda / Zandora Crypts' },
@@ -157,7 +157,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Plants a radiant healing spiritual flower on allies, rapidly restoring health and cleansing status debuffs over time.',
+        description: 'Form spiritual spheres around yourself that recovers health and status abnormalities. The range grows depending on the charge time. The effectiveness rises upon a full charge.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Frost Machina', count: 3, minEnemyLevel: 60, location: 'Leste / Acker Glaciers' },
@@ -176,7 +176,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Forms revolving spirit shields around the user and nearby party members, absorbing incoming blows.',
+        description: 'Forms a protective barrier that blocks attacks. Striking enemies stores spirit energy, releasable with button input.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bifrost', count: 3, minEnemyLevel: 70, location: 'Megado Royal Ruins' },
@@ -195,7 +195,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Fire',
         staminaCost: 'High',
-        description: 'Calls down a barrage of blazing spirit spears from the heavens onto the designated area.',
+        description: 'A high power skill that covers a wide area. If the first hit is successfully landed, it will become a full on combo attack.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Mad Invasion Demon', count: 10, minEnemyLevel: 80, location: 'Finis Obsidian Valley' },
@@ -214,7 +214,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Assumes a spiritual parry stance, countering any enemy attack with an explosive spirit lance counter-thrust.',
+        description: 'Expands an area that boosts damage and knock back for nearby allies’ enchantments/crests. If used as a counter: Effect↑ + Size↑.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Armored Gore Cyclops', count: 3, minEnemyLevel: 80, location: 'Finis Obsidian Gate' },
@@ -818,7 +818,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Low',
-        description: 'Lunges forward at extreme speed, piercing through enemies in a straight line with high knockdown.',
+        description: 'A dash forward that ends with a lunged stab to the enemy; damage is higher the further the dash distance.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bull Ape', count: 20, minEnemyLevel: 10 },
@@ -837,7 +837,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Delivers a ferocious upward rising blade strike that launches lightweight targets into the air.',
+        description: 'Traces a grand upward arc with the sword, sending lightweight enemies into the air.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Hobgoblin Leader', count: 15, minEnemyLevel: 15 },
@@ -855,7 +855,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'Low',
-        description: 'Slams shield into the target, staggering enemies and shredding monster rage / stamina bars.',
+        description: 'Deals a barrage of blows on the enemy with the shield.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'wolf', count: 40, minEnemyLevel: 10 },
@@ -873,7 +873,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Leaps upward with a powerful vertical rising slash designed to strike flying harpy units and monster heads.',
+        description: 'Unleashes a flurry of skyward slashes well-suited to bringing flying foes to the ground.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Harpy', count: 20, minEnemyLevel: 10 },
@@ -891,7 +891,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Readies a parrying stance to fluidly deflect incoming enemy strikes directly into a lethal spinning counter-attack.',
+        description: 'Ducks backward to evade attack before charging in to deliver a slashing blow. If timed correctly to evade an attack, this increases its power.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Skeleton Sorcerer', count: 13, minEnemyLevel: 20 },
@@ -909,7 +909,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Plunges sword vertically downward from the air into monsters below, pinning targets and delivering high impact damage.',
+        description: 'Leaps to deliver a solid downward thrust.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Rock Lizard', count: 15, minEnemyLevel: 20 },
@@ -927,7 +927,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'Medium',
-        description: 'Raises shield with spiked reinforcement to absorb frontal blows and release counter shockwaves.',
+        description: 'Unleashes a flurry of stabbing attacks at the enemy while blocking with the shield.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Snow Harpy', count: 15, minEnemyLevel: 30 },
@@ -946,7 +946,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Performs a sweeping 360-degree whirlwind sword slash that grants brief invincibility frames.',
+        description: 'Spins with blade extended, drawing a circular slash twice around you.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Troll', count: 3, minEnemyLevel: 30 },
@@ -964,7 +964,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'High',
-        description: 'Charges forward behind the vanguard shield like an unstoppable heavy war chariot, bulldozing all enemies.',
+        description: 'A quick lunge while blocking with the shield.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Golem', count: 5, minEnemyLevel: 30 },
@@ -985,7 +985,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Delivers a rapid double-stab thrust that breaks guard and drills deep into monster weak points.',
+        description: 'Delivers a quick stab and withdrawal slash to the enemy without distancing away.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Silver Roar', count: 5, minEnemyLevel: 40 },
@@ -1006,7 +1006,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'High',
-        description: 'Channels dragon-slaying energy into a violent ascending cyclone sword combo.',
+        description: 'Blocks with the shield and then counters enemy attacks. Damage is greater if a perfect block with the shield is correctly executed.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Damned Goblin', count: 20, minEnemyLevel: 40 },
@@ -1028,7 +1028,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'High',
-        description: 'Unleashes a relentless flurry of multi-directional sword slashes finishing with an earth-shattering blow.',
+        description: 'Unleashes an onslaught of swift, powerful attacks to all surroundings within reach.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Death Knight', count: 3, minEnemyLevel: 50 },
@@ -1673,7 +1673,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'Medium',
-        description: 'Fires rapid successive arrows into an exact weak point in quick sequence.',
+        description: 'Fire multiple arrows in quick succession. Staggers large enemies.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Hobgoblin', count: 15, minEnemyLevel: 10 },
@@ -1691,7 +1691,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'Medium',
-        description: 'Draws the bowstring to maximum tension to loose a heavy piercing arrow that punches through enemy lines.',
+        description: 'Fires a hot capable of piercing multiple targets.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'skeleton', count: 30, minEnemyLevel: 10 },
@@ -1709,7 +1709,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'Medium',
-        description: 'Fires a wide horizontal spread of multiple arrows simultaneously to clear minion swarms.',
+        description: 'Fires three arrow in a wedge pattern.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Forest Goblin', count: 20, minEnemyLevel: 10 },
@@ -1727,7 +1727,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'Low',
-        description: 'Nocks specialized acoustic sonic arrows that detonate with a concussive blast, staggering flying and sensitive monsters.',
+        description: 'Fires an arrow that produces a deafening blare on impact, breaking enemy guard. Will also launch nearby enemies.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Mist Hunter', count: 15, minEnemyLevel: 10 },
@@ -1745,7 +1745,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Fire',
         staminaCost: 'High',
-        description: 'Shoots a blazing volley into the sky that cascades down upon a targeted area with incendiary arrows.',
+        description: 'Sends a wall of arrows skyward to rain down on a broad area.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Dread Ape', count: 3, minEnemyLevel: 10 },
@@ -1763,7 +1763,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'Medium',
-        description: 'Spins dynamically while releasing spiraling arrows that generate mini-whirlwinds upon impact.',
+        description: 'Looses a spinning arrow that delivers a barrage of hits to an area. Especially effective with status arrows.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Skeleton Sorcerer', count: 13, minEnemyLevel: 20 },
@@ -1781,7 +1781,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Fire',
         staminaCost: 'High',
-        description: 'Loads high-grade combustible red powder into arrowheads that detonate in massive fireballs upon striking targets.',
+        description: 'Applies an explosive to stun effect all arrows loaded. Increase damage inflicted.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Orc Soldier', count: 15, minEnemyLevel: 30 },
@@ -1800,7 +1800,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'High',
-        description: 'Channels total body strength into a devastating sniper shot with massive knockdown and stagger ratings.',
+        description: 'Draws the bow with all the user’s might, then looses a shot straight ahead. Power greatly increases if released as maximum charge is reached.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Captain Oak', count: 5, minEnemyLevel: 30 },
@@ -1818,7 +1818,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'Medium',
-        description: 'Executes an evasive backflip leap while loosing a volley of counter-arrows directly into the attacker.',
+        description: 'Quickly dodges backwards, creating distance between you and your enemies.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Orcbringer', count: 20, minEnemyLevel: 40 },
@@ -1839,7 +1839,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Fire',
         staminaCost: 'High',
-        description: 'Shoots high-explosive cluster arrows high into the air that carpet-bomb the target battlefield below.',
+        description: 'Coat multiple arrows in gunpowder and send them skyward to rain down a broad area.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Chimera', count: 5, minEnemyLevel: 40 },
@@ -1860,7 +1860,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'High',
-        description: 'Enters a rapid-fire stance to unleash an uninterrupted hailstorm of precision arrows across the frontline.',
+        description: 'Continuously shoot multiple arrows as you press the button. As you shoot more arrows, it becomes easier to stagger enemies.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Damned Wolf', count: 40, minEnemyLevel: 46 },
@@ -1882,7 +1882,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'High',
-        description: 'Draws upon demonic archery spirits to fire a hyper-penetrating dread arrow that shreds boss weak points.',
+        description: 'Fires an extremely powerful magic arrow that gains a massive damage boost at full charge. Exceptionally effective against weakened foes.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Death Knight', count: 5, minEnemyLevel: 56 },
@@ -1904,7 +1904,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'High',
-        description: 'Unleashes mystical wind-infused explosive arrows that cause severe shockwave ruptures on collision.',
+        description: 'Fires arrows wrapped in chained explosives skyward. Hold button during the shot to increase detonation altitude.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Frost Machina', count: 3, minEnemyLevel: 60 },
@@ -1923,7 +1923,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Shot',
         staminaCost: 'High',
-        description: 'Steps into point-blank range to deliver a lethal point-blank release that completely obliterates monster armor.',
+        description: 'At close range, nock multiple arrows and fire with full force. Can be used even while clinging to foes.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bifrost', count: 3, minEnemyLevel: 70 },
@@ -2516,7 +2516,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Creates a sacred glyph area that grants high physical and magick attack buffs to all party members inside.',
+        description: 'Emits an aura of Attack and Magick power. Applies a temporary increase to nearby allies. Can be used with Field Shift.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bull Ape', count: 10, minEnemyLevel: 10 },
@@ -2535,7 +2535,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Creates a protective holy barrier field that elevates physical and magick defense for all allies standing within.',
+        description: 'Emits an aura of Attack and Magick defense. Applies a temporary increase to nearby allies. Can be used with Field Shift.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Sling Forest Goblin', count: 15, minEnemyLevel: 10 },
@@ -2553,7 +2553,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Unleashes wings of divine light from the staff, discharging multiple seeking holy projectiles that purge foes.',
+        description: 'After charging, launch tracking projectiles. Fires magick spheres of Holy attribute.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Skeleton Alchemy', count: 8, minEnemyLevel: 10 },
@@ -2571,7 +2571,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Manifests revolving spheres of holy protective energy around allies that nullify incoming blows.',
+        description: 'Creates 3 magick spheres that rapidly orbit around you. Nullifies one incoming attack per sphere.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Skeleton Mage', count: 15, minEnemyLevel: 10 },
@@ -2589,7 +2589,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Conjures a stationary field of restorative light on the ground that continuously heals allies standing within.',
+        description: 'Creates a healing zone that rapidly restores HP. Only recovers grey health. Damages undead.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Redcap', count: 13, minEnemyLevel: 10 },
@@ -2607,7 +2607,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Generates a sanctified circle that cleanses all debilitating status conditions and ailments from allies.',
+        description: 'Creates a magick area that instantly cures debilitations. Damages undead.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Large Sulfur', count: 10, minEnemyLevel: 20 },
@@ -2625,7 +2625,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Summons a colossal pillar of brilliant sacred light from the heavens, dealing continuous holy damage to foes.',
+        description: 'After charging, fire a magick sphere that emits an intense light of the Holy attribute in a wide area.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Orc Soldier', count: 30, minEnemyLevel: 30 },
@@ -2643,7 +2643,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Detonates concentrated spiritual energy inside an enemy or holy beacon to trigger a massive radiant blast.',
+        description: 'Channels magick int your body - when HP reaches to zero, triggers catastrophic blast that ravages nearby foes.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Grimwarg', count: 30, minEnemyLevel: 35 },
@@ -2661,7 +2661,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Erects an unbreakable sacred ward that grants complete stagger immunity and hyper-armor to party members inside.',
+        description: 'Emits an aura of Endurance. Applies a temporary increase to nearby allies. Can be used with Field Shift.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Armor Cyclops', count: 5, minEnemyLevel: 35 },
@@ -2682,7 +2682,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Creates a rejuvenating font of spiritual vigor that provides rapid infinite stamina recovery for all party members.',
+        description: 'Creates a magick aura that rapidly regenerates Stamina. Damages undead.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Colossus', count: 5, minEnemyLevel: 40 },
@@ -2703,7 +2703,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Creates a grand celestial sanctuary that unleashes massive periodic holy eruptions and purges evil.',
+        description: 'Creates a wide magick area of the Holy attribute centered on yourself, dealing damage to enemies.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Skeleton Warrior', count: 40, minEnemyLevel: 46 },
@@ -2725,7 +2725,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Greatly accelerates chant and cast times for all party members standing within the holy zone.',
+        description: 'Focus a prayer on nearby allies, hastening the charging of all their skills that display a charge gauge.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Death Knight', count: 5, minEnemyLevel: 56 },
@@ -2747,7 +2747,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Ignites a supreme solar beacon that grants attack, defense, and stamina generation all at once to allies.',
+        description: 'Deploys a magick aura that temporarily boosts life recovery around you. Can be used with Field Shift.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Frost Machina', count: 3, minEnemyLevel: 60 },
@@ -2766,7 +2766,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Imbues holy bursts into ally weapons, causing explosive holy detonations on every physical and magick hit.',
+        description: 'Creates a turret that fires additional shots when hit by Blast Bit. Lasts for limited time.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bifrost', count: 3, minEnemyLevel: 70 },
@@ -3360,7 +3360,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'None',
         staminaCost: 'Medium',
-        description: 'Imbues the Great Shield with concentrated force energy to repel incoming assaults and blast enemies backward.',
+        description: 'For a period of time, when an attack is blocked, a shockwave will be emitted.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Lizardman', count: 40, minEnemyLevel: 10 },
@@ -3379,7 +3379,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Channels concentrated light from the shield to inflict massive Slow status on all targets within the beam.',
+        description: 'Continuously shine rod’s radiance on foes to build Torpor status. When force gauge ↑1, consumes to enhance effect.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'wolf', count: 40, minEnemyLevel: 10 },
@@ -3397,7 +3397,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Projects an ethereal hypnotic light beam that puts enemies into a deep sleep state.',
+        description: 'Continuously shine rod’s radiance on foes to build Sleep status. When force gauge ↑1, consumes to enhance effect.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Slime', count: 80, minEnemyLevel: 1 },
@@ -3415,7 +3415,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'Medium',
-        description: 'Rushes forward while sheltering behind the Great Shield, crushing through enemy lines and staggering monsters.',
+        description: 'Raises greatshield and charges forward, knocking back enemies in path. When force gauge ↑1, consumes to boost attack.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bull Ape', count: 20, minEnemyLevel: 15 },
@@ -3433,7 +3433,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'None',
         staminaCost: 'Low',
-        description: 'Discharges stored elemental force to endow weapons of all party members with the absorbed element.',
+        description: 'Provides allies with elemental damage and status resistance (fire, ice, thunder, holy, dark based on rod). When force gauge ↑1, uses to greatly extend duration.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Glutton Wooze', count: 30, minEnemyLevel: 20 },
@@ -3451,7 +3451,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'High',
-        description: 'Slams the Great Shield into the earth with tremendous power, sending seismic shockwaves that rupture the ground.',
+        description: 'Shake the earth, staggering enemies in a wide range. Staggers large enemies and some formidable foes. When force gauge ↑1, uses to shorten casting time.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Sludge Man', count: 30, minEnemyLevel: 20 },
@@ -3469,7 +3469,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'None',
         staminaCost: 'Medium',
-        description: 'Tethers an enemy with energy chains from the shield, draining their stamina and immobilizing their movements.',
+        description: 'Fires a magical anchor to restrain foes. Against large and special enemies builds ATK↓, MAG↓, DEF↓ and RES↓ status.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Snow Harpy', count: 30, minEnemyLevel: 30 },
@@ -3487,7 +3487,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Erects an immovable sacred barrier of divine light that absorbs and completely negates heavy physical and magick attacks.',
+        description: 'Create walls of magic that increase the range of your shield’s ability to block.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Troll', count: 10, minEnemyLevel: 30 },
@@ -3505,7 +3505,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'None',
         staminaCost: 'Medium',
-        description: 'Channels absorbed elemental power into a brilliant beam that damages enemies while inflicting elemental debuffs.',
+        description: 'Emits light that builds elemental defense down status (fire/ice/thunder/holy/dark based on rod). When force gauge ↑1, consumes to enhance effect.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Captain Oak', count: 15, minEnemyLevel: 40 },
@@ -3526,7 +3526,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'High',
-        description: 'Detonates an intense concussive shockwave from the shield face that instantly stuns and staggers nearby enemies.',
+        description: 'Parries attacks with greatshield, dealing impact that builds Stun status. When force gauge ↑1, consumes to enhance effect.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Griffin', count: 5, minEnemyLevel: 40 },
@@ -3547,7 +3547,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Sustained',
-        description: 'Channels an impenetrable divine sanctuary field around yourself and nearby allies, granting absolute invulnerability to damage while maintained.',
+        description: 'Guard an area around you, nullifying damage for all allies nearby.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Damned Wolf', count: 20, minEnemyLevel: 40 },
@@ -3569,7 +3569,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'None',
         staminaCost: 'Medium',
-        description: 'Latches energy chains onto enemies to absorb force directly into your Great Shield gauge while restricting monster movement.',
+        description: 'Fires a magical anchor towards a foe, and gradually fill the force gauge and aggression meter if it hits. While the anchor is active, you can move in any direction with the left stick.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Death Knight', count: 3, minEnemyLevel: 50 },
@@ -3591,7 +3591,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Projects a petrifying gaze from the shield, turning flesh to solid stone and freezing enemy actions.',
+        description: 'Continuously shine rod’s radiance on foes to build Petrify status. When force gauge ↑1, consumes to enhance effect.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Frost Machina', count: 3, minEnemyLevel: 60 },
@@ -3610,7 +3610,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'High',
-        description: 'Swings the massive Great Shield in a wide protective arc, dealing colossal physical impact and staggering all nearby foes.',
+        description: 'Swings greatshield while pulling in nearby foes. Blocking attacks boosts its power. When force gauge ↑1, consumes to enhance effect.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bifrost', count: 3, minEnemyLevel: 70 },
@@ -5902,7 +5902,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Low',
-        description: 'Rapidly discharges a burst of homing magickal light bullets into targeted monster weak points.',
+        description: 'Fires multiple magick arrows with there Ice attribute at a single point.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Shield Goblin', count: 13, minEnemyLevel: 1 },
@@ -5920,7 +5920,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Locks onto allies to fire curative arrows that restore HP and cleanse basic status ailments.',
+        description: 'Fires magick arrows that create health-restoring fields on impact. Fields damage undead enemies in range.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Hobgoblin Fighter', count: 10, minEnemyLevel: 10 },
@@ -5938,7 +5938,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Advanced curative arrow with higher burst recovery potency and longer regeneration aura.',
+        description: 'Fires magick arrows that emit curative fields on impact. Cure status to allies, boosts defence and harms undead.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Ooze', count: 13, minEnemyLevel: 10 },
@@ -5956,7 +5956,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Fire',
         staminaCost: 'Medium',
-        description: 'Imbues arrows with intense flame energy that sets targets ablaze and deals continuous fire damage.',
+        description: 'Fires magick arrows that lodge in enemies. Attacking embedded arrows triggers explosions, knocking back nearby foes from the blast.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Direwolf', count: 15, minEnemyLevel: 20 },
@@ -5974,7 +5974,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Releases a blinding flare of holy light that illuminates the area, blinds monsters, and deals holy damage.',
+        description: 'Fires holy magick arrows that deploy spheres on impact. Attached spheres drain enemy HP continuously.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Goblin Bomber', count: 15, minEnemyLevel: 20 },
@@ -5992,7 +5992,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'Medium',
-        description: 'Curves magickal shots around terrain obstacles to strike enemies in hard cover.',
+        description: 'Fire magick arrows that decrease the Physical and magical attack power of enemies for a period of time.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Ent', count: 3, minEnemyLevel: 20 },
@@ -6010,7 +6010,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'None',
         staminaCost: 'High',
-        description: 'Fires an energy-draining arrow that saps monster stamina and reduces enemy casting speed.',
+        description: 'Fires magick arrows that decrease the Physical and magical defense of enemies for a period of time.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Dread Ape', count: 3, minEnemyLevel: 20 },
@@ -6028,7 +6028,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Thunder',
         staminaCost: 'High',
-        description: 'Fires lightning arrows that bounce rapidly between dungeon walls and monster bodies, multiplying in power.',
+        description: 'Fires a magick arrow that increases in power as it ricochets towards its target.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Troll', count: 3, minEnemyLevel: 30 },
@@ -6046,7 +6046,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Pins a regenerative holy anchor into the battlefield that continuously restores ally stamina and health.',
+        description: 'Fires magick arrows that create stamina-restoring fields on impact. These fields also damage undead enemies in range.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Silver Roar', count: 3, minEnemyLevel: 40 },
@@ -6066,7 +6066,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'None',
         staminaCost: 'High',
-        description: 'Advanced weakening arrow that inflicts heavy attack and defense reductions upon large monsters.',
+        description: 'Fires magick arrows that decrease the Endurance of enemies for a period of time.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Witch', count: 4, minEnemyLevel: 40 },
@@ -6086,7 +6086,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Dark',
         staminaCost: 'High',
-        description: 'Fires an ominous dark magick arrow that inflicts multiple simultaneous attribute weaknesses on bosses.',
+        description: 'Fires magick arrows that implant magic spheres into enraged enemies’ Secret Cores. These spheres, when attacked, inflict massive stamina damage.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Damned Goblin Fighter', count: 20, minEnemyLevel: 40 },
@@ -6108,7 +6108,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Channels the archer’s entire remaining stamina into a supreme concentrated magick arrow of apocalyptic power.',
+        description: 'Fires a massive holy magick arrow after charging. Left stick steers in flight. Hit body parts become auto-targets.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Death Knight', count: 3, minEnemyLevel: 50 },
@@ -6130,7 +6130,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Detonates a blinding flash of holy restorative power that instantly brings near-dead allies back to high health.',
+        description: 'Fires a healing magick arrow that detonates midair, emitting a flash that restores HP to illuminated allies. Damages undead.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Frost Machina', count: 3, minEnemyLevel: 60 },
@@ -6149,7 +6149,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Fires ancient spirit arrows that latch onto targets and radiate continuous homing particle lasers.',
+        description: 'Fires arrows that sprout tentacles on hit. Tentacles chain attacks between foes. Scales with size. Strong versus Infected Growths.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bifrost', count: 3, minEnemyLevel: 70 },
@@ -6746,7 +6746,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Low',
-        description: 'Lunges upward with a heavy vertical cleave that launches smaller enemies into the air.',
+        description: 'Stabs foes then fiercely slashes upward. Can send foes flying high into the air.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Hobgoblin', count: 15, minEnemyLevel: 10 },
@@ -6765,7 +6765,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Charges forward swinging the greatsword continuously, smashing through obstacles and enemy lines.',
+        description: 'Charge forward with blade extended, knocking down any caught in its path. Left stick to steer charge.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Orc Soldier', count: 15, minEnemyLevel: 10 },
@@ -6784,7 +6784,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'Low',
-        description: 'Strikes quickly with the pommel/hilt of the greatsword to daze and stagger foes.',
+        description: 'Steps forward with hilt strike. Easily staggers enemies and drains enraged stamina.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Slinghobgoblin', count: 20, minEnemyLevel: 10 },
@@ -6802,7 +6802,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Low',
-        description: 'Steps backward to evade incoming attacks before immediately delivering a heavy counter-slash.',
+        description: 'Steps backwards in a swift evasive manoeuvre while delivering a slashing blow.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Large Lizard', count: 15, minEnemyLevel: 10 },
@@ -6820,7 +6820,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Performs a full 360-degree horizontal sweeping cleave with tremendous momentum.',
+        description: 'Spins the blade in a swift circle, slashing at foes all around the user.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Skeleton', count: 15, minEnemyLevel: 20 },
@@ -6839,7 +6839,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'High',
-        description: 'Unleashes a devastating charged overhead two-handed cleave with supreme knockdown and damage.',
+        description: 'Charges to slam foes with blade. High Stun potential. Perfect release timing maximises damage.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Sulfur Lizard', count: 15, minEnemyLevel: 20 },
@@ -6857,7 +6857,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Leaps into the air while unleashing an upward spiral greatsword slash.',
+        description: 'Thrust your blade with great force into the air. Especially effective against aerial enemies.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Hobgoblin Fighter', count: 30, minEnemyLevel: 25 },
@@ -6875,7 +6875,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'High',
-        description: 'Enters a focused stance to counter enemy attacks with a lethal, lightning-fast greatsword slash.',
+        description: 'Readies greatsword to parry enemy attacks, followed by counter combo. Only executes chain after a successful parry.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Grimwarg', count: 40, minEnemyLevel: 35 },
@@ -6893,7 +6893,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Flowing battle stance that accelerates consecutive strike cadence and reduces stamina drain.',
+        description: 'Steps forward to absorb enemy attacks. Can cancel many actions but not itself. Successfully absorbing fills revenge gauge significantly.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Troll', count: 8, minEnemyLevel: 40 },
@@ -6913,7 +6913,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'High',
-        description: 'Spins continuously like a devastating cyclone, carving through multiple surrounding enemies.',
+        description: 'Alternates greatsword swings to shred foes. Rapid inputs increase attack count.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Witch', count: 10, minEnemyLevel: 40 },
@@ -6933,7 +6933,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Pierce',
         staminaCost: 'High',
-        description: 'Propels forward in a violent dragon-piercing thrust that pins and drills through massive bosses.',
+        description: 'Jump high an deliver a focused powerful greatsword strike. Small range but devastating damage. Damage increases with drop distance.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Damned Goblin Fighter', count: 20, minEnemyLevel: 40 },
@@ -6955,7 +6955,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'High',
-        description: 'Releases a giant crescent shockwave of condensed force that cuts through enemies at mid-range.',
+        description: 'After channeling enough energy, release a devastating slash with your body’s entire might.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Death Knight', count: 3, minEnemyLevel: 50 },
@@ -6977,7 +6977,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'High',
-        description: 'Drives the greatsword deep into the monster and gouges upward with extreme brutality.',
+        description: 'While climbing an enemy, thrust the blade deep into them and vigorously shake it around. The number of shakes increases with repeated button presses.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Frost Machina', count: 3, minEnemyLevel: 60 },
@@ -6996,7 +6996,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'High',
-        description: 'Slams the colossal greatsword into the earth to generate a massive seismic shockwave that shatters monster stance.',
+        description: 'Plunges greatsword with full force, shaking the earth. Holding button on ground or fall height in air increases damage. Most effective against downed foes.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bifrost', count: 3, minEnemyLevel: 70 },
@@ -7562,7 +7562,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'Medium',
-        description: 'Erects massive transmutation pillars from the ground to stagger enemies and control positioning.',
+        description: 'Drive your gauntlet into the ground and create pillars that encircle you. Can be used while airborne.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bull Ape', count: 30, minEnemyLevel: 8 },
@@ -7581,7 +7581,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'Medium',
-        description: 'Sends out concentric shockwaves along the ground to destabilize crowds and build elixir gauge.',
+        description: 'Generate a grounded wave of alchemical substance that travels in a straight line.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Redcap', count: 15, minEnemyLevel: 8 },
@@ -7602,7 +7602,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'None',
         staminaCost: 'Low',
-        description: 'Imbues gauntlet and transmutation spikes with chosen elemental affinities.',
+        description: 'Generate an alchemical orb imbued with fire, ice or lighting and place it on the ground.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Skeleton Alchemy', count: 10, minEnemyLevel: 10 },
@@ -7616,14 +7616,14 @@ const RAW_VOCATIONS: VocationData[] = [
       },
       {
         id: 'alc_rex_catapult',
-        name: 'Rex Catapult',
+        name: 'Rex Catapulta',
         jpName: 'レクス・カタパルト',
         type: 'custom',
         unlockLevel: 20,
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'Medium',
-        description: 'Transmutes an alchemical jump pad to launch allies and self high into the air for aerial assaults.',
+        description: 'Place an alchemical device on the ground that propels allies who step on it into the air. Utility skill.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Large Sulfur', count: 10, minEnemyLevel: 20 },
@@ -7637,14 +7637,14 @@ const RAW_VOCATIONS: VocationData[] = [
       },
       {
         id: 'alc_alma_windus',
-        name: 'Alma Windus',
+        name: 'Alma Windust',
         jpName: 'アルマ・ウィンデュス',
         type: 'custom',
         unlockLevel: 27,
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'Medium',
-        description: 'Fires spiraling alchemical projectiles that bind and encase targets in transmutation substance.',
+        description: 'Place a wind-wrapped orb. Striking it after placement generates bursts of Wind Pressure. Utility skill.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Rock Lizard', count: 30, minEnemyLevel: 20 },
@@ -7666,7 +7666,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Pierce',
         staminaCost: 'Medium',
-        description: 'Drives heavy alchemical needles deep into monster hide to draw aggro and establish gold transmutation.',
+        description: 'Dash forward with your gauntlet extended, and drive an alchemical stake into the enemy.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Grimwarg', count: 20, minEnemyLevel: 20 },
@@ -7681,14 +7681,14 @@ const RAW_VOCATIONS: VocationData[] = [
       },
       {
         id: 'alc_dorus_morsus',
-        name: 'Dorus Morsus',
+        name: 'Dolus Morsus',
         jpName: 'ドルス・モルスス',
         type: 'custom',
         unlockLevel: 32,
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'High',
-        description: 'Creates a magnetic alchemical vortex that pulls nearby monsters directly toward the Alchemist.',
+        description: 'Place a lingering alchemical orb on the ground that lashes out at in range for a duration.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Oak Aimer', count: 15, minEnemyLevel: 30 },
@@ -7710,7 +7710,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Turns surrounding terrain into pure transmutation gold, inflicting supreme stagger and status build-up.',
+        description: 'Encase yourself in glittering gold. Nullifies all damage, with some exceptions such as grab attacks and scripted oneshots. Enemies that land attacks on you will get Golden accumulation. Aerial activation is possible.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Cyclops', count: 3, minEnemyLevel: 50 },
@@ -7725,14 +7725,14 @@ const RAW_VOCATIONS: VocationData[] = [
       },
       {
         id: 'alc_alchem_burst',
-        name: 'Alchem Burst',
+        name: 'Alchemical Burst',
         jpName: 'アルケム・バースト',
         type: 'custom',
         unlockLevel: 67,
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'High',
-        description: 'Detonates all placed alchemy marks in a catastrophic multi-chain reaction.',
+        description: 'Spawn a giant metal arm and punch with it. If this skill hits an alchemical stake, it will detonate it like Elixir. The power and debilitation rate of the skill relies on how developed the struck alchemical stake is. Can be used while climbing.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Frost Machina', count: 3, minEnemyLevel: 60 },
@@ -7744,14 +7744,14 @@ const RAW_VOCATIONS: VocationData[] = [
       },
       {
         id: 'alc_dorus_aerith',
-        name: 'Dorus Aerith',
+        name: 'Dolus Aeris',
         jpName: 'ドルス・エアリス',
         type: 'custom',
         unlockLevel: 75,
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'High',
-        description: 'Creates a floating alchemical sphere that bombards surrounded enemies with homing liquid mortar.',
+        description: 'Leap into the air and condense an alchemical orb that floats. The orb will emit damaging shockwaves when enemies are in range.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Bifrost', count: 3, minEnemyLevel: 70 },
@@ -7770,7 +7770,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Strike',
         staminaCost: 'High',
-        description: 'Deploys a protective alchemical barrier that absorbs incoming heavy blows and reflects damage.',
+        description: 'Fire alchemical shrapnel in a radial pattern. Close range skill. Multiple hits may launch enemies or stagger them. Aerial activation is possible.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Mad Invasion Demon', count: 10, minEnemyLevel: 80 },
@@ -7782,14 +7782,14 @@ const RAW_VOCATIONS: VocationData[] = [
       },
       {
         id: 'alc_regia_barial',
-        name: 'Regia Barial',
+        name: 'Regal Barrier',
         jpName: 'レギア・バリアル',
         type: 'custom',
         unlockLevel: 78,
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Supreme alchemical aegis creating an impenetrable golden forcefield that renders allies immune to flinching.',
+        description: 'After a series of inputs, generate a dome-shaped protective zone that nullifies all damage. Enemies that enter the dome slowly accumulate the same debilitation your chosen Elixir has. More inputs will increase maximum duration.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Armored Gore Cyclops', count: 3, minEnemyLevel: 80 },
@@ -8388,7 +8388,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Low',
-        description: 'Performs a rapid circular spinning blade sweep infused with magic power.',
+        description: 'Imbue your sword with Holy attribute and attack surrounding enemies. Damage increases when the Magick Glyph grows.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Direwolf', count: 15, minEnemyLevel: 20 },
@@ -8406,7 +8406,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'None',
         staminaCost: 'Low',
-        description: 'Blinds enemies with afterimages and executes rapid teleporting sword strikes.',
+        description: 'Creates a phantom and teleports forward. Contact during warp deals magick damage. Two aerial uses.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Orb Enemy', count: 15, minEnemyLevel: 20 },
@@ -8424,7 +8424,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Dark',
         staminaCost: 'Medium',
-        description: 'Channels shadow magic to slash through the dimension, striking far enemies.',
+        description: 'Ready your sword downwards, releases several magick blades towards enemies in front of you.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Grimwarg', count: 15, minEnemyLevel: 30 },
@@ -8442,7 +8442,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'Medium',
-        description: 'Executes pitch-black consecutive piercing thrusts at lightning speed.',
+        description: 'Thrusts the blade imbued with dark magick into the target’s body before pulling it out. Damage is increased when the Magick Glyph grows.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Blue Newt', count: 15, minEnemyLevel: 30 },
@@ -8460,7 +8460,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'None',
         staminaCost: 'Medium',
-        description: 'Deploys a magical sword barrier that absorbs incoming projectiles and counters.',
+        description: 'Creates a magical barrier ahead that persists for fixed duration. Duration unaffected by pure magick activation.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Captain Oak', count: 6, minEnemyLevel: 30 },
@@ -8478,7 +8478,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Dark',
         staminaCost: 'High',
-        description: 'Unleashes concentrated magical detonation waves from the blade tip.',
+        description: 'Slashes enemies with magick blades, inflicting continuous Dark and Slash damage. Extra inputs add hits.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Orb Enemy', count: 15, minEnemyLevel: 40 },
@@ -8496,7 +8496,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Holy',
         staminaCost: 'High',
-        description: 'Creates a brilliant solar flare and astral blade burst that shreds enemy defenses.',
+        description: 'Create a vortex that deals Holy and Impact damage.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Frost Machina', count: 5, minEnemyLevel: 60 },
@@ -8514,7 +8514,7 @@ const RAW_VOCATIONS: VocationData[] = [
         maxRank: 10,
         element: 'Slash',
         staminaCost: 'High',
-        description: 'Ultimate magic blade form that surrounds the blade in phantom energy for supreme DPS.',
+        description: 'Enchants sword with magick, adding afterimages to normal attacks. Extra input releases magic-absorbing strike scaling with hits. Drains magic.',
         levelingNotes: 'Ranks 1–5: Unlock with Job Points. Ranks 6–10: Requires Job Training Trials.',
         jobTraining: [
           { targetRank: 7, targetEnemy: 'Black Knight', count: 3, minEnemyLevel: 80 },

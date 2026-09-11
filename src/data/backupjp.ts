@@ -45,7 +45,7 @@ export const FIGHTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 1,
     maxRank: 10,
-    description: 'Lunges forward at high velocity, piercing through enemies in a straight line with knockdown.',
+    description: 'A dash forward that ends with a lunged stab to the enemy; damage is higher the further the dash distance.',
     reqLevels: [0, 3, 6, 9, 12, 15, 0, 0, 0, 0],
     jpCosts: [0, 300, 600, 1000, 1500, 2300, 3200, 4200, 5200, 7200]
   },
@@ -57,7 +57,7 @@ export const FIGHTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 6,
     maxRank: 10,
-    description: 'Slams the shield against the sword or foe in a loud burst, staggering foes and shaving rage.',
+    description: 'Deals a barrage of blows on the enemy with the shield.',
     reqLevels: [6, 9, 13, 16, 18, 20, 0, 0, 0, 0],
     jpCosts: [500, 800, 1200, 1600, 2100, 3000, 4000, 5200, 6400, 8400]
   },
@@ -69,7 +69,7 @@ export const FIGHTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 6,
     maxRank: 10,
-    description: 'Leaps upward with a sweeping high-angle vertical slash aimed at airborne enemies and monster weak points.',
+    description: 'Unleashes a flurry of skyward slashes well-suited to bringing flying foes to the ground.',
     reqLevels: [6, 9, 13, 16, 18, 20, 0, 0, 0, 0],
     jpCosts: [500, 800, 1200, 1600, 2100, 3000, 4000, 5200, 6400, 8400]
   },
@@ -81,7 +81,7 @@ export const FIGHTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 3,
     maxRank: 10,
-    description: 'Ferocious rising upward strike launching lightweight foes into the air.',
+    description: 'Traces a grand upward arc with the sword, sending lightweight enemies into the air.',
     reqLevels: [3, 6, 9, 12, 15, 18, 0, 0, 0, 0],
     jpCosts: [300, 600, 900, 1300, 1800, 2600, 3500, 4500, 5500, 7500]
   },
@@ -93,7 +93,7 @@ export const FIGHTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 20,
     maxRank: 10,
-    description: 'Thrusts forward repeatedly from behind the safety of the shield, maintaining guard while attacking.',
+    description: 'Unleashes a flurry of stabbing attacks at the enemy while blocking with the shield.',
     reqLevels: [20, 22, 25, 27, 30, 32, 0, 0, 0, 0],
     jpCosts: [1200, 1500, 2000, 2500, 3000, 3900, 4800, 5800, 7000, 9000]
   },
@@ -105,7 +105,7 @@ export const FIGHTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 13,
     maxRank: 10,
-    description: 'Spins in a 360-degree whirlwind arc with extended invulnerability during the blade rotation.',
+    description: 'Spins with blade extended, drawing a circular slash twice around you.',
     reqLevels: [13, 16, 18, 20, 23, 25, 0, 0, 0, 0],
     jpCosts: [800, 1100, 1500, 1900, 2400, 3300, 4300, 5500, 6700, 8700]
   },
@@ -117,7 +117,7 @@ export const FIGHTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 20,
     maxRank: 10,
-    description: 'Evades backward before delivering a crushing counter-slash with high knockdown multiplier.',
+    description: 'Ducks backward to evade attack before charging in to deliver a slashing blow. If timed correctly to evade an attack, this increases its power.',
     reqLevels: [20, 22, 25, 27, 30, 32, 0, 0, 0, 0],
     jpCosts: [1200, 1500, 2000, 2500, 3000, 3900, 4800, 5800, 7000, 9000]
   },
@@ -181,7 +181,7 @@ export const HUNTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 1,
     maxRank: 10,
-    description: 'Rapid multi-arrow burst shot in rapid succession into a single point.',
+    description: 'Fire multiple arrows in quick succession. Staggers large enemies.',
     reqLevels: [0, 3, 6, 9, 12, 15, 0, 0, 0, 0],
     jpCosts: [0, 300, 600, 1000, 1500, 2300, 3200, 4200, 5200, 7200]
   },
@@ -193,7 +193,7 @@ export const HUNTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 6,
     maxRank: 10,
-    description: 'Fires a wide fan of arrows covering a broad horizontal cone for crowd control.',
+    description: 'Fires three arrow in a wedge pattern.',
     reqLevels: [6, 9, 13, 16, 18, 20, 0, 0, 0, 0],
     jpCosts: [500, 800, 1200, 1600, 2100, 3000, 4000, 5200, 6400, 8400]
   },
@@ -205,7 +205,7 @@ export const HUNTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 6,
     maxRank: 10,
-    description: 'Lobs a shower of arrows into the air that rains continuously onto the target area.',
+    description: 'Sends a wall of arrows skyward to rain down on a broad area.',
     reqLevels: [6, 9, 13, 16, 18, 20, 0, 0, 0, 0],
     jpCosts: [500, 800, 1200, 1600, 2100, 3000, 4000, 5200, 6400, 8400]
   },
@@ -241,7 +241,7 @@ export const HUNTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 13,
     maxRank: 10,
-    description: 'Charged high-penetration arrow that cuts cleanly through multiple enemies in line.',
+    description: 'Fires a hot capable of piercing multiple targets.',
     reqLevels: [13, 16, 18, 20, 23, 25, 0, 0, 0, 0],
     jpCosts: [800, 1100, 1500, 1900, 2400, 3300, 4300, 5500, 6700, 8700]
   },
@@ -253,7 +253,7 @@ export const HUNTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 20,
     maxRank: 10,
-    description: 'Inflicts heavy bleeding and stamina exhaustion on monster joints.',
+    description: 'Draws the bow with all the user’s might, then looses a shot straight ahead. Power greatly increases if released as maximum charge is reached.',
     reqLevels: [20, 22, 25, 27, 30, 32, 0, 0, 0, 0],
     jpCosts: [1200, 1500, 2000, 2500, 3000, 3900, 4800, 5800, 7000, 9000]
   },
@@ -265,7 +265,7 @@ export const HUNTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'High',
     unlockLevel: 28,
     maxRank: 10,
-    description: 'Massive barrage of incendiary arrows blanketing an entire monster battlefield.',
+    description: 'Applies an explosive to stun effect all arrows loaded. Increase damage inflicted.',
     reqLevels: [28, 30, 33, 35, 38, 40, 0, 0, 0, 0],
     jpCosts: [1800, 2200, 2700, 3200, 3800, 4800, 5800, 6900, 8200, 10500]
   },
@@ -317,7 +317,7 @@ export const PRIEST_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 1,
     maxRank: 10,
-    description: 'Generates a restorative holy zone on the ground that heals allies and cleanses debuffs.',
+    description: 'Creates a healing zone that rapidly restores HP. Only recovers grey health. Damages undead.',
     reqLevels: [0, 3, 6, 9, 12, 15, 0, 0, 0, 0],
     jpCosts: [0, 300, 600, 1000, 1500, 2300, 3200, 4200, 5200, 7200]
   },
@@ -329,7 +329,7 @@ export const PRIEST_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 6,
     maxRank: 10,
-    description: 'Summons floating holy orbs around the caster that automatically absorb incoming attacks.',
+    description: 'Creates 3 magick spheres that rapidly orbit around you. Nullifies one incoming attack per sphere.',
     reqLevels: [6, 9, 13, 16, 18, 20, 0, 0, 0, 0],
     jpCosts: [500, 800, 1200, 1600, 2100, 3000, 4000, 5200, 6400, 8400]
   },
@@ -377,7 +377,7 @@ export const PRIEST_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 13,
     maxRank: 10,
-    description: 'Chants a high-speed instant recovery sphere restoring massive HP in emergencies.',
+    description: 'Focus a prayer on nearby allies, hastening the charging of all their skills that display a charge gauge.',
     reqLevels: [13, 16, 18, 20, 23, 25, 0, 0, 0, 0],
     jpCosts: [800, 1100, 1500, 1900, 2400, 3300, 4300, 5500, 6700, 8700]
   },
@@ -389,7 +389,7 @@ export const PRIEST_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 20,
     maxRank: 10,
-    description: 'Erects an unbreakable sacred ward protecting party members against stagger and blowback.',
+    description: 'Emits an aura of Endurance. Applies a temporary increase to nearby allies. Can be used with Field Shift.',
     reqLevels: [20, 22, 25, 27, 30, 32, 0, 0, 0, 0],
     jpCosts: [1200, 1500, 2000, 2500, 3000, 3900, 4800, 5800, 7000, 9000]
   },
@@ -401,7 +401,7 @@ export const PRIEST_SKILLS: SkillDataDef[] = [
     staminaCost: 'High',
     unlockLevel: 28,
     maxRank: 10,
-    description: 'Channels divine power into party weapons, granting massive physical and magick attack boost.',
+    description: 'Emits an aura of Attack and Magick power. Applies a temporary increase to nearby allies. Can be used with Field Shift.',
     reqLevels: [28, 30, 33, 35, 38, 40, 0, 0, 0, 0],
     jpCosts: [1800, 2200, 2700, 3200, 3800, 4800, 5800, 6900, 8200, 10500]
   },
@@ -425,7 +425,7 @@ export const PRIEST_SKILLS: SkillDataDef[] = [
     staminaCost: 'High',
     unlockLevel: 45,
     maxRank: 10,
-    description: 'Calls down heavenly seraphic rays that continuously scorch enemy dark cores.',
+    description: 'After charging, launch tracking projectiles. Fires magick spheres of Holy attribute.',
     reqLevels: [45, 47, 50, 52, 55, 58, 0, 0, 0, 0],
     jpCosts: [3500, 4000, 4700, 5400, 6200, 7500, 8800, 10300, 12000, 15000]
   },
@@ -537,7 +537,7 @@ export const SHIELD_SAGE_SKILLS: SkillDataDef[] = [
     staminaCost: 'High',
     unlockLevel: 28,
     maxRank: 10,
-    description: 'Projects a temporal deceleration beam drastically slowing target monster movement and attack speed.',
+    description: 'Continuously shine rod’s radiance on foes to build Torpor status. When force gauge ↑1, consumes to enhance effect.',
     reqLevels: [28, 30, 33, 35, 38, 40, 0, 0, 0, 0],
     jpCosts: [1800, 2200, 2700, 3200, 3800, 4800, 5800, 6900, 8200, 10500]
   },
@@ -861,7 +861,7 @@ export const ELEMENT_ARCHER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 1,
     maxRank: 10,
-    description: 'Fires tracking magick arrows that seek out wounded allies and restore HP.',
+    description: 'Fires magick arrows that create health-restoring fields on impact. Fields damage undead enemies in range.',
     reqLevels: [0, 3, 6, 9, 12, 15, 0, 0, 0, 0],
     jpCosts: [0, 300, 600, 1000, 1500, 2300, 3200, 4200, 5200, 7200]
   },
@@ -873,7 +873,7 @@ export const ELEMENT_ARCHER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 6,
     maxRank: 10,
-    description: 'Shoots fiery homing magick darts igniting monster weak points.',
+    description: 'Fires magick arrows that lodge in enemies. Attacking embedded arrows triggers explosions, knocking back nearby foes from the blast.',
     reqLevels: [6, 9, 13, 16, 18, 20, 0, 0, 0, 0],
     jpCosts: [500, 800, 1200, 1600, 2100, 3000, 4000, 5200, 6400, 8400]
   },
@@ -921,7 +921,7 @@ export const ELEMENT_ARCHER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 13,
     maxRank: 10,
-    description: 'Locks on to up to 8 targets firing a swarm of homing energy spheres simultaneously.',
+    description: 'Fires multiple magick arrows with there Ice attribute at a single point.',
     reqLevels: [13, 16, 18, 20, 23, 25, 0, 0, 0, 0],
     jpCosts: [800, 1100, 1500, 1900, 2400, 3300, 4300, 5500, 6700, 8700]
   },
@@ -997,7 +997,7 @@ export const WARRIOR_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 1,
     maxRank: 10,
-    description: 'Charged overhead greatsword swing crushing through monster defense.',
+    description: 'Charges to slam foes with blade. High Stun potential. Perfect release timing maximises damage.',
     reqLevels: [0, 3, 6, 9, 12, 15, 0, 0, 0, 0],
     jpCosts: [0, 300, 600, 1000, 1500, 2300, 3200, 4200, 5200, 7200]
   },
@@ -1269,7 +1269,7 @@ export const SPIRIT_LANCER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 1,
     maxRank: 10,
-    description: 'Rapid spirit spear thrusts ending in a high-velocity forward piercing strike.',
+    description: 'Launch enemies upward with a slash.',
     reqLevels: [0, 3, 6, 9, 12, 15, 0, 0, 0, 0],
     jpCosts: [0, 300, 600, 1000, 1500, 2300, 3200, 4200, 5200, 7200]
   },
@@ -1281,7 +1281,7 @@ export const SPIRIT_LANCER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 6,
     maxRank: 10,
-    description: 'Sweeping wide-arc spirit lance slash with heavy knockdown and crowd control.',
+    description: 'Swing the lance around and attack the surrounding area. Can be activated in air.',
     reqLevels: [6, 9, 13, 16, 18, 20, 0, 0, 0, 0],
     jpCosts: [500, 800, 1200, 1600, 2100, 3000, 4000, 5200, 6400, 8400]
   },
@@ -1293,7 +1293,7 @@ export const SPIRIT_LANCER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 6,
     maxRank: 10,
-    description: 'Leaps into the air and plunges the spirit lance straight down into the foe.',
+    description: 'Gather energy and thrust forward, releasing a blast of energy. The first strike always chases an enemy.',
     reqLevels: [6, 9, 13, 16, 18, 20, 0, 0, 0, 0],
     jpCosts: [500, 800, 1200, 1600, 2100, 3000, 4000, 5200, 6400, 8400]
   },
@@ -1305,7 +1305,7 @@ export const SPIRIT_LANCER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 3,
     maxRank: 10,
-    description: 'Places a spiritual barrier that absorbs damage and grants continuous healing.',
+    description: 'Creates an energy pool that heals and grants Defense boost to allies who enter. Lasts a limited time.',
     reqLevels: [3, 6, 9, 12, 15, 18, 0, 0, 0, 0],
     jpCosts: [300, 600, 900, 1300, 1800, 2600, 3500, 4500, 5500, 7500]
   },
@@ -1317,7 +1317,7 @@ export const SPIRIT_LANCER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 20,
     maxRank: 10,
-    description: 'Whirlwind aerial spear dive generating spirit spirals around the Arisen.',
+    description: 'Spin the lance all-around, continuously slashing forward. The last blow’s power changes according to the number of attacks made.',
     reqLevels: [20, 22, 25, 27, 30, 32, 0, 0, 0, 0],
     jpCosts: [1200, 1500, 2000, 2500, 3000, 3900, 4800, 5800, 7000, 9000]
   },
@@ -1329,7 +1329,7 @@ export const SPIRIT_LANCER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 13,
     maxRank: 10,
-    description: 'Channels accumulated spirit gauge into a high-powered radiant energy spear.',
+    description: 'Creates an orb that emits shockwaves when struck. Absorbs spirit energy from attacks. Manual detonation available both on ground and in air.',
     reqLevels: [13, 16, 18, 20, 23, 25, 0, 0, 0, 0],
     jpCosts: [800, 1100, 1500, 1900, 2400, 3300, 4300, 5500, 6700, 8700]
   },
@@ -1341,7 +1341,7 @@ export const SPIRIT_LANCER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Medium',
     unlockLevel: 20,
     maxRank: 10,
-    description: 'Erects an extensive restorative sanctuary restoring massive HP and curing ailments.',
+    description: 'Form spiritual spheres around yourself that recovers health and status abnormalities. The range grows depending on the charge time. The effectiveness rises upon a full charge.',
     reqLevels: [20, 22, 25, 27, 30, 32, 0, 0, 0, 0],
     jpCosts: [1200, 1500, 2000, 2500, 3000, 3900, 4800, 5800, 7000, 9000]
   },
@@ -1353,7 +1353,7 @@ export const SPIRIT_LANCER_SKILLS: SkillDataDef[] = [
     staminaCost: 'High',
     unlockLevel: 28,
     maxRank: 10,
-    description: 'Deploys rotating spirit shields deflecting attacks and reflecting damage.',
+    description: 'Forms a protective barrier that blocks attacks. Striking enemies stores spirit energy, releasable with button input.',
     reqLevels: [28, 30, 33, 35, 38, 40, 0, 0, 0, 0],
     jpCosts: [1800, 2200, 2700, 3200, 3800, 4800, 5800, 6900, 8200, 10500]
   },
@@ -1365,7 +1365,7 @@ export const SPIRIT_LANCER_SKILLS: SkillDataDef[] = [
     staminaCost: 'High',
     unlockLevel: 35,
     maxRank: 10,
-    description: 'Calls down blazing spirit spears from the sky onto the designated zone.',
+    description: 'A high power skill that covers a wide area. If the first hit is successfully landed, it will become a full on combo attack.',
     reqLevels: [35, 38, 40, 43, 45, 48, 0, 0, 0, 0],
     jpCosts: [2500, 3000, 3600, 4200, 4900, 6000, 7200, 8500, 10000, 12500]
   },
@@ -1377,7 +1377,7 @@ export const SPIRIT_LANCER_SKILLS: SkillDataDef[] = [
     staminaCost: 'High',
     unlockLevel: 45,
     maxRank: 10,
-    description: 'Spiritual parry stance countering any attack with an explosive spirit lance thrust.',
+    description: 'Expands an area that boosts damage and knock back for nearby allies’ enchantments/crests. If used as a counter: Effect↑ + Size↑.',
     reqLevels: [45, 47, 50, 52, 55, 58, 0, 0, 0, 0],
     jpCosts: [3500, 4000, 4700, 5400, 6200, 7500, 8800, 10300, 12000, 15000]
   },
@@ -1405,7 +1405,7 @@ export const HIGH_SCEPTER_SKILLS: SkillDataDef[] = [
     staminaCost: 'Low',
     unlockLevel: 1,
     maxRank: 10,
-    description: 'Instant teleportation dash through space bypassing attacks with i-frames.',
+    description: 'Creates a phantom and teleports forward. Contact during warp deals magick damage. Two aerial uses.',
     reqLevels: [0, 9, 13, 16, 18, 20, 0, 0, 0, 0],
     jpCosts: [0, 800, 1200, 1600, 2100, 3000, 4000, 5200, 6400, 8400]
   },

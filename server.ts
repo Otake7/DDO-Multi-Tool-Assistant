@@ -1514,24 +1514,33 @@ async function startServer() {
     app.use(express.static(publicPath));
   }
 
-  if (process.env.NODE_ENV !== 'production') {
+  const distPath = path.join(process.cwd(), 'dist');
+  const hasDist = fs.existsSync(path.join(distPath, 'index.html'));
+
+  // In production or when the build artifacts exist in dist/, serve statically
+  if (process.env.NODE_ENV === 'production' || hasDist) {
+    console.log('[Server] Serving pre-compiled static production assets from', distPath);
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  } else {
+    console.log('[Server] Starting Vite in development middleware mode');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
   }
 
   const portToListen = process.env.PORT ? parseInt(process.env.PORT, 10) : PORT;
-  app.listen(portToListen, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${portToListen}`);
-    ensureDbSchema().catch((e) => console.error('[Initial Schema Check]', e));
+  const serverInstance = app.listen(portToListen, '0.0.0.0', () => {
+    console.log(`[Server] Live and listening on http://0.0.0.0:${portToListen} (PORT env: ${process.env.PORT || 'default 3000'})`);
+    ensureDbSchema().catch((e) => console.error('[Initial Schema Check Error]', e));
+  });
+
+  serverInstance.on('error', (err: unknown) => {
+    console.error('[Server Listen Error]', err);
   });
 }
 

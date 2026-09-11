@@ -114,31 +114,33 @@ export const PWAInstallModal: React.FC<PWAInstallModalProps> = ({ isOpen, onClos
             )}
           </div>
 
-          {/* Download Raw Icon Assets for Custom Shortcuts */}
-          <div className="pt-2 border-t border-slate-800">
-            <div className="text-[11px] text-slate-400 mb-2 font-medium">
-              Want the raw icon files for custom shortcuts, Steam, or taskbars?
+          {/* Download Raw Icon Assets for Electron, Windows .exe, Linux, or Custom Shortcuts */}
+          <div className="pt-2 border-t border-slate-800 space-y-2">
+            <div className="text-[11px] text-slate-300 font-medium">
+              Desktop Executable (.exe / Linux) Icon Assets:
             </div>
             <div className="flex flex-wrap gap-2">
               <a
-                href="/icon-512.png"
-                download="ddo-assistant-icon-512.png"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs transition-colors border border-slate-700"
+                href="/icon.ico"
+                download="icon.ico"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-semibold transition-colors"
+                title="Multi-resolution Windows icon (256x256, 128x128, 64x64, 48x48, 32x32, 16x16) for .exe"
               >
                 <Download className="w-3.5 h-3.5 text-amber-400" />
-                <span>PNG (512x512)</span>
+                <span>Windows icon.ico (for .exe)</span>
               </a>
               <a
-                href="/favicon.ico"
-                download="ddo-assistant-icon.ico"
+                href="/icon-512.png"
+                download="icon.png"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs transition-colors border border-slate-700"
+                title="High-resolution PNG icon for Linux .desktop or window bar"
               >
                 <Download className="w-3.5 h-3.5 text-amber-400" />
-                <span>Windows ICO</span>
+                <span>Linux icon.png (512x512)</span>
               </a>
               <a
                 href="/icon.svg"
-                download="ddo-assistant-icon.svg"
+                download="icon.svg"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs transition-colors border border-slate-700"
               >
                 <Download className="w-3.5 h-3.5 text-amber-400" />

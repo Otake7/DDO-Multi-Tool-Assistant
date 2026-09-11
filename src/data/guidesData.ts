@@ -207,7 +207,7 @@ Copy this setup:
 * **Flowing Sword Slash**: Defensive option with counter attack, the pawn's aren't that bad at using it so it can be worth for managing some goblin aggression.
 * **Skyward Lash**: The only skill able to reach high targets.
 
-![Custom Skills Setup](https://imgur.com/a/QKGON8w)
+![Custom Skills Setup](https://i.imgur.com/BhZYkzR.png)
 
 ---
 
@@ -226,7 +226,7 @@ All damage augments are from Fighter (no epitaph required) and all stamina augme
 * **Efficacy (Secret Augment)**: Can help with healing items in case your pawns lack defense and don't have 100 recovery limit + Self-Feedback.
 * **Self-Feedback (Elemental Archer)**: If you have 100 recovery limit.
 
-![Augments Setup](https://imgur.com/a/saKtSQ4)
+![Augments Setup](https://i.imgur.com/gsjrRIf.png)
 
 ---
 
@@ -234,9 +234,9 @@ All damage augments are from Fighter (no epitaph required) and all stamina augme
 
 We want our pawns in the fight spamming Compass Slash on every small enemies. This is a very basic setup.
 
-![Bell Setup Overview](https://imgur.com/a/m9cMaGy)
+![Bell Setup Overview](https://i.imgur.com/66AWefH.png)
 
-![Bell Priorities Detail](https://imgur.com/a/AVlAzJm)
+![Bell Priorities Detail](https://i.imgur.com/ojxcQ8j.png)
 
 ---
 
@@ -244,7 +244,7 @@ We want our pawns in the fight spamming Compass Slash on every small enemies. Th
 
 Really, if you have a set of IR 90+ armor and weapons you should be fine. As an exemple here is my hardcore pawn gear state right now. She carried me through 930 lvls of farming without a single issue.
 
-![Hardcore Pawn Gear State](https://imgur.com/a/mHCoVCS)
+![Hardcore Pawn Gear State](https://i.imgur.com/Rn4wU18.png)
 
 ---
 
