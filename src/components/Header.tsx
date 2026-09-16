@@ -65,7 +65,9 @@ export const Header: React.FC<HeaderProps> = ({
       case 'knowledge': return 'Knowledge Library';
       case 'bestiary': return 'Bestiary & Enemies';
       case 'fast_routes': return 'Leveling Routes';
+      case 'exm': return 'EXM (Missions)';
       case 'guides': return 'Guides & Notes';
+      case 'bbm_seals': return 'BBM Seals';
       case 'journal': return 'Ask Assistant';
       case 'leaderboard': return 'Leaderboard';
       case 'table': return `Lv 1–${maxLevel} Table`;
@@ -563,6 +565,19 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             <button
+              id="tab-exm"
+              onClick={() => setActiveTab('exm')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'exm'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Swords className="w-4 h-4" />
+              <span>EXM</span>
+            </button>
+
+            <button
               id="tab-bestiary"
               onClick={() => setActiveTab('bestiary')}
               className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
@@ -599,6 +614,19 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <BookOpen className="w-4 h-4" />
               <span>Guides</span>
+            </button>
+
+            <button
+              id="tab-bbm-seals"
+              onClick={() => setActiveTab('bbm_seals')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'bbm_seals'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              <span>BBM Seals</span>
             </button>
 
             <button

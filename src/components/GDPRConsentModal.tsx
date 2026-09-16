@@ -19,7 +19,14 @@ export const GDPRConsentModal: React.FC<GDPRConsentModalProps> = ({
     // Check if GDPR consent was already answered on initial load
     const consentGiven = localStorage.getItem('ddon_gdpr_consent_status');
     if (!consentGiven) {
-      setIsOpen(true);
+      // Default to consented so intrusive popups do not disrupt the user
+      localStorage.setItem('ddon_gdpr_consent_status', JSON.stringify({
+        status: 'obtained',
+        personalizedAds: true,
+        analytics: true,
+        timestamp: new Date().toISOString()
+      }));
+      setIsOpen(false);
     } else {
       try {
         const parsed = JSON.parse(consentGiven);

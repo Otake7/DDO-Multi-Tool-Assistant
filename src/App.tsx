@@ -14,19 +14,21 @@ import { AskTheJournal } from './components/AskTheJournal';
 import { Leaderboards } from './components/Leaderboards';
 import { Bestiary } from './components/Bestiary';
 import { KnowledgeLibrary } from './components/KnowledgeLibrary';
+import { EXMPage } from './components/EXMPage';
+import { BBMSealsPage } from './components/BBMSealsPage';
 import { CustomQuestModal } from './components/CustomQuestModal';
 import { WelcomeAuthScreen } from './components/WelcomeAuthScreen';
 import { UserProfileModal } from './components/UserProfileModal';
 import { CommunityFarmSpotsBrowser } from './components/CommunityFarmSpotsBrowser';
-import { SponsorAdBanner } from './components/SponsorAdBanner';
 import { GDPRConsentModal } from './components/GDPRConsentModal';
 import { MobileDrawerMenu } from './components/MobileDrawerMenu';
+import { StartupNoticeModal } from './components/StartupNoticeModal';
 import { BoosterSettings, CommunityFarmSpot, GameVersion, PlannedQuest, Quest, SpotSearchCategory, SpotSearchStageScope, UserProfile, VocationType } from './types';
 import { LEVELING_PRESETS } from './data/levelingPresets';
 import { ALL_QUESTS } from './data/quests';
 import { getMaxLevelForVersion } from './data/levelTable';
 import { incrementTimesPlanned } from './utils/communityStats';
-import { Check, Sparkles, AlertCircle, Coffee, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, PackageCheck, Compass, BookOpen, Table, PanelTop, PanelLeft, Skull, Library, Menu, MessageSquarePlus } from 'lucide-react';
+import { Check, Sparkles, AlertCircle, AlertTriangle, Coffee, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, PackageCheck, Compass, BookOpen, Table, PanelTop, PanelLeft, Skull, Library, Menu, MessageSquarePlus, Layers } from 'lucide-react';
 
 export default function App() {
   // --- Account & User Profile State ---
@@ -461,7 +463,7 @@ export default function App() {
   };
 
   // If user has not logged in or chosen guest mode yet, show Welcome screen first
-  // GDPR Consent Modal is rendered here as well so consent is requested upon first opening the app
+  // GDPR Consent Modal and Startup Notice Modal are rendered here as well so they are available upon first opening the app
   if (!isSessionStarted) {
     return (
       <>
@@ -470,12 +472,16 @@ export default function App() {
           onContinueAsGuest={handleGuest}
         />
         <GDPRConsentModal />
+        <StartupNoticeModal onNavigateToFeedback={() => { handleGuest(); setActiveTab('feedback'); }} />
       </>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
+      
+      {/* Startup Notice Modal */}
+      <StartupNoticeModal onNavigateToFeedback={() => setActiveTab('feedback')} />
       
       {/* Navigation Header */}
       <Header
@@ -672,6 +678,19 @@ export default function App() {
               </button>
 
               <button
+                id="sidebar-tab-exm"
+                onClick={() => setActiveTab('exm')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'exm'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Swords className="w-4 h-4 shrink-0" />
+                <span className="truncate">EXM (Extreme Missions)</span>
+              </button>
+
+              <button
                 id="sidebar-tab-bestiary"
                 onClick={() => setActiveTab('bestiary')}
                 className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
@@ -708,6 +727,19 @@ export default function App() {
               >
                 <BookOpen className="w-4 h-4 shrink-0" />
                 <span className="truncate">Guides</span>
+              </button>
+
+              <button
+                id="sidebar-tab-bbm-seals"
+                onClick={() => setActiveTab('bbm_seals')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'bbm_seals'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Layers className="w-4 h-4 shrink-0" />
+                <span className="truncate">BBM Seals</span>
               </button>
 
               <button
@@ -886,16 +918,23 @@ export default function App() {
           />
         )}
 
-        {/* Tab 8: Bestiary & Monster Compendium */}
-        {activeTab === 'bestiary' && (
-          <Bestiary
+        {/* Tab 9: Knowledge Library */}
+        {activeTab === 'knowledge' && (
+          <KnowledgeLibrary
             onNavigateToTab={(tab) => setActiveTab(tab)}
           />
         )}
 
-        {/* Tab 9: Knowledge Library */}
-        {activeTab === 'knowledge' && (
-          <KnowledgeLibrary
+        {/* Tab: EXM (Extreme Missions) */}
+        {activeTab === 'exm' && (
+          <EXMPage
+            onNavigateToTab={(tab) => setActiveTab(tab)}
+          />
+        )}
+
+        {/* Tab 8: Bestiary & Monster Compendium */}
+        {activeTab === 'bestiary' && (
+          <Bestiary
             onNavigateToTab={(tab) => setActiveTab(tab)}
           />
         )}
@@ -907,6 +946,11 @@ export default function App() {
             currentUser={currentUser}
             onOpenAuth={handleOpenAuthScreen}
           />
+        )}
+
+        {/* Tab: BBM Seals (Bitterblack Maze Bracelets & Earrings) */}
+        {activeTab === 'bbm_seals' && (
+          <BBMSealsPage />
         )}
 
         {/* Tab 11: Ask the Journal Knowledge Base & Q&A */}
@@ -960,9 +1004,6 @@ export default function App() {
         onOpenAuthScreen={handleOpenAuthScreen}
         currentLevel={currentLevel}
       />
-
-      {/* Cross-Platform Community Sponsor / Ad Banner */}
-      <SponsorAdBanner placement="bottom_sticky" />
 
       {/* First-Launch GDPR & Privacy Consent Dialog */}
       <GDPRConsentModal />
@@ -1061,6 +1102,14 @@ export default function App() {
             <Coffee className="w-3.5 h-3.5 text-amber-400" />
             <span>If you want support me Buy me a Ko-fi</span>
           </a>
+
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('open_startup_notice_modal'))}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 hover:bg-amber-500/10 border border-slate-800 hover:border-amber-500/30 text-slate-400 hover:text-amber-300 text-xs transition-colors cursor-pointer"
+          >
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+            <span>Beta & Server Notice</span>
+          </button>
 
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('open_gdpr_modal'))}

@@ -107,6 +107,14 @@ export const MobileDrawerMenu: React.FC<MobileDrawerMenuProps> = ({
       bgColor: 'bg-indigo-500/10 border-indigo-500/30',
     },
     {
+      id: 'exm',
+      title: 'EXM (Extreme Missions)',
+      subtitle: 'Endgame raids, 60-min trials & strategies',
+      icon: Swords,
+      color: 'text-red-400',
+      bgColor: 'bg-red-500/10 border-red-500/30',
+    },
+    {
       id: 'bestiary',
       title: 'Bestiary & Monsters',
       subtitle: 'Boss weaknesses, drops & combat tactics',
@@ -129,6 +137,14 @@ export const MobileDrawerMenu: React.FC<MobileDrawerMenuProps> = ({
       icon: BookOpen,
       color: 'text-teal-400',
       bgColor: 'bg-teal-500/10 border-teal-500/30',
+    },
+    {
+      id: 'bbm_seals',
+      title: 'BBM Seals',
+      subtitle: 'Bracelets & Earrings seal tiers, stats & pool',
+      icon: Layers,
+      color: 'text-amber-400',
+      bgColor: 'bg-amber-500/10 border-amber-500/30',
     },
     {
       id: 'journal',
