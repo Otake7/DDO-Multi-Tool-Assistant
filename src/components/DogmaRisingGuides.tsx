@@ -68,49 +68,51 @@ export const DogmaRisingGuides: React.FC<DogmaRisingGuidesProps> = ({
       </div>
 
       {/* Recommended Routes Step-by-Step */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
-        <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-          <Target className="w-5 h-5 text-amber-400" />
-          <span>Dogma Rising Leveling Route Roadmap (1 → 93)</span>
-        </h3>
+      {LEVELING_PRESETS.length > 0 && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
+          <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
+            <Target className="w-5 h-5 text-amber-400" />
+            <span>Dogma Rising Leveling Route Roadmap (1 → 93)</span>
+          </h3>
 
-        <div className="space-y-4">
-          {LEVELING_PRESETS.map((preset, idx) => (
-            <div
-              key={preset.id}
-              className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-amber-500/40 transition-all"
-            >
-              <div className="space-y-1.5 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center font-mono">
-                    {idx + 1}
-                  </span>
-                  <h4 className="text-sm font-bold text-slate-100">{preset.name}</h4>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
-                    {preset.levelRange}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  {preset.description}
-                </p>
-                <div className="text-[11px] text-slate-500">
-                  Region: <strong className="text-slate-300">{preset.region}</strong>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  onLoadPreset(preset.id);
-                  onGoToPlanner();
-                }}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 text-xs font-bold border border-slate-700 hover:border-amber-400 transition-all whitespace-nowrap"
+          <div className="space-y-4">
+            {LEVELING_PRESETS.map((preset, idx) => (
+              <div
+                key={preset.id}
+                className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-amber-500/40 transition-all"
               >
-                Load into Planner
-              </button>
-            </div>
-          ))}
+                <div className="space-y-1.5 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center font-mono">
+                      {idx + 1}
+                    </span>
+                    <h4 className="text-sm font-bold text-slate-100">{preset.name}</h4>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                      {preset.levelRange}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {preset.description}
+                  </p>
+                  <div className="text-[11px] text-slate-500">
+                    Region: <strong className="text-slate-300">{preset.region}</strong>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    onLoadPreset(preset.id);
+                    onGoToPlanner();
+                  }}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-200 text-xs font-bold border border-slate-700 hover:border-amber-400 transition-all whitespace-nowrap"
+                >
+                  Load into Planner
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

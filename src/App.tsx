@@ -150,12 +150,7 @@ export default function App() {
         // fallback
       }
     }
-    // Start with starter sprint preset for immediate rich utility
-    return LEVELING_PRESETS[0].quests.map((q) => ({
-      questId: q.questId,
-      quantity: q.quantity,
-      addedAt: Date.now()
-    }));
+    return [];
   });
 
   const [activeTab, setActiveTab] = useState<string>('calculator');
@@ -183,6 +178,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('ddon_selected_vocation', selectedVocation);
   }, [selectedVocation]);
+
+  useEffect(() => {
+    document.title = 'DDO Multi Tool Assistant';
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('ddon_current_lvl', currentLevel.toString());

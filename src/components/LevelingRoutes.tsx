@@ -313,7 +313,23 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
 
       {/* Routes Grid / List */}
       <div className="space-y-4">
-        {filteredRoutes.map((route, idx) => {
+        {filteredRoutes.length === 0 ? (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
+            <Compass className="w-10 h-10 text-slate-600 mx-auto" />
+            <div className="text-slate-300 font-semibold text-sm">No Leveling Routes Found</div>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              Create and share your own custom leveling route or quest loop with the community using the button above!
+            </p>
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create Your First Route</span>
+            </button>
+          </div>
+        ) : (
+          filteredRoutes.map((route, idx) => {
           const stats = getItemEngagementStats(route.id);
           const userVote = userVotes[route.id];
           const isPreset = LEVELING_PRESETS.some(lp => lp.id === route.id);
@@ -479,7 +495,8 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
               )}
             </div>
           );
-        })}
+        })
+      )}
       </div>
 
       {/* Modal: Create & Share Custom Leveling Route */}

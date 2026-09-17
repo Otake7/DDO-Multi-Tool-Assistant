@@ -1,6 +1,6 @@
 {
-  "name": "Dragon's Dogma Online Multi Tool Assistant",
-  "description": "Dragon's Dogma Online Multi Tool Assistant: Level, JP, and Item Calculator, BBM Seals and Jewelry compendium, EXM sub-pages, Bestiary, Spot Search radar, and Guides creator.",
+  "name": "DDO Multi Tool Assistant",
+  "description": "DDO Multi Tool Assistant: Level, JP, and Item Calculator, BBM Seals and Jewelry compendium, EXM sub-pages, Bestiary, Spot Search radar, and Guides creator.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

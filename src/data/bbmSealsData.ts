@@ -1,4 +1,4 @@
-export type BBMSealTier = 'Keeper' | 'A' | 'B' | 'C' | '?';
+export type BBMSealTier = 'SS' | 'S+' | 'S' | 'S-' | 'A' | 'B' | 'C' | 'C-' | '?';
 
 export interface BBMBraceletSeal {
   id: string;
@@ -33,17 +33,55 @@ export interface BBMEarringAttribute {
   notes: string;
 }
 
+export interface BBMEarringMatrixCell {
+  value: string;
+  isRed?: boolean;
+}
+
+export interface BBMVocationEarringMatrixRow {
+  vocation: string;
+  slash: BBMEarringMatrixCell;
+  impact: BBMEarringMatrixCell;
+  piercing: BBMEarringMatrixCell;
+  nullType: BBMEarringMatrixCell;
+  fire: BBMEarringMatrixCell;
+  ice: BBMEarringMatrixCell;
+  thunder: BBMEarringMatrixCell;
+  holy: BBMEarringMatrixCell;
+  dark: BBMEarringMatrixCell;
+  maxValue: string;
+  isMaxBold?: boolean;
+}
+
 export const TIER_DEFINITIONS: Record<BBMSealTier, { label: string; meaning: string; badgeColor: string; action: string }> = {
-  Keeper: {
-    label: 'Keeper',
-    meaning: 'Essential / Best-in-Slot priority. Never seal under any circumstance.',
-    badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50',
+  SS: {
+    label: 'SS Tier',
+    meaning: 'Absolute Highest Priority. Flat +30 Physical Attack & Magick Attack rolls. Never seal.',
+    badgeColor: 'bg-red-500/25 text-red-300 border-red-500/60 font-black',
+    action: 'Must Keep Always'
+  },
+  'S+': {
+    label: 'S+ Tier',
+    meaning: 'Best Elemental debuff, most universal one, works fine on current endgame stuff (Ice Force 100).',
+    badgeColor: 'bg-cyan-500/25 text-cyan-300 border-cyan-500/60 font-black',
+    action: 'Keep Always'
+  },
+  S: {
+    label: 'S Tier',
+    meaning: 'Essential / Best-in-Slot priority (replaces former Keeper tier). Top slayers, core combat augments & primary forces.',
+    badgeColor: 'bg-emerald-500/25 text-emerald-300 border-emerald-500/60 font-bold',
+    action: 'Keep Always'
+  },
+  'S-': {
+    label: 'S- Tier',
+    meaning: 'High Priority S- (Lightning Force & Holy Force 100 max - pivotal endgame raid elements).',
+    badgeColor: 'bg-teal-500/20 text-teal-300 border-teal-500/50 font-bold',
     action: 'Keep Always'
   },
   A: {
     label: 'Tier A',
     meaning: 'Keep by default but can be discarded if needed/not played.',
-    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/50',
+    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/50 font-semibold',
     action: 'Keep by Default'
   },
   B: {
@@ -57,6 +95,12 @@ export const TIER_DEFINITIONS: Record<BBMSealTier, { label: string; meaning: str
     meaning: 'Seal immediately to remove junk from the Bitterblack drop pool.',
     badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/50',
     action: 'Seal Immediately'
+  },
+  'C-': {
+    label: 'Tier C-',
+    meaning: 'Lowest Priority / Instant Seal (Formless Slayer - slimes/blobs with zero raid relevance).',
+    badgeColor: 'bg-purple-950/40 text-rose-400 border-rose-800/60 font-semibold',
+    action: 'Seal Instantly'
   },
   '?': {
     label: 'Tier ?',
@@ -72,24 +116,24 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
     id: 'b-p1-phys-atk',
     page: 1,
     effect: 'Physical Attack',
-    tier: 'A',
+    tier: 'SS',
     max: '30',
     category: 'Core Stats',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Adds flat Physical Attack to weapons. Top tier roll for melee red vocations (Fighter, Hunter, Seeker, Warrior, Alchemist, High Scepter).',
+    tierDescription: 'SS Tier - Absolute priority flat stat roll for physical red vocations',
+    recommendedAction: 'Keep',
+    explanation: 'Adds flat Physical Attack to weapons. Absolute top tier roll (SS) for all melee physical vocations (Fighter, Hunter, Seeker, Warrior, Alchemist, High Scepter). Never seal.',
     vocations: ['Fighter', 'Hunter', 'Seeker', 'Warrior', 'Alchemist', 'High Scepter']
   },
   {
     id: 'b-p1-mag-atk',
     page: 1,
     effect: 'Magick Attack',
-    tier: 'A',
+    tier: 'SS',
     max: '30',
     category: 'Core Stats',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Adds flat Magick Attack. Highly sought after for Sorcerer, Priest, Elemental Archer, Spirit Lancer, and High Scepter.',
+    tierDescription: 'SS Tier - Absolute priority flat stat roll for magical vocations',
+    recommendedAction: 'Keep',
+    explanation: 'Adds flat Magick Attack. Absolute top tier roll (SS) for Sorcerer, Priest, Elemental Archer, Spirit Lancer, and High Scepter. Never seal.',
     vocations: ['Sorcerer', 'Priest', 'Elemental Archer', 'Spirit Lancer', 'High Scepter']
   },
   {
@@ -250,51 +294,63 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
 
   // --- PAGE 2: Elemental Forces & Monster Slayers ---
   {
+    id: 'b-p2-ice-force',
+    page: 2,
+    effect: 'Ice Force',
+    tier: 'S+',
+    max: '100',
+    category: 'Forces & Slayers',
+    tierDescription: 'Best Elemental debuff, most universal one, works fine on current endgame stuff',
+    recommendedAction: 'Keep',
+    explanation: 'Best Elemental debuff, most universal one, works fine on current endgame stuff (100 max roll).',
+    vocations: ['All Vocations']
+  },
+  {
     id: 'b-p2-fire-force',
     page: 2,
     effect: 'Fire Force',
-    tier: 'A',
+    tier: 'S',
     max: '100',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Massively empowers Fire elemental weapon infusions and spells. Exploits common undead, beast, and plant weaknesses.',
+    tierDescription: 'S Tier - Essential elemental force for beasts, undead, and high-tier raids',
+    recommendedAction: 'Keep',
+    explanation: 'Massively empowers Fire elemental weapon infusions and spells. Exploits common undead, beast, and plant weaknesses. S-tier priority.',
+    vocations: ['All Vocations']
+  },
+  {
+    id: 'b-p2-poison-force',
+    page: 2,
+    effect: 'Poison Force',
+    tier: 'S',
+    max: '100',
+    category: 'Forces & Slayers',
+    tierDescription: 'S Tier - Essential status force roll',
+    recommendedAction: 'Keep',
+    explanation: 'Accelerates poison buildup and enhances damage over time. Crucial for ticking down massive HP bars and debilitating raid bosses. S-tier priority.',
     vocations: ['All Vocations']
   },
   {
     id: 'b-p2-light-force',
     page: 2,
-    effect: 'Light Force',
-    tier: 'A',
+    effect: 'Holy Force (Light Force)',
+    tier: 'S-',
     max: '100',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Light/Holy is the premier endgame element in DDON (White Dragon blessings, Catacombs, Gorgoran, Black Knight). High priority.',
-    vocations: ['All Vocations']
-  },
-  {
-    id: 'b-p2-ice-force',
-    page: 2,
-    effect: 'Ice Force',
-    tier: 'A',
-    max: '100',
-    category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Crucial for Mist Drake EXM, fiery monsters, and desert Colossi.',
+    tierDescription: 'S- Tier - High priority elemental force for Catacombs, Gorgoran, and Black Knight',
+    recommendedAction: 'Keep',
+    explanation: 'Light/Holy is the premier endgame element in DDON (White Dragon blessings, Catacombs, Gorgoran, Black Knight). S- tier priority.',
     vocations: ['All Vocations']
   },
   {
     id: 'b-p2-thunder-force',
     page: 2,
-    effect: 'Thunder Force',
-    tier: 'A',
+    effect: 'Lightning Force (Thunder Force)',
+    tier: 'S-',
     max: '100',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Best element against Mist Wyrms, Gryphons, and aquatic reptilian foes.',
+    tierDescription: 'S- Tier - High priority elemental force for Wyrms, Gryphons, and aquatic beasts',
+    recommendedAction: 'Keep',
+    explanation: 'Best element against Mist Wyrms, Gryphons, and aquatic reptilian foes. S- tier priority.',
     vocations: ['All Vocations']
   },
   {
@@ -309,16 +365,93 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
     explanation: 'Used against holy-attuned guardians, Elves, and select Season 3 celestial bosses.',
     vocations: ['All Vocations']
   },
+
+  // --- Slayers: S-Tier ---
   {
-    id: 'b-p2-skeleton-slayer',
+    id: 'b-p2-warready-slayer',
     page: 2,
-    effect: 'Skeleton Slayer',
+    effect: 'War-Ready Slayer',
+    tier: 'S',
+    max: '90',
+    category: 'Forces & Slayers',
+    tierDescription: 'S Tier - Essential for Season 3 War-Ready armored bosses and Catoblepas',
+    recommendedAction: 'Keep',
+    explanation: 'Direct damage multiplier up to +90 against Season 3 War-Ready enemies and armored fortress beasts. S-Tier priority.',
+    vocations: ['All Vocations']
+  },
+  {
+    id: 'b-p2-fiend-slayer',
+    page: 2,
+    effect: 'Fiend Slayer',
+    tier: 'S',
+    max: '90',
+    category: 'Forces & Slayers',
+    tierDescription: 'S Tier - Premier slayer for demonic entities, Evil Eye, and Ifrit',
+    recommendedAction: 'Keep',
+    explanation: 'Massive damage boost against Zuhl, Medusas, Gorgons, Evil Eye, Volt Eye, and Ifrit. S-Tier priority.',
+    vocations: ['All Vocations']
+  },
+  {
+    id: 'b-p2-spirit-slayer',
+    page: 2,
+    effect: 'Spirit Slayer',
+    tier: 'S',
+    max: '90',
+    category: 'Forces & Slayers',
+    tierDescription: 'S Tier - Crucial for Black Knight, Living Armor, Death, and Ghost Mails',
+    recommendedAction: 'Keep',
+    explanation: 'Increases damage against ethereal entities, Black Knight, Living Armors, Death Knights, and Reaper Death. S-Tier priority.',
+    vocations: ['All Vocations']
+  },
+  {
+    id: 'b-p2-dragon-slayer',
+    page: 2,
+    effect: 'Dragonkin Slayer (Dragon Slayer)',
+    tier: 'S',
+    max: '90',
+    category: 'Forces & Slayers',
+    tierDescription: 'S Tier - Premier slayer augment for Drakes, Wyrms, Gorgoran, and Dragonkin raids',
+    recommendedAction: 'Keep',
+    explanation: 'Premier slayer augment. Essential for Drakes, Wyrms, Gorgoran, and Dragonkin raids. Never seal.',
+    vocations: ['All Vocations']
+  },
+  {
+    id: 'b-p2-ogre-slayer',
+    page: 2,
+    effect: 'Ogrekin Slayer (Ogre Slayer)',
+    tier: 'S',
+    max: '90',
+    category: 'Forces & Slayers',
+    tierDescription: 'S Tier - Essential for Orcs, Ogres, Trolls, Dread Apes, and Spinebacks',
+    recommendedAction: 'Keep',
+    explanation: 'Provides up to +90 bonus against Orcs, Ogres, Trolls, and Cyclopes. S-Tier priority.',
+    vocations: ['All Vocations']
+  },
+
+  // --- Slayers: Tier A ---
+  {
+    id: 'b-p2-giant-slayer',
+    page: 2,
+    effect: 'Giant Slayer (Colossus Slayer)',
     tier: 'A',
     max: '90',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
+    tierDescription: 'Tier A - Strong bonus against Cyclopes, Colossi, Trolls, and Ents',
     recommendedAction: 'Keep or Discard',
-    explanation: 'Direct damage multiplier up to +90 against Skeleton warriors, knights, and Skull Lords in catacombs.'
+    explanation: 'Crucial for Goliath, Colossus, and Ent world bosses with massive HP pools. Tier A priority.',
+    vocations: ['All Vocations']
+  },
+  {
+    id: 'b-p2-corrupted-slayer',
+    page: 2,
+    effect: 'Corrupted Slayer (Infected Slayer)',
+    tier: 'A',
+    max: '90',
+    category: 'Forces & Slayers',
+    tierDescription: 'Tier A - Effective against Season 2 Infected and Corrupted spore enemies',
+    recommendedAction: 'Keep or Discard',
+    explanation: 'Direct damage multiplier against Season 2 Infected beasts, spore monsters, and Corrupted entities. Tier A.',
+    vocations: ['All Vocations']
   },
   {
     id: 'b-p2-cursed-slayer',
@@ -327,31 +460,22 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
     tier: 'A',
     max: '90',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
+    tierDescription: 'Tier A - Strong damage against Shadow variants, Grudge Ghosts, and Cursed Dragons',
     recommendedAction: 'Keep or Discard',
-    explanation: 'Amplifies damage against cursed entities, spectres, and cursed dragons.'
+    explanation: 'Amplifies damage against cursed entities, spectres, and cursed dragons. Tier A.',
+    vocations: ['All Vocations']
   },
   {
-    id: 'b-p2-undead-slayer',
+    id: 'b-p2-demihuman-slayer',
     page: 2,
-    effect: 'Undead Slayer',
+    effect: 'Demihuman Slayer',
     tier: 'A',
     max: '90',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
+    tierDescription: 'Tier A - High damage bonus on Goblins, Saurians, Mandragoras, and Pixies',
     recommendedAction: 'Keep or Discard',
-    explanation: 'Massive bonus against zombies, wights, liches, and ghouls across all dungeon content.'
-  },
-  {
-    id: 'b-p2-ghost-slayer',
-    page: 2,
-    effect: 'Ghost Slayer',
-    tier: 'A',
-    max: '90',
-    category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Essential for spirits, wraiths, and ghost mail which possess high physical resistance.'
+    explanation: 'Provides damage bonus against all goblin variants, saurians, pixies, and demihumans. Tier A.',
+    vocations: ['All Vocations']
   },
   {
     id: 'b-p2-beast-slayer',
@@ -360,76 +484,110 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
     tier: 'A',
     max: '90',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
+    tierDescription: 'Tier A - Solid damage bonus on Wolves, Chimeras, Manticores, and beasts',
     recommendedAction: 'Keep or Discard',
-    explanation: 'Boosts damage on wolves, chimeras, manticores, and boar beasts.'
+    explanation: 'Boosts damage on wolves, chimeras, manticores, and boar beasts. (Can also be sealed if prioritizing raid bosses). Tier A.',
+    vocations: ['All Vocations']
   },
+
+  // --- Slayers: Tier B ---
   {
-    id: 'b-p2-ogre-slayer',
+    id: 'b-p2-human-slayer',
     page: 2,
-    effect: 'Ogre Slayer',
-    tier: 'A',
+    effect: 'Human Slayer',
+    tier: 'B',
     max: '90',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Provides up to +90 bonus against Orcs, Ogres, Trolls, and Cyclopes.'
+    tierDescription: 'Tier B - Niche bonus vs Human bandits, Rogue Pawns, and humanoid foes',
+    recommendedAction: 'Seal (Niche Keep)',
+    explanation: 'Increases damage against human enemies, bandits, and rogue pawns. Seal by default unless farming human-heavy areas. Tier B.',
+    vocations: ['All Vocations']
   },
   {
-    id: 'b-p2-colossus-slayer',
+    id: 'b-p2-aerial-slayer',
     page: 2,
-    effect: 'Colossus Slayer',
-    tier: 'A',
+    effect: 'Winged Slayer (Aerial Slayer)',
+    tier: 'B',
     max: '90',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Crucial for Goliath, Colossus, and Ent world bosses with massive HP pools.'
+    tierDescription: 'Tier B - Niche boost against Griffins, Harpies, Cockatrices, and Sphinxes',
+    recommendedAction: 'Seal (Niche Keep)',
+    explanation: 'Increases damage against flying targets (Gryphons, Cockatrices, Harpies, Wyverns). Tier B.',
+    vocations: ['All Vocations']
   },
   {
-    id: 'b-p2-dragon-slayer',
+    id: 'b-p2-alchemized-slayer',
     page: 2,
-    effect: 'Dragon Slayer',
-    tier: 'Keeper',
+    effect: 'Alchemized Slayer',
+    tier: 'B',
     max: '90',
     category: 'Forces & Slayers',
-    tierDescription: 'Keeper (Top priority for endgame raids and EXM)',
-    recommendedAction: 'Keep',
-    explanation: 'Premier slayer augment. Essential for Drakes, Wyrms, Gorgoran, and Dragonkin raids. Never seal.',
+    tierDescription: 'Tier B - Niche bonus vs Season 1 Alchemized enemies and gold-cased guardians',
+    recommendedAction: 'Seal (Niche Keep)',
+    explanation: 'Increases damage on Season 1 Alchemized foes and gold-plated monsters in Mergoda. Tier B.',
+    vocations: ['All Vocations']
+  },
+  {
+    id: 'b-p2-undead-slayer',
+    page: 2,
+    effect: 'Undead Slayer',
+    tier: 'B',
+    max: '90',
+    category: 'Forces & Slayers',
+    tierDescription: 'Tier B - Niche bonus vs Zombies, Wights, and Eliminators',
+    recommendedAction: 'Seal (Niche Keep)',
+    explanation: 'Bonus against zombies, wights, liches, and ghouls across dungeon content. Tier B.',
+    vocations: ['All Vocations']
+  },
+  {
+    id: 'b-p2-skeleton-slayer',
+    page: 2,
+    effect: 'Skeleton Slayer',
+    tier: 'B',
+    max: '90',
+    category: 'Forces & Slayers',
+    tierDescription: 'Tier B - Niche bonus vs Skeleton Knights, Skull Lords, and Skeleton Cyclopes',
+    recommendedAction: 'Seal (Niche Keep)',
+    explanation: 'Direct damage multiplier up to +90 against Skeleton warriors, knights, and Skull Lords in catacombs. Tier B.',
+    vocations: ['All Vocations']
+  },
+  {
+    id: 'b-p2-construct-slayer',
+    page: 2,
+    effect: 'Golem Slayer (Construct Slayer)',
+    tier: 'B',
+    max: '90',
+    category: 'Forces & Slayers',
+    tierDescription: 'Tier B - Niche bonus vs Golems, Machinas, and Gargoyles',
+    recommendedAction: 'Seal (Niche Keep)',
+    explanation: 'Increases damage on Golems, Living Armor, and mechanical fortress sentries. Tier B.',
     vocations: ['All Vocations']
   },
   {
     id: 'b-p2-demon-slayer',
     page: 2,
     effect: 'Demon Slayer',
-    tier: 'A',
+    tier: 'B',
     max: '90',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'High value against Gargoyles, Succubi, and Fiends in Dark dungeons.'
+    tierDescription: 'Tier B - Niche damage boost vs minor lesser demons, gargoyles, and succubi',
+    recommendedAction: 'Seal (Niche Keep)',
+    explanation: 'Damage multiplier against lesser demonic monsters and gargoyles in dark catacombs. Tier B.',
+    vocations: ['All Vocations']
   },
+
+  // --- Slayers: Tier C- ---
   {
-    id: 'b-p2-construct-slayer',
+    id: 'b-p2-formless-slayer',
     page: 2,
-    effect: 'Construct Slayer',
-    tier: 'A',
+    effect: 'Formless Slayer (Soft Slayer)',
+    tier: 'C-',
     max: '90',
     category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Increases damage on Golems, Living Armor, and mechanical fortress sentries.'
-  },
-  {
-    id: 'b-p2-aerial-slayer',
-    page: 2,
-    effect: 'Aerial Slayer',
-    tier: 'A',
-    max: '90',
-    category: 'Forces & Slayers',
-    tierDescription: 'Keep by default but can be discarded if needed/not played',
-    recommendedAction: 'Keep or Discard',
-    explanation: 'Increases damage against flying targets (Gryphons, Cockatrices, Harpies, Wyverns).'
+    tierDescription: 'Tier C- - Lowest priority. Slimes, Blobs, and Leeches have no major bosses. Seal immediately.',
+    recommendedAction: 'Seal',
+    explanation: 'Formless and Soft enemies (slimes, blobs, jellies, leeches) are low-threat open-world mobs with zero endgame raid relevance. Lowest tier roll (C-); seal immediately.',
+    vocations: ['All Vocations']
   },
 
   // --- PAGE 3: Mobility, Defensive & Stamina Abilities ---
@@ -495,12 +653,12 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
     id: 'b-p3-knockdown-boost',
     page: 3,
     effect: 'Knockdown Boost',
-    tier: 'Keeper',
+    tier: 'A',
     max: 'lvl6',
     category: 'Mobility & Defense',
-    tierDescription: 'Keeper (Top priority for bringing down enrage meters)',
+    tierDescription: 'A Tier - Top priority for bringing down enrage meters (Onslaught)',
     recommendedAction: 'Keep',
-    explanation: 'Accelerates stamina gauge destruction during boss Enrage phases. Critical for fast clears.',
+    explanation: 'Accelerates stamina gauge destruction during boss Enrage phases (Onslaught). Critical for fast clears.',
     vocations: ['All Vocations']
   },
   {
@@ -623,12 +781,12 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
     id: 'b-p4-heavy-step',
     page: 4,
     effect: 'Heavy Step',
-    tier: 'Keeper',
+    tier: 'A',
     max: 'lvl6',
     category: 'Tactical & Core',
-    tierDescription: 'Keeper (Mandatory for Gorgoran, dragons & wind pressure bosses)',
+    tierDescription: 'A Tier - Mandatory for Gorgoran, dragons & wind pressure bosses (Quakemaker)',
     recommendedAction: 'Keep',
-    explanation: 'Completely negates wind pressure staggers from dragons flapping wings. Essential for EXM4 Shining Gate.',
+    explanation: 'Completely negates wind pressure staggers from dragons flapping wings (Quakemaker). Essential for EXM4 Shining Gate.',
     vocations: ['All Vocations']
   },
   {
@@ -772,24 +930,24 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
     id: 'b-p5-composure',
     page: 5,
     effect: 'Composure',
-    tier: 'Keeper',
+    tier: 'A',
     max: 'lvl6',
     category: 'Elemental Affinities',
-    tierDescription: 'Keeper (Top tier magick augment for spellcasters)',
+    tierDescription: 'A Tier - Top tier magick augment for spellcasters (Relaxedness)',
     recommendedAction: 'Keep',
-    explanation: 'Boosts magick damage significantly while stamina is kept above 50%. Essential for Sorcerer and Priest.',
+    explanation: 'Boosts magick damage significantly while stamina is kept above 50% (Relaxedness). Essential for Sorcerer and Priest.',
     vocations: ['Sorcerer', 'Priest', 'Elemental Archer', 'Spirit Lancer', 'High Scepter']
   },
   {
     id: 'b-p5-fighting-spirit',
     page: 5,
     effect: 'Fighting Spirit',
-    tier: 'Keeper',
+    tier: 'A',
     max: 'lvl6',
     category: 'Elemental Affinities',
-    tierDescription: 'Keeper (Top tier physical augment for melee attackers)',
+    tierDescription: 'A Tier - Top tier physical augment for melee attackers (Heavy Attack)',
     recommendedAction: 'Keep',
-    explanation: 'Boosts physical attack substantially when stamina is above 50%. Essential for Fighter, Hunter, Seeker, Warrior.',
+    explanation: 'Boosts physical attack substantially when stamina is above 50% (Heavy Attack). Essential for Fighter, Hunter, Seeker, Warrior.',
     vocations: ['Fighter', 'Hunter', 'Seeker', 'Warrior', 'Alchemist', 'High Scepter']
   },
   {
@@ -855,24 +1013,24 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
     id: 'b-p6-critical-strike',
     page: 6,
     effect: 'Critical Strike',
-    tier: 'Keeper',
+    tier: 'C',
     max: 'lvl6',
     category: 'Advanced Combat',
-    tierDescription: 'Keeper (Top-tier endgame DPS modifier)',
-    recommendedAction: 'Keep',
-    explanation: 'Directly raises Critical Hit rate across all attacks. Top priority for every damage dealer.',
+    tierDescription: 'Tier C - Low priority augment roll. Seal immediately to clean up drop pool',
+    recommendedAction: 'Seal',
+    explanation: 'Directly raises Critical Hit rate across attacks. Classified as Tier C for sealing prioritization; seal to prioritize higher tier rolls.',
     vocations: ['All Vocations']
   },
   {
     id: 'b-p6-secret-core',
     page: 6,
     effect: 'Secret Core Piercer',
-    tier: 'Keeper',
+    tier: 'A',
     max: 'lvl6',
     category: 'Advanced Combat',
-    tierDescription: 'Keeper (Dramatically boosts damage to exposed Enrage cores)',
+    tierDescription: 'A Tier - Dramatically boosts damage to exposed Enrage cores (Secret Augment)',
     recommendedAction: 'Keep',
-    explanation: 'Massively boosts damage and knockdown when attacking revealed elemental or stamina cores during enrage.',
+    explanation: 'Massively boosts damage and knockdown when attacking revealed elemental or stamina cores during enrage (Secret Augment Efficacy).',
     vocations: ['All Vocations']
   },
   {
@@ -901,12 +1059,12 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
     id: 'b-p6-quick-cast',
     page: 6,
     effect: 'Quick Cast',
-    tier: 'Keeper',
+    tier: 'B',
     max: 'lvl6',
     category: 'Advanced Combat',
-    tierDescription: 'Keeper (Premier augment for Sorcerer and Priest chants)',
-    recommendedAction: 'Keep',
-    explanation: 'Reduces chant cast time for high-tier incantations (Meteor, Rain, Briarro, Guard Aura).',
+    tierDescription: 'B Tier - Secondary utility / cast speed augment (Magickal Chant)',
+    recommendedAction: 'Seal (Niche Keep)',
+    explanation: 'Reduces chant cast time for high-tier incantations (Magickal Chant). Good utility, but secondary to direct damage.',
     vocations: ['Sorcerer', 'Priest']
   },
   {
@@ -937,8 +1095,8 @@ export const BBM_EARRINGS_DATA: BBMEarringAttribute[] = [
     holy: '—',
     dark: '—',
     maxValue: '+15% / +20%',
-    tier: 'Keeper',
-    tierDescription: 'Keeper (Top priority for Fighter, Seeker, Alchemist against Beasts & Undead)',
+    tier: 'S',
+    tierDescription: 'S Tier (Top priority for Fighter, Seeker, Alchemist against Beasts & Undead)',
     recommendedAction: 'Keep',
     bestVocations: ['Fighter', 'Seeker', 'Alchemist'],
     notes: 'Premier slashing earring. Fire exploits chimera, plant, and ghoul vulnerabilities while boosting physical slash scaling.'
@@ -956,8 +1114,8 @@ export const BBM_EARRINGS_DATA: BBMEarringAttribute[] = [
     holy: '★ Primary (+15%)',
     dark: '—',
     maxValue: '+15% / +20%',
-    tier: 'Keeper',
-    tierDescription: 'Keeper (Universal Endgame Raids & Gorgoran / Black Knight)',
+    tier: 'S',
+    tierDescription: 'S Tier (Universal Endgame Raids & Gorgoran / Black Knight)',
     recommendedAction: 'Keep',
     bestVocations: ['Fighter', 'Seeker', 'High Scepter', 'Warrior'],
     notes: 'The single most versatile earring in DDON. Holy is the most common endgame weakness.'
@@ -1013,8 +1171,8 @@ export const BBM_EARRINGS_DATA: BBMEarringAttribute[] = [
     holy: '—',
     dark: '—',
     maxValue: '+15% / +20%',
-    tier: 'Keeper',
-    tierDescription: 'Keeper (Best in Slot for Hunter against Mist Drake and flying dragons)',
+    tier: 'S',
+    tierDescription: 'S Tier (Best in Slot for Hunter against Mist Drake and flying dragons)',
     recommendedAction: 'Keep',
     bestVocations: ['Hunter', 'Elemental Archer'],
     notes: 'Hunters deal piercing damage; pairing this with Ice creates devastating spiral arrow bursts on Drake weakpoints.'
@@ -1032,8 +1190,8 @@ export const BBM_EARRINGS_DATA: BBMEarringAttribute[] = [
     holy: '★ Primary (+15%)',
     dark: '—',
     maxValue: '+15% / +20%',
-    tier: 'Keeper',
-    tierDescription: 'Keeper (Top tier for Hunter and Elemental Archer in raids)',
+    tier: 'S',
+    tierDescription: 'S Tier (Top tier for Hunter and Elemental Archer in raids)',
     recommendedAction: 'Keep',
     bestVocations: ['Hunter', 'Elemental Archer', 'Spirit Lancer'],
     notes: 'Exceptional against winged demon bosses, Gorgoran, and Dark Knights.'
@@ -1070,8 +1228,8 @@ export const BBM_EARRINGS_DATA: BBMEarringAttribute[] = [
     holy: '★ Primary (+15%)',
     dark: '—',
     maxValue: '+15% / +20%',
-    tier: 'Keeper',
-    tierDescription: 'Keeper (Best in Slot for Shield Sage and Warrior against Living Armor)',
+    tier: 'S',
+    tierDescription: 'S Tier (Best in Slot for Shield Sage and Warrior against Living Armor)',
     recommendedAction: 'Keep',
     bestVocations: ['Shield Sage', 'Warrior'],
     notes: 'Blunt/Impact damage crushes heavily armored skeletons and Living Armor while Holy exploits undead core weaknesses.'
@@ -1108,8 +1266,8 @@ export const BBM_EARRINGS_DATA: BBMEarringAttribute[] = [
     holy: '—',
     dark: '—',
     maxValue: '+15% / +20%',
-    tier: 'Keeper',
-    tierDescription: 'Keeper (The ultimate universal physical backup earring)',
+    tier: 'S',
+    tierDescription: 'S Tier (The ultimate universal physical backup earring)',
     recommendedAction: 'Keep',
     bestVocations: ['Fighter', 'Hunter', 'Seeker', 'Warrior', 'High Scepter'],
     notes: 'Applies to ALL raw physical damage regardless of elemental enchantment, ensuring consistent DPS without needing element matching.'
@@ -1127,8 +1285,8 @@ export const BBM_EARRINGS_DATA: BBMEarringAttribute[] = [
     holy: '★ Primary (+15%)',
     dark: '—',
     maxValue: '+15% / +20%',
-    tier: 'Keeper',
-    tierDescription: 'Keeper (Premier Sorcerer and Priest spellcasting earring)',
+    tier: 'S',
+    tierDescription: 'S Tier (Premier Sorcerer and Priest spellcasting earring)',
     recommendedAction: 'Keep',
     bestVocations: ['Sorcerer', 'Priest', 'Elemental Archer'],
     notes: 'Covers Meteor, Briarro, and Holy exorcism incantations simultaneously.'
@@ -1146,8 +1304,8 @@ export const BBM_EARRINGS_DATA: BBMEarringAttribute[] = [
     holy: '—',
     dark: '—',
     maxValue: '+15% / +20%',
-    tier: 'Keeper',
-    tierDescription: 'Keeper (Top tier for Sorcerer blizzard and lightning spells)',
+    tier: 'S',
+    tierDescription: 'S Tier (Top tier for Sorcerer blizzard and lightning spells)',
     recommendedAction: 'Keep',
     bestVocations: ['Sorcerer', 'Elemental Archer'],
     notes: 'Empowers Rain (Thunder) and Gicel / Frost spells for EM2 and EM3 dragon hunts.'
@@ -1195,27 +1353,184 @@ export const BBM_EARRINGS_DATA: BBMEarringAttribute[] = [
 export const BBM_SEALING_GUIDE = {
   title: 'Bitterblack Maze (BBM) Sealing Guide & Drop Mechanics',
   summary:
-    'In Bitterblack Maze (Normal and Abyss channels), high-tier Bracelets and % Damage Earrings roll random abilities, stats, and multipliers. Using Red Dragon Marks (Seals) allows you to permanently remove low-value and unwanted effects from the pool, dramatically increasing your chances of rolling Tier A and Keeper abilities with maximum values.',
+    'In Bitterblack Maze Normal , high-tier Bracelets, Abyss % Damage Earrings roll random abilities, stats, and multipliers. Using Red Dragon Marks (Seals) allows you to permanently remove low-value and unwanted effects from the pool, dramatically increasing your chances of rolling Tier A and S bracelets and earrings',
   keyRules: [
     {
       title: 'How Sealing Works',
       detail:
-        'Interacting with the Sealing Stone at Cave Harbor consumes Red Dragon Marks to seal an ability. Once sealed, that stat or augment will NEVER appear on any newly acquired BBM accessory until unsealed.'
+        'Interacting with the npc at Bitter Black Maze, and choose option with seals, consumes Red Dragon Marks to seal an ability. Once sealed, that stat or augment will NEVER appear on any newly acquired BBM accessory until unsealed. The more you seal the more it costs max is 80 and unsealing cost 500 red marks'
     },
     {
       title: 'Priority Sealing Strategy',
       detail:
-        'Seal all Tier C items first (Defense stats, Poison/Blind resists, Counter, Provocation). With junk stats removed, every box opened has an exponentially higher mathematical probability of hitting Critical Strike, Knockdown Boost, Fighting Spirit, Composure, or +30 Atk.'
+        'Seal all Tier C items first (Defense stats, Poison/Blind resists, Counter, Provocation). With junk stats removed, every box opened has an exponentially higher mathematical probability of hitting A and S rolls'
     },
     {
       title: 'Bracelets vs. Earrings Farming',
       detail:
-        'Bracelets drop primarily from Normal BBM (Channels 1, 2, 5, 6), rolling flat stats, slayers, and level 6 augments. % Damage Earrings drop from the Abyss (Channel 3 & 5 bosses), rolling elemental and damage-type multipliers (Slash, Piercing, Impact, Null).'
+        'Bracelets drop from Normal BBM rolling flat stats, slayers, and level 4-6 augments. % Damage Earrings drop from the Abyss, rolling elemental and damage-type multipliers (Slash, Piercing, Impact, Null, fire...).'
     },
     {
       title: 'Unsealing Cost Warning',
       detail:
-        'Unsealing requires Golden Gemstones or large ticket costs. Plan your seals carefully according to your primary vocation.'
+        'Unsealing requires 500 red marks and unseals EVERYTHING'
     }
   ]
 };
+
+export const BBM_EARRINGS_MATRIX: BBMVocationEarringMatrixRow[] = [
+  {
+    vocation: 'Fighter',
+    slash: { value: 'A' },
+    impact: { value: 'B' },
+    piercing: { value: '-', isRed: true },
+    nullType: { value: '' },
+    fire: { value: '' },
+    ice: { value: '' },
+    thunder: { value: '' },
+    holy: { value: '' },
+    dark: { value: '' },
+    maxValue: '20%',
+    isMaxBold: true
+  },
+  {
+    vocation: 'Seeker',
+    slash: { value: 'A' },
+    impact: { value: 'A*' },
+    piercing: { value: '-', isRed: true },
+    nullType: { value: '' },
+    fire: { value: '' },
+    ice: { value: '' },
+    thunder: { value: '' },
+    holy: { value: '' },
+    dark: { value: '' },
+    maxValue: '13%',
+    isMaxBold: false
+  },
+  {
+    vocation: 'Hunter',
+    slash: { value: '-', isRed: true },
+    impact: { value: 'B' },
+    piercing: { value: 'A' },
+    nullType: { value: '' },
+    fire: { value: 'B' },
+    ice: { value: '' },
+    thunder: { value: '' },
+    holy: { value: '' },
+    dark: { value: '' },
+    maxValue: '13%',
+    isMaxBold: false
+  },
+  {
+    vocation: 'Priest',
+    slash: { value: '-', isRed: true },
+    impact: { value: '-', isRed: true },
+    piercing: { value: '-', isRed: true },
+    nullType: { value: '-' },
+    fire: { value: '' },
+    ice: { value: '' },
+    thunder: { value: '' },
+    holy: { value: 'A' },
+    dark: { value: '' },
+    maxValue: '13%',
+    isMaxBold: false
+  },
+  {
+    vocation: 'Shield Sage',
+    slash: { value: '-', isRed: true },
+    impact: { value: 'A' },
+    piercing: { value: '-', isRed: true },
+    nullType: { value: '-' },
+    fire: { value: 'A' },
+    ice: { value: 'A' },
+    thunder: { value: 'A' },
+    holy: { value: 'A' },
+    dark: { value: 'A' },
+    maxValue: '20%',
+    isMaxBold: true
+  },
+  {
+    vocation: 'Sorcerer',
+    slash: { value: '' },
+    impact: { value: '' },
+    piercing: { value: '' },
+    nullType: { value: 'A' },
+    fire: { value: 'A' },
+    ice: { value: 'A' },
+    thunder: { value: 'A' },
+    holy: { value: '' },
+    dark: { value: 'A' },
+    maxValue: '13%',
+    isMaxBold: false
+  },
+  {
+    vocation: 'Warrior',
+    slash: { value: 'A' },
+    impact: { value: 'B' },
+    piercing: { value: '-', isRed: true },
+    nullType: { value: '' },
+    fire: { value: '' },
+    ice: { value: '' },
+    thunder: { value: '' },
+    holy: { value: '' },
+    dark: { value: '' },
+    maxValue: '20%',
+    isMaxBold: true
+  },
+  {
+    vocation: 'Elemental Archer',
+    slash: { value: '-', isRed: true },
+    impact: { value: '' },
+    piercing: { value: 'A' },
+    nullType: { value: '' },
+    fire: { value: 'A' },
+    ice: { value: '' },
+    thunder: { value: '' },
+    holy: { value: '-' },
+    dark: { value: '' },
+    maxValue: '13%',
+    isMaxBold: false
+  },
+  {
+    vocation: 'Alchemist',
+    slash: { value: '-', isRed: true },
+    impact: { value: 'A' },
+    piercing: { value: '-', isRed: true },
+    nullType: { value: '-' },
+    fire: { value: '' },
+    ice: { value: '' },
+    thunder: { value: '' },
+    holy: { value: '' },
+    dark: { value: '' },
+    maxValue: '13%',
+    isMaxBold: false
+  },
+  {
+    vocation: 'Spirit Lancer',
+    slash: { value: 'A' },
+    impact: { value: '' },
+    piercing: { value: '-', isRed: true },
+    nullType: { value: '' },
+    fire: { value: '' },
+    ice: { value: '' },
+    thunder: { value: '' },
+    holy: { value: '' },
+    dark: { value: '' },
+    maxValue: '13%',
+    isMaxBold: false
+  },
+  {
+    vocation: 'High Scepter',
+    slash: { value: 'A' },
+    impact: { value: '' },
+    piercing: { value: '-' },
+    nullType: { value: '' },
+    fire: { value: '' },
+    ice: { value: '' },
+    thunder: { value: '' },
+    holy: { value: 'A' },
+    dark: { value: 'B' },
+    maxValue: '13%',
+    isMaxBold: false
+  }
+];

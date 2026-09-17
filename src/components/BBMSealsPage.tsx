@@ -7,11 +7,13 @@ import {
 import {
   BBM_BRACELETS_DATA,
   BBM_EARRINGS_DATA,
+  BBM_EARRINGS_MATRIX,
   BBM_SEALING_GUIDE,
   TIER_DEFINITIONS,
   BBMSealTier,
   BBMBraceletSeal,
-  BBMEarringAttribute
+  BBMEarringAttribute,
+  BBMVocationEarringMatrixRow
 } from '../data/bbmSealsData';
 
 export const BBMSealsPage: React.FC = () => {
@@ -54,10 +56,10 @@ export const BBMSealsPage: React.FC = () => {
 
   const handleSealAllTierC = () => {
     const next = { ...sealedIds };
-    BBM_BRACELETS_DATA.filter((b) => b.tier === 'C').forEach((b) => {
+    BBM_BRACELETS_DATA.filter((b) => b.tier === 'C' || b.tier === 'C-').forEach((b) => {
       next[b.id] = true;
     });
-    BBM_EARRINGS_DATA.filter((e) => e.tier === 'C').forEach((e) => {
+    BBM_EARRINGS_DATA.filter((e) => e.tier === 'C' || e.tier === 'C-').forEach((e) => {
       next[e.id] = true;
     });
     setSealedIds(next);
@@ -95,27 +97,59 @@ export const BBMSealsPage: React.FC = () => {
     });
   }, [searchQuery, selectedTier, selectedPage, selectedCategory]);
 
-  // Filtered Earrings
-  const filteredEarrings = useMemo(() => {
-    return BBM_EARRINGS_DATA.filter((item) => {
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesName = item.name.toLowerCase().includes(q);
-        const matchesNotes = item.notes.toLowerCase().includes(q);
-        const matchesVoc = item.bestVocations.some((v) => v.toLowerCase().includes(q));
-        if (!matchesName && !matchesNotes && !matchesVoc) return false;
-      }
+  // Filtered Earring Matrix
+  const filteredEarringMatrix = useMemo(() => {
+    if (!searchQuery.trim()) return BBM_EARRINGS_MATRIX;
+    const q = searchQuery.toLowerCase();
+    return BBM_EARRINGS_MATRIX.filter((row) =>
+      row.vocation.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
 
-      if (selectedTier !== 'ALL' && item.tier !== selectedTier) {
-        return false;
-      }
+  // Helper for rendering matrix cells matching the spreadsheet
+  const renderMatrixCell = (cell: { value: string; isRed?: boolean }) => {
+    if (cell.isRed) {
+      return (
+        <td className="py-2.5 px-3 text-center border border-slate-700 bg-[#7f2626] text-rose-100 font-black font-mono text-sm shadow-inner">
+          -
+        </td>
+      );
+    }
 
-      return true;
-    });
-  }, [searchQuery, selectedTier]);
+    if (cell.value === '-') {
+      return (
+        <td className="py-2.5 px-3 text-center border border-slate-700 bg-slate-900 text-slate-400 font-bold font-mono text-sm">
+          -
+        </td>
+      );
+    }
 
+    if (cell.value === 'A' || cell.value === 'A*') {
+      return (
+        <td className="py-2.5 px-3 text-center border border-slate-700 bg-slate-900 text-amber-300 font-black font-mono text-sm">
+          {cell.value}
+        </td>
+      );
+    }
+
+    if (cell.value === 'B') {
+      return (
+        <td className="py-2.5 px-3 text-center border border-slate-700 bg-slate-900 text-blue-300 font-bold font-mono text-sm">
+          B
+        </td>
+      );
+    }
+
+    return (
+      <td className="py-2.5 px-3 text-center border border-slate-700 bg-slate-900/50">
+        &nbsp;
+      </td>
+    );
+  };
+
+  const MAX_SEAL_POOL = 80;
   const sealedCount = Object.values(sealedIds).filter(Boolean).length;
-  const totalItemsCount = BBM_BRACELETS_DATA.length + BBM_EARRINGS_DATA.length;
+  const totalItemsCount = BBM_BRACELETS_DATA.length + BBM_EARRINGS_MATRIX.length;
 
   return (
     <div className="space-y-6">
@@ -139,7 +173,7 @@ export const BBMSealsPage: React.FC = () => {
 
             <p className="text-sm text-slate-300 max-w-3xl leading-relaxed">
               Complete drop pool, tier classifications, and sealing strategies for Bitterblack Maze Bracelets and % Damage Earrings.
-              Use Red Dragon Marks to seal away low-value attributes and guarantee higher chances of rolling best-in-slot Tier A and Keeper augments.
+              Use Red Dragon Marks to seal away low-value attributes and guarantee higher chances of rolling best-in-slot Tier SS, S+, and S augments.
             </p>
           </div>
 
@@ -151,21 +185,25 @@ export const BBMSealsPage: React.FC = () => {
             </span>
             <div className="flex items-baseline gap-1.5 mt-1">
               <span className="text-2xl font-black font-mono text-amber-400">{sealedCount}</span>
-              <span className="text-xs text-slate-400 font-mono">/ {totalItemsCount} pool</span>
+              <span className="text-xs text-slate-400 font-mono">/ {MAX_SEAL_POOL} max seal pool</span>
             </div>
             <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-amber-500 to-yellow-400 h-full transition-all duration-300"
-                style={{ width: `${Math.min(100, (sealedCount / totalItemsCount) * 100)}%` }}
+                className={`h-full transition-all duration-300 ${
+                  sealedCount >= MAX_SEAL_POOL
+                    ? 'bg-rose-500'
+                    : 'bg-gradient-to-r from-amber-500 to-yellow-400'
+                }`}
+                style={{ width: `${Math.min(100, (sealedCount / MAX_SEAL_POOL) * 100)}%` }}
               ></div>
             </div>
             <div className="flex items-center gap-2 mt-2 w-full justify-between">
               <button
                 onClick={handleSealAllTierC}
                 className="text-[10px] text-rose-400 hover:text-rose-300 font-bold transition-colors cursor-pointer hover:underline"
-                title="Mark all Tier C effects as sealed in your tracker"
+                title="Mark all Tier C and C- effects as sealed in your tracker"
               >
-                + Seal Tier C
+                + Seal Tier C / C-
               </button>
               {sealedCount > 0 && (
                 <button
@@ -209,11 +247,11 @@ export const BBMSealsPage: React.FC = () => {
             }`}
           >
             <Swords className="w-4 h-4" />
-            <span>Sub Page: Earrings (% Damage Pool)</span>
+            <span>Sub Page: % Damage Earrings Matrix</span>
             <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
               activeSubPage === 'earrings' ? 'bg-slate-950 text-amber-300' : 'bg-slate-900 text-slate-400'
             }`}>
-              {BBM_EARRINGS_DATA.length}
+              11 Vocations
             </span>
           </button>
 
@@ -234,15 +272,27 @@ export const BBMSealsPage: React.FC = () => {
 
       {/* Tier Descriptions Legend Ribbon */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-slate-900/90 border border-red-500/40 rounded-xl p-3 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="px-2 py-0.5 rounded text-xs font-black font-mono bg-red-500/20 text-red-300 border border-red-500/50">
+              Tier SS / S+
+            </span>
+            <span className="text-[10px] font-mono text-red-400 font-bold uppercase">Never Seal</span>
+          </div>
+          <p className="text-xs text-slate-300 leading-snug">
+            <strong>SS:</strong> Physical Attack & Magick Attack (+30). <strong>S+:</strong> Ice Force (100) — Best elemental debuff, most universal one.
+          </p>
+        </div>
+
         <div className="bg-slate-900/90 border border-emerald-500/30 rounded-xl p-3 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1.5">
             <span className="px-2 py-0.5 rounded text-xs font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-              Keeper
+              Tier S / S-
             </span>
-            <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase">Never Seal</span>
+            <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase">Must Keep</span>
           </div>
           <p className="text-xs text-slate-300 leading-snug">
-            Essential Best-in-Slot priorities (e.g. Critical Strike, Knockdown Boost, Dragon Slayer). Keep always.
+            <strong>S:</strong> War-Ready, Fiend, Spirit, Dragonkin, Ogrekin Slayers, Poison & Fire Force. <strong>S-:</strong> Lightning & Holy Force (100 max).
           </p>
         </div>
 
@@ -254,31 +304,19 @@ export const BBMSealsPage: React.FC = () => {
             <span className="text-[10px] font-mono text-amber-400 font-bold uppercase">Keep by Default</span>
           </div>
           <p className="text-xs text-slate-300 leading-snug">
-            Keep by default but can be discarded if needed/not played (e.g. Physical Attack +30, Elemental Forces).
+            Giant, Corrupted, Cursed, Demihuman, Beast Slayers. Keep by default but discard if not played.
           </p>
         </div>
 
         <div className="bg-slate-900/90 border border-blue-500/30 rounded-xl p-3 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1.5">
             <span className="px-2 py-0.5 rounded text-xs font-bold font-mono bg-blue-500/20 text-blue-300 border border-blue-500/40">
-              Tier B
+              Tier B / C / C-
             </span>
-            <span className="text-[10px] font-mono text-blue-400 font-bold uppercase">Seal (Niche Use)</span>
+            <span className="text-[10px] font-mono text-rose-400 font-bold uppercase">Seal by Default</span>
           </div>
           <p className="text-xs text-slate-300 leading-snug">
-            Seal by default, but can be kept for niche use cases (e.g. specific boss resistances, Rope Reversal).
-          </p>
-        </div>
-
-        <div className="bg-slate-900/90 border border-rose-500/30 rounded-xl p-3 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="px-2 py-0.5 rounded text-xs font-bold font-mono bg-rose-500/20 text-rose-300 border border-rose-500/40">
-              Tier C
-            </span>
-            <span className="text-[10px] font-mono text-rose-400 font-bold uppercase">Seal Immediately</span>
-          </div>
-          <p className="text-xs text-slate-300 leading-snug">
-            Seal. Eliminating these low-impact rolls permanently removes them from your drop pool.
+            <strong>B:</strong> Human, Winged, Alchemized, Undead, Golem, Demon. <strong>C-:</strong> Formless Slayer. Seal immediately.
           </p>
         </div>
       </div>
@@ -310,7 +348,7 @@ export const BBMSealsPage: React.FC = () => {
           {/* Quick Stats & View Mode Toggle */}
           <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
             <span className="text-xs text-slate-400 font-mono">
-              Showing <strong className="text-amber-300">{activeSubPage === 'bracelets' ? filteredBracelets.length : filteredEarrings.length}</strong> items
+              Showing <strong className="text-amber-300">{activeSubPage === 'bracelets' ? filteredBracelets.length : filteredEarringMatrix.length}</strong> {activeSubPage === 'bracelets' ? 'items' : 'vocations'}
             </span>
 
             {activeSubPage === 'bracelets' && (
@@ -336,37 +374,73 @@ export const BBMSealsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Tier Filter Pills */}
-        <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-slate-800/80">
-          <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 mr-1.5 flex items-center gap-1">
-            <Filter className="w-3 h-3 text-amber-400" />
-            <span>Tier:</span>
-          </span>
+        {/* Tier Filter Pills for Bracelets */}
+        {activeSubPage === 'bracelets' && (
+          <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-slate-800/80">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 mr-1.5 flex items-center gap-1">
+              <Filter className="w-3 h-3 text-amber-400" />
+              <span>Tier:</span>
+            </span>
 
-          {['ALL', 'Keeper', 'A', 'B', 'C', '?'].map((tier) => (
+            {['ALL', 'SS', 'S+', 'S', 'S-', 'A', 'B', 'C', 'C-', '?'].map((tier) => (
+              <button
+                key={tier}
+                id={`filter-tier-${tier}`}
+                onClick={() => setSelectedTier(tier)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  selectedTier === tier
+                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                    : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white border border-slate-700/60'
+                }`}
+              >
+                <span>{tier === 'ALL' ? 'All Tiers' : `${tier} Tier`}</span>
+                {tier !== 'ALL' && (
+                  <span className={`text-[10px] px-1 py-0.2 rounded font-mono ${
+                    selectedTier === tier ? 'bg-slate-950 text-amber-300' : 'bg-slate-900 text-slate-400'
+                  }`}>
+                    {BBM_BRACELETS_DATA.filter((b) => b.tier === tier).length}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Quick Vocation Selector for Earrings Matrix */}
+        {activeSubPage === 'earrings' && (
+          <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-slate-800/80">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 mr-1.5 flex items-center gap-1">
+              <Swords className="w-3 h-3 text-amber-400" />
+              <span>Filter Vocation:</span>
+            </span>
             <button
-              key={tier}
-              id={`filter-tier-${tier}`}
-              onClick={() => setSelectedTier(tier)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                selectedTier === tier
-                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                  : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 hover:text-white border border-slate-700/60'
+              onClick={() => setSearchQuery('')}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                searchQuery === ''
+                  ? 'bg-amber-500 text-slate-950 shadow'
+                  : 'bg-slate-800/80 text-slate-400 hover:text-slate-200 border border-slate-700/60'
               }`}
             >
-              <span>{tier === 'ALL' ? 'All Tiers' : tier === 'Keeper' ? 'Keeper' : `Tier ${tier}`}</span>
-              {tier !== 'ALL' && (
-                <span className={`text-[10px] px-1 py-0.2 rounded font-mono ${
-                  selectedTier === tier ? 'bg-slate-950 text-amber-300' : 'bg-slate-900 text-slate-400'
-                }`}>
-                  {activeSubPage === 'bracelets'
-                    ? BBM_BRACELETS_DATA.filter((b) => b.tier === tier).length
-                    : BBM_EARRINGS_DATA.filter((e) => e.tier === tier).length}
-                </span>
-              )}
+              All 11
             </button>
-          ))}
-        </div>
+            {['Fighter', 'Seeker', 'Hunter', 'Priest', 'Shield Sage', 'Sorcerer', 'Warrior', 'Elemental Archer', 'Alchemist', 'Spirit Lancer', 'High Scepter'].map((voc) => {
+              const isActive = searchQuery.toLowerCase() === voc.toLowerCase();
+              return (
+                <button
+                  key={voc}
+                  onClick={() => setSearchQuery(isActive ? '' : voc)}
+                  className={`px-2.5 py-1 rounded-lg text-xs transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-amber-500 text-slate-950 font-bold shadow'
+                      : 'bg-slate-800/80 text-slate-300 hover:text-white border border-slate-700/60'
+                  }`}
+                >
+                  {voc}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Page Filter Tabs for Bracelets */}
         {activeSubPage === 'bracelets' && (
@@ -502,10 +576,14 @@ export const BBMSealsPage: React.FC = () => {
                           <td className="py-3 px-3 sm:px-4">
                             <div className="flex flex-col gap-0.5">
                               <span className={`text-xs font-bold ${
-                                item.tier === 'Keeper' ? 'text-emerald-400' :
+                                item.tier === 'SS' ? 'text-red-400 font-black' :
+                                item.tier === 'S+' ? 'text-cyan-400 font-bold' :
+                                item.tier === 'S' ? 'text-emerald-400 font-bold' :
+                                item.tier === 'S-' ? 'text-teal-400 font-semibold' :
                                 item.tier === 'A' ? 'text-amber-300' :
                                 item.tier === 'B' ? 'text-blue-300' :
-                                item.tier === 'C' ? 'text-rose-400' : 'text-purple-300'
+                                item.tier === 'C' ? 'text-rose-400' :
+                                item.tier === 'C-' ? 'text-rose-500 font-mono' : 'text-purple-300'
                               }`}>
                                 {item.tierDescription}
                               </span>
@@ -616,7 +694,8 @@ export const BBMSealsPage: React.FC = () => {
       {/* SUB PAGE 2: EARRINGS VIEW (% Damage Multipliers Pool) */}
       {/* ========================================================================= */}
       {activeSubPage === 'earrings' && (
-        <div className="space-y-4">
+        <div className="space-y-5">
+          {/* Header Description & Tactical Summary */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
               <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
@@ -624,227 +703,159 @@ export const BBMSealsPage: React.FC = () => {
                 <span>BBM Abyss % Damage Earrings Matrix</span>
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed max-w-3xl">
-                Earrings drop exclusively in Bitterblack Maze Abyss. Unlike bracelets, earrings roll percentage damage boosts
-                (Slash, Impact, Piercing, Null, and 5 elements) with max values up to +15% / +20%.
-                Always seal pure defense and resistance earrings to guarantee damage rolls on every drop!
+                Vocation damage multiplier affinities and maximum single-slot earring caps in Bitterblack Maze Abyss.
+                Highlighted red cells indicate physical attack types the vocation cannot deal.
               </p>
             </div>
 
-            <div className="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-amber-300 shrink-0">
-              <span>Target: Dual +15% Rolls</span>
+            <div className="flex items-center gap-2 font-mono text-xs shrink-0">
+              <span className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-amber-300">
+                11 Vocations
+              </span>
+              <span className="px-3 py-1.5 rounded-xl bg-emerald-950/70 border border-emerald-800/80 text-emerald-300 font-bold">
+                Max Roll: Up to 20%
+              </span>
             </div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+          {/* Exact Spreadsheet Matrix matching user image */}
+          <div className="bg-slate-900 border border-slate-700/80 rounded-2xl overflow-hidden shadow-2xl">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-950/90 text-slate-400 font-mono text-[11px] uppercase tracking-wider border-b border-slate-800">
-                  <tr>
-                    <th className="py-3 px-3 sm:px-4 text-center w-12">Seal</th>
-                    <th className="py-3 px-3 sm:px-4">Earring Focus</th>
-                    <th className="py-3 px-2 sm:px-3 text-center">Slash</th>
-                    <th className="py-3 px-2 sm:px-3 text-center">Impact</th>
-                    <th className="py-3 px-2 sm:px-3 text-center">Piercing</th>
-                    <th className="py-3 px-2 sm:px-3 text-center">Null</th>
-                    <th className="py-3 px-2 sm:px-3 text-center">Fire</th>
-                    <th className="py-3 px-2 sm:px-3 text-center">Ice</th>
-                    <th className="py-3 px-2 sm:px-3 text-center">Thunder</th>
-                    <th className="py-3 px-2 sm:px-3 text-center">Holy</th>
-                    <th className="py-3 px-2 sm:px-3 text-center">Dark</th>
-                    <th className="py-3 px-3 sm:px-4">Max Value</th>
-                    <th className="py-3 px-3 sm:px-4">Tier</th>
-                    <th className="py-3 px-3 sm:px-4">Best Vocations & Tactical Notes</th>
+              <table className="w-full border-collapse font-sans text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b border-slate-700">
+                    <th className="py-3 px-4 text-left border border-slate-700 font-mono text-xs uppercase tracking-wider text-slate-300 bg-slate-800 w-44">
+                      Vocation
+                    </th>
+                    <th className="py-3 px-3 text-center border border-slate-700 font-mono font-bold text-xs sm:text-sm bg-slate-800 text-slate-200 min-w-[58px]">
+                      Slash
+                    </th>
+                    <th className="py-3 px-3 text-center border border-slate-700 font-mono font-bold text-xs sm:text-sm bg-slate-800 text-slate-200 min-w-[58px]">
+                      Impact
+                    </th>
+                    <th className="py-3 px-3 text-center border border-slate-700 font-mono font-bold text-xs sm:text-sm bg-slate-800 text-slate-200 min-w-[58px]">
+                      Piercing
+                    </th>
+                    <th className="py-3 px-3 text-center border border-slate-700 font-mono font-bold text-xs sm:text-sm bg-slate-800 text-slate-200 min-w-[58px]">
+                      Null
+                    </th>
+                    <th className="py-3 px-3 text-center border border-slate-700 font-mono font-bold text-xs sm:text-sm bg-slate-800 text-slate-200 min-w-[58px]">
+                      Fire
+                    </th>
+                    <th className="py-3 px-3 text-center border border-slate-700 font-mono font-bold text-xs sm:text-sm bg-slate-800 text-slate-200 min-w-[58px]">
+                      Ice
+                    </th>
+                    <th className="py-3 px-3 text-center border border-slate-700 font-mono font-bold text-xs sm:text-sm bg-slate-800 text-slate-200 min-w-[58px]">
+                      Thunder
+                    </th>
+                    <th className="py-3 px-3 text-center border border-slate-700 font-mono font-bold text-xs sm:text-sm bg-slate-800 text-slate-200 min-w-[58px]">
+                      Holy
+                    </th>
+                    <th className="py-3 px-3 text-center border border-slate-700 font-mono font-bold text-xs sm:text-sm bg-slate-800 text-slate-200 min-w-[58px]">
+                      Dark
+                    </th>
+                    <th className="py-3 px-4 text-center border border-slate-700 font-mono font-bold text-xs sm:text-sm bg-emerald-900/60 text-emerald-300 min-w-[96px]">
+                      Max Value
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 font-sans">
-                  {filteredEarrings.map((item) => {
-                    const isSealed = Boolean(sealedIds[item.id]);
-                    const tierDef = TIER_DEFINITIONS[item.tier];
+                <tbody>
+                  {filteredEarringMatrix.map((row) => (
+                    <tr
+                      key={row.vocation}
+                      className="hover:bg-slate-800/40 transition-colors"
+                    >
+                      {/* Vocation Column (Matches gray left column in sheet) */}
+                      <td className="py-2.5 px-4 font-bold text-slate-100 bg-slate-800/90 border border-slate-700 whitespace-nowrap text-left font-mono">
+                        {row.vocation}
+                      </td>
 
-                    return (
-                      <tr
-                        key={item.id}
-                        className={`hover:bg-slate-800/40 transition-colors ${
-                          isSealed ? 'bg-rose-950/15' : ''
-                        }`}
-                      >
-                        {/* Interactive Seal Toggle */}
-                        <td className="py-3 px-3 sm:px-4 text-center">
-                          <button
-                            onClick={() => toggleSeal(item.id)}
-                            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                              isSealed
-                                ? 'bg-rose-500 text-white border-rose-400 shadow-md shadow-rose-500/30'
-                                : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:border-amber-400/60'
-                            }`}
-                            title={isSealed ? 'Marked as Sealed' : 'Click to mark as Sealed'}
-                          >
-                            {isSealed ? <Check className="w-3.5 h-3.5 font-black" /> : <Circle className="w-3.5 h-3.5" />}
-                          </button>
-                        </td>
+                      {/* Slash */}
+                      {renderMatrixCell(row.slash)}
 
-                        {/* Name */}
-                        <td className="py-3 px-3 sm:px-4 font-bold text-slate-100 whitespace-nowrap">
-                          <div className="flex flex-col">
-                            <span className={isSealed ? 'line-through text-slate-400' : 'text-amber-200 font-bold'}>
-                              {item.name}
-                            </span>
-                            <span className="text-[10px] text-slate-400 font-mono">
-                              {item.recommendedAction}
-                            </span>
-                          </div>
-                        </td>
+                      {/* Impact */}
+                      {renderMatrixCell(row.impact)}
 
-                        {/* Slash */}
-                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-xs">
-                          {item.slash.includes('★') ? (
-                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
-                              {item.slash}
-                            </span>
-                          ) : item.slash !== '—' ? (
-                            <span className="text-slate-300">{item.slash}</span>
-                          ) : (
-                            <span className="text-slate-600">—</span>
-                          )}
-                        </td>
+                      {/* Piercing */}
+                      {renderMatrixCell(row.piercing)}
 
-                        {/* Impact */}
-                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-xs">
-                          {item.impact.includes('★') ? (
-                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
-                              {item.impact}
-                            </span>
-                          ) : item.impact !== '—' ? (
-                            <span className="text-slate-300">{item.impact}</span>
-                          ) : (
-                            <span className="text-slate-600">—</span>
-                          )}
-                        </td>
+                      {/* Null */}
+                      {renderMatrixCell(row.nullType)}
 
-                        {/* Piercing */}
-                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-xs">
-                          {item.piercing.includes('★') ? (
-                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
-                              {item.piercing}
-                            </span>
-                          ) : item.piercing !== '—' ? (
-                            <span className="text-slate-300">{item.piercing}</span>
-                          ) : (
-                            <span className="text-slate-600">—</span>
-                          )}
-                        </td>
+                      {/* Fire */}
+                      {renderMatrixCell(row.fire)}
 
-                        {/* Null */}
-                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-xs">
-                          {item.nullType.includes('★') ? (
-                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
-                              {item.nullType}
-                            </span>
-                          ) : item.nullType !== '—' ? (
-                            <span className="text-slate-300">{item.nullType}</span>
-                          ) : (
-                            <span className="text-slate-600">—</span>
-                          )}
-                        </td>
+                      {/* Ice */}
+                      {renderMatrixCell(row.ice)}
 
-                        {/* Fire */}
-                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-xs">
-                          {item.fire.includes('★') ? (
-                            <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 font-bold border border-red-500/40">
-                              {item.fire}
-                            </span>
-                          ) : item.fire !== '—' ? (
-                            <span className="text-slate-300">{item.fire}</span>
-                          ) : (
-                            <span className="text-slate-600">—</span>
-                          )}
-                        </td>
+                      {/* Thunder */}
+                      {renderMatrixCell(row.thunder)}
 
-                        {/* Ice */}
-                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-xs">
-                          {item.ice.includes('★') ? (
-                            <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40">
-                              {item.ice}
-                            </span>
-                          ) : item.ice !== '—' ? (
-                            <span className="text-slate-300">{item.ice}</span>
-                          ) : (
-                            <span className="text-slate-600">—</span>
-                          )}
-                        </td>
+                      {/* Holy */}
+                      {renderMatrixCell(row.holy)}
 
-                        {/* Thunder */}
-                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-xs">
-                          {item.thunder.includes('★') ? (
-                            <span className="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-300 font-bold border border-yellow-500/40">
-                              {item.thunder}
-                            </span>
-                          ) : item.thunder !== '—' ? (
-                            <span className="text-slate-300">{item.thunder}</span>
-                          ) : (
-                            <span className="text-slate-600">—</span>
-                          )}
-                        </td>
+                      {/* Dark */}
+                      {renderMatrixCell(row.dark)}
 
-                        {/* Holy */}
-                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-xs">
-                          {item.holy.includes('★') ? (
-                            <span className="px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-200 font-bold border border-amber-400/40">
-                              {item.holy}
-                            </span>
-                          ) : item.holy !== '—' ? (
-                            <span className="text-slate-300">{item.holy}</span>
-                          ) : (
-                            <span className="text-slate-600">—</span>
-                          )}
-                        </td>
-
-                        {/* Dark */}
-                        <td className="py-3 px-2 sm:px-3 text-center font-mono text-xs">
-                          {item.dark.includes('★') ? (
-                            <span className="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">
-                              {item.dark}
-                            </span>
-                          ) : item.dark !== '—' ? (
-                            <span className="text-slate-300">{item.dark}</span>
-                          ) : (
-                            <span className="text-slate-600">—</span>
-                          )}
-                        </td>
-
-                        {/* Max Value */}
-                        <td className="py-3 px-3 sm:px-4 font-mono font-bold text-slate-200 whitespace-nowrap">
-                          <span className="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-amber-300">
-                            {item.maxValue}
-                          </span>
-                        </td>
-
-                        {/* Tier */}
-                        <td className="py-3 px-3 sm:px-4 whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded text-xs font-bold font-mono border ${tierDef.badgeColor}`}>
-                            {item.tier}
-                          </span>
-                        </td>
-
-                        {/* Best Vocations & Notes */}
-                        <td className="py-3 px-3 sm:px-4 text-xs text-slate-300 max-w-sm leading-snug">
-                          <p>{item.notes}</p>
-                          {item.bestVocations && item.bestVocations.length > 0 && (
-                            <div className="mt-1 flex items-center gap-1 flex-wrap">
-                              <span className="text-[10px] text-slate-400">Recommended:</span>
-                              {item.bestVocations.map((v) => (
-                                <span key={v} className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono">
-                                  {v}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                      {/* Max Value (Matches green column in sheet) */}
+                      <td className="py-2.5 px-4 text-center border border-slate-700 bg-emerald-950/40 font-mono">
+                        <span
+                          className={
+                            row.isMaxBold
+                              ? 'font-black text-sm text-emerald-400'
+                              : 'font-semibold text-xs sm:text-sm text-emerald-300/90'
+                          }
+                        >
+                          {row.maxValue}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Matrix Legend matching the spreadsheet */}
+          <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-3 sm:gap-5 flex-wrap">
+              <span className="font-bold text-slate-400 font-mono uppercase text-[11px]">Legend:</span>
+              <div className="flex items-center gap-1.5">
+                <span className="w-6 h-6 rounded flex items-center justify-center font-black font-mono text-amber-300 bg-slate-800 border border-slate-700 text-xs">
+                  A
+                </span>
+                <span className="text-slate-300 font-medium">Top Priority Multiplier</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-6 h-6 rounded flex items-center justify-center font-black font-mono text-amber-300 bg-slate-800 border border-slate-700 text-xs">
+                  A*
+                </span>
+                <span className="text-slate-300 font-medium">Top Priority (Skill/Build Specific)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-6 h-6 rounded flex items-center justify-center font-bold font-mono text-blue-300 bg-slate-800 border border-slate-700 text-xs">
+                  B
+                </span>
+                <span className="text-slate-300 font-medium">Secondary Multiplier</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-6 h-6 rounded flex items-center justify-center font-black font-mono text-rose-100 bg-[#7f2626] border border-red-800 text-xs shadow-inner">
+                  -
+                </span>
+                <span className="text-slate-300 font-medium">Incompatible (Class Deals 0 Damage)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-6 h-6 rounded flex items-center justify-center font-bold font-mono text-slate-400 bg-slate-800 border border-slate-700 text-xs">
+                  -
+                </span>
+                <span className="text-slate-300 font-medium">Nullified / Non-Damaging</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="px-2 py-0.5 rounded font-mono font-bold text-emerald-300 bg-emerald-950/70 border border-emerald-800 text-xs">
+                  20% / 13%
+                </span>
+                <span className="text-slate-300 font-medium">Max Achievable Single Earring Roll</span>
+              </div>
             </div>
           </div>
         </div>
@@ -863,25 +874,73 @@ export const BBMSealsPage: React.FC = () => {
             </h3>
 
             <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-slate-950/70 border border-emerald-500/40 space-y-1.5">
+              {/* Tier SS */}
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-red-500/50 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/50">
-                    Keeper (S-Tier)
+                  <span className="px-2.5 py-0.5 rounded text-xs font-black font-mono bg-red-500/20 text-red-300 border border-red-500/60">
+                    Tier SS
                   </span>
-                  <span className="text-xs font-mono text-emerald-400 font-bold uppercase">Never Seal</span>
+                  <span className="text-xs font-mono text-red-400 font-bold uppercase">Supreme Priority • Never Seal</span>
                 </div>
                 <p className="text-sm font-semibold text-slate-200">
-                  Essential / Best-in-Slot priorities for all endgame raids.
+                  Flat Raw Attack Power (+30) — The absolute highest value rolls in BBM.
                 </p>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  These abilities define peak combat performance in Dragon's Dogma Online:
-                  <strong> Critical Strike</strong> (+crit rate), <strong>Knockdown Boost</strong> (breaks boss Enrage states quickly),
-                  <strong> Fighting Spirit</strong> (+physical attack above 50% stamina), <strong>Composure</strong> (+magick attack above 50% stamina),
-                  <strong> Heavy Step</strong> (negates dragon wind pressure), <strong>Dragon Slayer</strong> (+90 dragonkin damage),
-                  and <strong>Quick Cast</strong> (shortens chanting for Sorcerers and Priests).
+                  <strong>Physical Attack (+30)</strong> and <strong>Magick Attack (+30)</strong> scale with every skill, multiplier, and elemental enchantment in the game. They form the foundational ceiling of all endgame damage builds.
                 </p>
               </div>
 
+              {/* Tier S+ */}
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-cyan-500/40 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/50">
+                    Tier S+
+                  </span>
+                  <span className="text-xs font-mono text-cyan-400 font-bold uppercase">Meta Element • Never Seal</span>
+                </div>
+                <p className="text-sm font-semibold text-slate-200">
+                  Ice Force (100) — Pinnacle elemental affinity.
+                </p>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Best Elemental debuff, most universal one, works fine on current endgame stuff.
+                </p>
+              </div>
+
+              {/* Tier S */}
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-emerald-500/40 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/50">
+                    Tier S
+                  </span>
+                  <span className="text-xs font-mono text-emerald-400 font-bold uppercase">Must Keep • Never Seal</span>
+                </div>
+                <p className="text-sm font-semibold text-slate-200">
+                  Essential / Best-in-Slot priorities (replaces former Keeper tier).
+                </p>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Includes top slayers: <strong>War-Ready</strong>, <strong>Fiend Slayer</strong>, <strong>Spirit Slayer</strong>, <strong>Dragonkin Slayer</strong>, and <strong>Ogrekin Slayer</strong> (+90 race damage),
+                  and primary elemental forces: <strong>Fire Force</strong> and <strong>Poison Force</strong>.
+                  High-priority combat mechanics like <strong>Knockdown Boost</strong>, <strong>Fighting Spirit</strong>, <strong>Composure</strong>, <strong>Heavy Step</strong>, and <strong>Secret Core Piercer</strong> are classified under Tier A, with <strong>Quick Cast</strong> under Tier B.
+                </p>
+              </div>
+
+              {/* Tier S- */}
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-teal-500/40 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded text-xs font-semibold font-mono bg-teal-500/20 text-teal-300 border border-teal-500/50">
+                    Tier S-
+                  </span>
+                  <span className="text-xs font-mono text-teal-400 font-bold uppercase">High Affinity • Keep</span>
+                </div>
+                <p className="text-sm font-semibold text-slate-200">
+                  Lightning Force & Holy Force (100 max).
+                </p>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Crucial elemental forces across major encounters: <strong>Holy Force</strong> exploits the most widespread endgame weakness (undead, Gorgoran, Black Knight), while <strong>Lightning Force</strong> crushes Mist Wyrms and aquatic/aerial bosses. Both roll up to 100 max value.
+                </p>
+              </div>
+
+              {/* Tier A */}
               <div className="p-4 rounded-xl bg-slate-950/70 border border-amber-500/40 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-amber-500/20 text-amber-300 border border-amber-500/50">
@@ -890,50 +949,43 @@ export const BBMSealsPage: React.FC = () => {
                   <span className="text-xs font-mono text-amber-400 font-bold uppercase">Keep by Default</span>
                 </div>
                 <p className="text-sm font-semibold text-slate-200">
-                  Keep by default but can be discarded if needed/not played.
+                  Keep by default but can be discarded if needed or not played.
                 </p>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Includes flat stats like <strong>Physical Attack (+30)</strong> and <strong>Magick Attack (+30)</strong>,
-                  elemental forces (<strong>Fire Force, Light Force, Ice Force, Thunder Force</strong>), monster slayers (<strong>Skeleton, Cursed, Undead, Colossus</strong>),
-                  and foundational combat augments (<strong>Resilience, Enduring Grip, Great Enchantment, Fortunes of War</strong>).
-                  If you do not play a specific vocation (e.g. you never play casters), Magick Attack can be discarded or sealed.
+                  High-frequency monster slayers: <strong>Giant Slayer</strong>, <strong>Corrupted Slayer</strong>, <strong>Cursed Slayer</strong>, <strong>Demihuman Slayer</strong>, and <strong>Beast Slayer</strong>. Also includes high-value utility augments like <strong>Element Weaver</strong> and <strong>Enduring Grip</strong>.
                 </p>
               </div>
 
+              {/* Tier B */}
               <div className="p-4 rounded-xl bg-slate-950/70 border border-blue-500/40 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-blue-500/20 text-blue-300 border border-blue-500/50">
+                  <span className="px-2.5 py-0.5 rounded text-xs font-mono bg-blue-500/20 text-blue-300 border border-blue-500/50">
                     Tier B
                   </span>
                   <span className="text-xs font-mono text-blue-400 font-bold uppercase">Seal (Niche Use)</span>
                 </div>
                 <p className="text-sm font-semibold text-slate-200">
-                  Seal by default, but can be kept for niche use cases.
+                  Seal by default, but can be kept for niche or situational builds.
                 </p>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  High-utility or vocation-specific mechanics that are not required for universal DPS. Examples include
-                  <strong> Rope Reversal</strong> (Seeker aerial recovery), <strong>Skilled Reload</strong> (Hunter arrow cycling),
-                  <strong> Agile Motion</strong>, and situational resistances like <strong>Petrifaction, Curse, or Torpor</strong> resist.
-                  Keep only if you actively play that niche build or lack cleansing curatives.
+                  Niche monster slayers: <strong>Human Slayer</strong>, <strong>Winged Slayer</strong>, <strong>Alchemized Slayer</strong>, <strong>Undead Slayer</strong>, <strong>Golem Slayer</strong>, and <strong>Demon Slayer</strong>. Also includes tactical class skills like <strong>Rope Reversal</strong> and <strong>Chain Mastery</strong>.
                 </p>
               </div>
 
+              {/* Tier C & C- */}
               <div className="p-4 rounded-xl bg-slate-950/70 border border-rose-500/40 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-0.5 rounded text-xs font-bold font-mono bg-rose-500/20 text-rose-300 border border-rose-500/50">
-                    Tier C
+                    Tier C / C-
                   </span>
                   <span className="text-xs font-mono text-rose-400 font-bold uppercase">Seal Immediately</span>
                 </div>
                 <p className="text-sm font-semibold text-slate-200">
-                  Seal. Eliminate immediately to clean up the drop pool.
+                  Seal. Eliminate immediately to remove pool dilution.
                 </p>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  These items dilute your drop pool with low effective combat value:
-                  <strong> Physical Defence (+60)</strong>, <strong>Magick Defence (+60)</strong>, <strong>Healing Power (+50)</strong>,
-                  <strong> Poison Resist</strong>, <strong>Blind Resist</strong>, <strong>Counter</strong>, <strong>Perky</strong>,
-                  <strong> Heal Thyself</strong>, and <strong>Provocation</strong>.
-                  Sealing all Tier C items guarantees that future drops roll higher-tier stats.
+                  <strong>Tier C-</strong> is <strong>Formless Slayer</strong> (slimes and blobs which are rare and easily defeated).
+                  <strong>Tier C</strong> comprises <strong>Critical Strike</strong>, defensive dilution items: <strong>Physical Defence (+60)</strong>, <strong>Magick Defence (+60)</strong>, <strong>Healing Power (+50)</strong>, and situational resistances. Sealing these guarantees future drops roll higher-tier offensive abilities.
                 </p>
               </div>
             </div>
