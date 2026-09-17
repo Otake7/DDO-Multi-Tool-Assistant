@@ -1507,6 +1507,35 @@ app.post('/api/feedback/:id/vote', async (req, res) => {
   }
 });
 
+// --- Rising Map Static & Remote Proxy Routes ---
+app.use('/rising-map', express.static(path.join(process.cwd(), 'public', 'rising-map'), { index: 'index.html' }));
+
+// Proxy dynamic stage enemy positions (e.g. 100.json, 101.json)
+app.get('/rising-map/resources/enemyPositions/:file', async (req, res) => {
+  const file = req.params.file;
+  const localPath = path.join(process.cwd(), 'public', 'rising-map', 'resources', 'enemyPositions', file);
+  if (fs.existsSync(localPath)) {
+    return res.sendFile(localPath);
+  }
+  try {
+    const upstreamUrl = `https://edelarrow.github.io/ddo-map-viewer-normal-channels/resources/enemyPositions/${file}`;
+    const upstream = await fetch(upstreamUrl);
+    if (!upstream.ok) return res.status(upstream.status).send('Stage position not found');
+    const data = await upstream.json();
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.json(data);
+  } catch (err) {
+    return res.status(502).json({ error: 'Failed to fetch stage enemy position' });
+  }
+});
+
+// Fast 302 redirect for heavy map image tiles & icons to GitHub CDN
+app.get('/rising-map/images/*', (req, res) => {
+  const imageSubpath = req.params[0];
+  return res.redirect(302, `https://edelarrow.github.io/ddo-map-viewer-normal-channels/images/${imageSubpath}`);
+});
+
 // --- Vite / Static Serve ---
 async function startServer() {
   const publicPath = path.join(process.cwd(), 'public');

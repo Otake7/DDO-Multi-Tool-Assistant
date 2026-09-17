@@ -31,7 +31,8 @@ const ZONE_PRESETS: ZonePreset[] = [
   { id: 'barmika', name: 'Barmika Plains', hash: '#field005_m00:st0105', category: 'Highlands & Forts' },
 ];
 
-const DIRECT_MAP_BASE = 'https://edelarrow.github.io/ddo-map-viewer-normal-channels';
+const EMBEDDED_MAP_BASE = '/rising-map/';
+const DIRECT_MAP_BASE = 'https://edelarrow.github.io/ddo-map-viewer-normal-channels/';
 const DOGMA_PORTAL_URL = 'https://play.dogmarising.org/interactive-map';
 const SEIYRIA_SEARCH_URL = 'https://seiyria.com/ddon-item-locations/#';
 
@@ -42,8 +43,10 @@ interface FindResourcesAndEnemiesProps {
   onClearInitialSearch?: () => void;
 }
 
+type EngineType = 'embedded' | 'cdn' | 'portal';
+
 export const FindResourcesAndEnemies: React.FC<FindResourcesAndEnemiesProps> = () => {
-  const [engineSource, setEngineSource] = useState<'direct' | 'portal'>('direct');
+  const [engineSource, setEngineSource] = useState<EngineType>('embedded');
   const [selectedZoneHash, setSelectedZoneHash] = useState<string>('#field000_m00:st0100');
   const [iframeKey, setIframeKey] = useState<number>(0);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -56,18 +59,22 @@ export const FindResourcesAndEnemies: React.FC<FindResourcesAndEnemiesProps> = (
   const [isSearchCollapsed, setIsSearchCollapsed] = useState<boolean>(false);
 
   // Compute active URL
-  const currentUrl = engineSource === 'direct'
-    ? `${DIRECT_MAP_BASE}/${selectedZoneHash}`
-    : DOGMA_PORTAL_URL;
+  const currentUrl = engineSource === 'embedded'
+    ? `${EMBEDDED_MAP_BASE}${selectedZoneHash}`
+    : engineSource === 'cdn'
+      ? `${DIRECT_MAP_BASE}${selectedZoneHash}`
+      : DOGMA_PORTAL_URL;
 
   const handleZoneSelect = (hash: string) => {
     setSelectedZoneHash(hash);
-    setEngineSource('direct');
+    if (engineSource === 'portal') {
+      setEngineSource('embedded');
+    }
     setIsLoading(true);
     setIframeKey(k => k + 1);
   };
 
-  const handleEngineSwitch = (engine: 'direct' | 'portal') => {
+  const handleEngineSwitch = (engine: EngineType) => {
     setEngineSource(engine);
     setIsLoading(true);
     setIframeKey(k => k + 1);
