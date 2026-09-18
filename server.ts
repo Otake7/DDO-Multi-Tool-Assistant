@@ -784,9 +784,14 @@ app.get('/api/comments', async (req, res) => {
 app.post('/api/comments', async (req, res) => {
   try {
     await ensureDbSchema();
-    const { id, itemId, parentId, parentAuthorName, itemType, authorId, authorName, authorClan, authorRole, avatarIcon, avatarColor, content } = req.body;
+    const { id, itemId, parentId, parentAuthorName, itemType, authorId, authorName, authorClan, authorRole, avatarIcon, avatarColor, content, isGuest } = req.body;
     if (!itemId || !content || !content.trim()) {
       return res.status(400).json({ error: 'itemId and comment content are required.' });
+    }
+
+    // Prohibit guest accounts from commenting
+    if (isGuest || !authorId || authorId === 'guest' || authorName === 'Guest Arisen') {
+      return res.status(403).json({ error: 'Guest accounts cannot post comments. Please log in or register.' });
     }
 
     const commentId = id || `comm_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;

@@ -187,7 +187,7 @@ export function incrementTimesPlanned(itemId: string): number {
   return nextPlanned;
 }
 
-// Add a comment or reply to an item
+// Add a comment or reply to an item (registered Arisen only - guests blocked)
 export async function addCommunityComment(
   itemId: string,
   itemType: 'quest' | 'preset' | 'farm_spot' | 'guide' | 'feedback',
@@ -196,12 +196,16 @@ export async function addCommunityComment(
   parentAuthorName?: string | null,
   user?: UserProfile | null
 ): Promise<CommunityComment> {
+  if (!user || user.isGuest) {
+    throw new Error('Guest accounts are not permitted to comment. Please log in.');
+  }
+
   const allComments = getAllComments();
-  const authorName = user?.characterName || user?.username || 'Guest Arisen';
-  const authorClan = user?.clanTag || undefined;
-  const authorRole = user?.role || (user?.username?.toLowerCase() === 'otake7' ? 'owner' : 'user');
-  const avatarIcon = user?.avatarIcon || 'flame';
-  const avatarColor = user?.avatarColor || 'amber';
+  const authorName = user.characterName || user.username || 'Arisen';
+  const authorClan = user.clanTag || undefined;
+  const authorRole = user.role || (user.username.toLowerCase() === 'otake7' ? 'owner' : 'user');
+  const avatarIcon = user.avatarIcon || 'flame';
+  const avatarColor = user.avatarColor || 'amber';
 
   const newComment: CommunityComment = {
     id: `comm_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
@@ -209,7 +213,7 @@ export async function addCommunityComment(
     parentId: parentId || null,
     parentAuthorName: parentAuthorName || null,
     itemType,
-    authorId: user?.id,
+    authorId: user.id,
     authorName,
     authorClan,
     authorRole,

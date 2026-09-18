@@ -16,7 +16,8 @@ import {
   ChevronDown,
   ChevronRight,
   Flame,
-  Award
+  Award,
+  Lock
 } from 'lucide-react';
 import { CommunityComment, UserProfile, VoteDirection } from '../types';
 import {
@@ -58,6 +59,7 @@ interface CommentNodeProps {
   handleCommentVote: (commentId: string, direction: VoteDirection) => Promise<void>;
   handleDeleteComment: (commentId: string) => Promise<void>;
   depth: number;
+  onOpenAuth?: () => void;
 }
 
 const CommentNode: React.FC<CommentNodeProps> = ({
@@ -74,11 +76,13 @@ const CommentNode: React.FC<CommentNodeProps> = ({
   isSubmittingReply,
   handleCommentVote,
   handleDeleteComment,
-  depth
+  depth,
+  onOpenAuth
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const replies = allRepliesMap[comment.id] || [];
 
+  const isGuest = !currentUser || currentUser.isGuest;
   const isDeleted = Boolean(comment.isDeleted || comment.content === '[deleted]' || comment.authorName === '[deleted]');
   const isOwner = !isDeleted && (comment.authorRole === 'owner' || comment.authorName.toLowerCase().includes('otake7'));
   const isMod = !isDeleted && comment.authorRole === 'moderator';
@@ -220,6 +224,10 @@ const CommentNode: React.FC<CommentNodeProps> = ({
               {/* Reply Button */}
               <button
                 onClick={() => {
+                  if (isGuest) {
+                    if (onOpenAuth) onOpenAuth();
+                    return;
+                  }
                   if (isReplying) {
                     setReplyingToId(null);
                   } else {
@@ -230,12 +238,15 @@ const CommentNode: React.FC<CommentNodeProps> = ({
                 className={`flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
                   isReplying
                     ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
+                    : isGuest
+                    ? 'bg-slate-900/40 text-slate-500 hover:text-amber-300 border-slate-800/80 hover:border-amber-500/30'
                     : 'bg-slate-900/70 text-slate-400 hover:text-slate-200 border-slate-800 hover:bg-slate-800'
                 }`}
-                title={`Reply to ${comment.authorName}`}
+                title={isGuest ? 'Sign in to reply to comments' : `Reply to ${comment.authorName}`}
               >
                 <Reply className="w-3 h-3" />
                 <span>Reply</span>
+                {isGuest && <Lock className="w-2.5 h-2.5 text-amber-400/80 ml-0.5" />}
               </button>
 
               {/* Delete button (Author or Owner/Mod only) */}
@@ -265,8 +276,8 @@ const CommentNode: React.FC<CommentNodeProps> = ({
               </p>
             )}
 
-            {/* Inline Nested Reply Form */}
-            {!isDeleted && isReplying && (
+            {/* Inline Nested Reply Form (Registered Accounts Only) */}
+            {!isDeleted && isReplying && !isGuest && (
               <div className="mt-2.5 pt-2 border-t border-slate-800/80 bg-slate-950/60 p-2.5 rounded-xl border border-slate-850">
                 <div className="flex items-center gap-1.5 mb-1.5 text-[11px] text-amber-400 font-medium">
                   <CornerDownRight className="w-3 h-3" />
@@ -285,7 +296,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
 
                 <div className="flex items-center justify-between gap-2 mt-1.5">
                   <span className="text-[10px] text-slate-500">
-                    Posting as: {currentUser?.characterName || currentUser?.username || 'Guest Arisen'}
+                    Posting as: {currentUser?.characterName || currentUser?.username || 'Arisen'}
                   </span>
 
                   <div className="flex items-center gap-1.5">
@@ -349,6 +360,7 @@ const CommentNode: React.FC<CommentNodeProps> = ({
               handleCommentVote={handleCommentVote}
               handleDeleteComment={handleDeleteComment}
               depth={depth + 1}
+              onOpenAuth={onOpenAuth}
             />
           ))}
         </div>
@@ -443,6 +455,10 @@ export const CommunityCommentsSection: React.FC<CommunityCommentsSectionProps> =
   // Submit top-level comment
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isGuest) {
+      if (onOpenAuth) onOpenAuth();
+      return;
+    }
     if (!commentText.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
@@ -460,6 +476,10 @@ export const CommunityCommentsSection: React.FC<CommunityCommentsSectionProps> =
 
   // Submit reply to a specific comment (ladder reply)
   const handleReplySubmit = async (parentId: string, parentAuthorName: string) => {
+    if (isGuest) {
+      if (onOpenAuth) onOpenAuth();
+      return;
+    }
     if (!replyText.trim() || isSubmittingReply) return;
 
     setIsSubmittingReply(true);
@@ -548,58 +568,67 @@ export const CommunityCommentsSection: React.FC<CommunityCommentsSectionProps> =
         </div>
       </div>
 
-      {/* Write New Top-Level Comment Form */}
-      <form onSubmit={handleCommentSubmit} className="space-y-2">
-        <div className="relative">
-          <textarea
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            placeholder={
-              isGuest
-                ? "Write a comment as Guest Arisen (or sign in to attach your character & clan)..."
-                : `Start a new discussion or note as ${currentUser?.characterName || currentUser?.username}...`
-            }
-            rows={2}
-            maxLength={400}
-            className="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all resize-none"
-          />
-        </div>
+      {/* Write New Top-Level Comment Form or Guest Notice */}
+      {isGuest ? (
+        <div className="p-3.5 sm:p-4 rounded-xl bg-slate-950/80 border border-slate-800/90 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-400 shrink-0">
+              <Lock className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-200 flex items-center gap-1.5 justify-center sm:justify-start">
+                <span>Commenting requires a registered Arisen account</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Guest accounts cannot post comments or replies. Sign in or create a character profile to participate in community discussions.
+              </p>
+            </div>
+          </div>
 
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-[11px] text-slate-400">
-            {currentUser && !currentUser.isGuest ? (
+          {onOpenAuth && (
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer shrink-0 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Log In to Comment</span>
+            </button>
+          )}
+        </div>
+      ) : (
+        <form onSubmit={handleCommentSubmit} className="space-y-2">
+          <div className="relative">
+            <textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder={`Start a new discussion or note as ${currentUser?.characterName || currentUser?.username}...`}
+              rows={2}
+              maxLength={400}
+              className="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl p-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 transition-all resize-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-[11px] text-slate-400">
               <span className="flex items-center gap-1 text-amber-300 font-medium">
                 <User className="w-3 h-3" />
                 <span>Posting as: {currentUser.characterName || currentUser.username}</span>
                 {currentUser.clanTag && <span className="text-slate-400">[{currentUser.clanTag}]</span>}
               </span>
-            ) : (
-              <span className="flex items-center gap-1 text-slate-500">
-                <User className="w-3 h-3" />
-                <span>Guest mode</span>
-                {onOpenAuth && (
-                  <button
-                    type="button"
-                    onClick={onOpenAuth}
-                    className="text-amber-400 hover:underline cursor-pointer ml-1"
-                  >
-                    • Login to save author identity
-                  </button>
-                )}
-              </span>
-            )}
-          </div>
+            </div>
 
-          <button
-            type="submit"
-            disabled={!commentText.trim() || isSubmitting}
-            className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:hover:bg-amber-500 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
-          >
-            <span>{isSubmitting ? 'Posting...' : 'Post Note'}</span>
-            <Send className="w-3 h-3" />
-          </button>
-        </div>
-      </form>
+            <button
+              type="submit"
+              disabled={!commentText.trim() || isSubmitting}
+              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:hover:bg-amber-500 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+            >
+              <span>{isSubmitting ? 'Posting...' : 'Post Note'}</span>
+              <Send className="w-3 h-3" />
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Reddit-Style Hierarchical Threaded Ladder List */}
       <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
@@ -621,6 +650,7 @@ export const CommunityCommentsSection: React.FC<CommunityCommentsSectionProps> =
               handleCommentVote={handleCommentVote}
               handleDeleteComment={handleDeleteComment}
               depth={0}
+              onOpenAuth={onOpenAuth}
             />
           ))
         ) : (
