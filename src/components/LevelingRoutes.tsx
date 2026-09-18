@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { 
   Compass, Sparkles, Swords, Shield, Zap, BookOpen, Target, 
   Plus, CheckCircle2, ThumbsUp, ThumbsDown, MessageSquare, 
-  Trash2, User, Share2, Search, ArrowUpDown, Filter, AlertCircle, X
+  Trash2, User, Share2, Search, ArrowUpDown, Filter, AlertCircle, X,
+  Server
 } from 'lucide-react';
-import { LevelPresetRoute, UserProfile, PlannedQuest } from '../types';
+import { LevelPresetRoute, UserProfile, PlannedQuest, GuideServer } from '../types';
 import { LEVELING_PRESETS } from '../data/levelingPresets';
 import { ALL_QUESTS, REGIONS } from '../data/quests';
 import { 
@@ -18,6 +19,8 @@ import {
   voteItem 
 } from '../utils/communityStats';
 import { CommunityCommentsSection } from './CommunityCommentsSection';
+import { ServerBadge } from './ServerBadge';
+import { getServerBadgeTheme } from '../utils/serverBadgeStyles';
 
 interface LevelingRoutesProps {
   onLoadPreset: (presetId: string) => void;
@@ -50,12 +53,15 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
   const [activeCommentRoute, setActiveCommentRoute] = useState<LevelPresetRoute | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedServer, setSelectedServer] = useState<string>('ALL');
+  const [includeUniversal, setIncludeUniversal] = useState<boolean>(true);
   const [sortBy, setSortBy] = useState<'rating' | 'level' | 'newest'>('rating');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [refreshStatsKey, setRefreshStatsKey] = useState(0);
 
   // Form State for creating a route
   const [routeName, setRouteName] = useState('');
+  const [routeServer, setRouteServer] = useState<GuideServer>('All');
   const [minLevel, setMinLevel] = useState(1);
   const [maxLevel, setMaxLevel] = useState(20);
   const [routeRegion, setRouteRegion] = useState(REGIONS[0] || 'Hidell Plains');
@@ -143,6 +149,7 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
       id: newId,
       name: routeName.trim(),
       levelRange: `Lv ${minLevel} - ${maxLevel}`,
+      server: routeServer,
       description: routeDescription.trim() || 'Custom community power-leveling route.',
       region: routeRegion,
       quests: selectedQuests,
@@ -160,6 +167,7 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
 
     // Reset Form
     setRouteName('');
+    setRouteServer('All');
     setRouteDescription('');
     setSelectedQuests([]);
     setIsCreateModalOpen(false);
@@ -181,13 +189,24 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
 
   // Filter and Sort routes
   const filteredRoutes = routes.filter(r => {
+    // Server filtering
+    if (selectedServer !== 'ALL') {
+      const srv = r.server || 'All';
+      if (includeUniversal) {
+        if (srv !== selectedServer && srv !== 'All') return false;
+      } else {
+        if (srv !== selectedServer) return false;
+      }
+    }
+
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
       r.name.toLowerCase().includes(q) ||
       r.description.toLowerCase().includes(q) ||
       r.region.toLowerCase().includes(q) ||
-      r.levelRange.toLowerCase().includes(q)
+      r.levelRange.toLowerCase().includes(q) ||
+      (r.server && r.server.toLowerCase().includes(q))
     );
   }).sort((a, b) => {
     const statsA = getItemEngagementStats(a.id);
@@ -283,8 +302,8 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
-        <div className="relative w-full sm:w-80">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-3 shadow-lg">
+        <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
@@ -295,19 +314,61 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <span className="text-xs text-slate-400 flex items-center gap-1">
-            <ArrowUpDown className="w-3.5 h-3.5" /> Sort:
-          </span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-semibold focus:outline-none focus:border-amber-500/60"
-          >
-            <option value="rating">Top Rated (Community Votes)</option>
-            <option value="level">Level Requirement (Ascending)</option>
-            <option value="newest">All Routes</option>
-          </select>
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+          {/* Relevant Server Filter */}
+          {(() => {
+            const currentTheme = getServerBadgeTheme(selectedServer === 'ALL' ? 'All' : selectedServer);
+            return (
+              <div className={`flex items-center gap-1.5 border rounded-xl px-2.5 py-1 transition-all ${
+                selectedServer === 'ALL' ? 'bg-slate-950 border-slate-800' : `${currentTheme.bgClass} ${currentTheme.borderClass}`
+              }`}>
+                <Server className={`w-3.5 h-3.5 shrink-0 ${currentTheme.textClass}`} />
+                <span className="text-xs text-slate-400 font-medium hidden sm:inline">Server:</span>
+                <select
+                  id="select-route-server-filter"
+                  value={selectedServer}
+                  onChange={(e) => setSelectedServer(e.target.value)}
+                  className={`bg-transparent text-xs font-bold focus:outline-none cursor-pointer ${currentTheme.textClass}`}
+                  title="Filter routes by relevant server"
+                >
+                  <option value="ALL" className="bg-slate-950 text-slate-200">🌐 All Servers</option>
+                  <option value="Rising" className="bg-[#2b1e09] text-[#facc15]">⚡ Rising</option>
+                  <option value="Revival" className="bg-[#2d0b0e] text-[#f87171]">🌿 Revival</option>
+                  <option value="Legacy" className="bg-[#1e232a] text-[#e2e8f0]">🏛️ Legacy</option>
+                </select>
+              </div>
+            );
+          })()}
+
+          {selectedServer !== 'ALL' && (
+            <button
+              type="button"
+              onClick={() => setIncludeUniversal(!includeUniversal)}
+              className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${
+                includeUniversal
+                  ? 'bg-amber-950/40 text-amber-300 border-amber-500/50 hover:bg-amber-900/40'
+                  : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+              }`}
+              title="Toggle including universal 'All' routes when filtering by server"
+            >
+              <span>{includeUniversal ? '✓ Incl. All' : 'Strict Only'}</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1">
+            <span className="text-xs text-slate-400 flex items-center gap-1">
+              <ArrowUpDown className="w-3.5 h-3.5 text-amber-400" /> Sort:
+            </span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="bg-transparent text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer"
+            >
+              <option value="rating" className="bg-slate-950 text-slate-200">⭐ Top Rated</option>
+              <option value="level" className="bg-slate-950 text-slate-200">📈 Level Requirement</option>
+              <option value="newest" className="bg-slate-950 text-slate-200">✨ All Routes</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -358,6 +419,7 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
                     <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
                       {route.levelRange}
                     </span>
+                    <ServerBadge server={route.server || 'All'} size="xs" />
                     {isPreset ? (
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/30">
                         Official Guide
@@ -534,6 +596,28 @@ export const LevelingRoutes: React.FC<LevelingRoutesProps> = ({
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/60"
                   required
                 />
+              </div>
+
+              {/* Relevant Server */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <Server className="w-3.5 h-3.5 text-amber-400" />
+                    Relevant Server *
+                  </label>
+                  <ServerBadge server={routeServer} size="xs" />
+                </div>
+                <select
+                  id="select-route-create-server"
+                  value={routeServer}
+                  onChange={(e) => setRouteServer(e.target.value as GuideServer)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 font-medium focus:outline-none focus:border-amber-500/60"
+                >
+                  <option value="All">🌐 All (Universal to all servers)</option>
+                  <option value="Rising">⚡ Rising Server</option>
+                  <option value="Revival">🌿 Revival Server</option>
+                  <option value="Legacy">🏛️ Legacy Server</option>
+                </select>
               </div>
 
               {/* Level Range & Region */}

@@ -119,8 +119,11 @@ export interface LevelPresetRoute {
   levelRange: string;
   description: string;
   region: string;
+  server?: GuideServer;
   minVersion?: GameVersion;
   quests: { questId: string; quantity: number }[];
+  author?: string;
+  createdAt?: number;
 }
 
 // ==================== VOCATIONS & JOB TRAINING (ジョブ修練) ====================
@@ -340,10 +343,13 @@ export interface ItemEngagementStats {
   createdAt: number;
 }
 
+export type GuideServer = 'All' | 'Rising' | 'Revival' | 'Legacy';
+
 export interface GuideSubPage {
   id: string;
   title: string;
   category: 'Progression' | 'Combat & Classes' | 'Pawns' | 'Crafting & Gear' | 'Raids & Bosses' | 'Server Rules' | 'Community';
+  server?: GuideServer;
   author: string;
   authorId?: string;
   authorClan?: string;
@@ -381,6 +387,7 @@ export interface JournalQuestion {
   question: string;
   answer: string;
   category: JournalCategory;
+  server?: GuideServer;
   tags: string[];
   source?: string;
   date?: string;

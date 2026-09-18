@@ -29,6 +29,7 @@ export async function fetchRemoteGuides(): Promise<RemoteGuidesResponse> {
       id: g.id,
       title: g.title,
       category: g.category || 'Community',
+      server: g.server || 'All',
       author: g.author || 'Anonymous Arisen',
       authorId: g.author_id || g.authorId,
       lastUpdated: g.last_updated || g.lastUpdated || 'Season 3.4',

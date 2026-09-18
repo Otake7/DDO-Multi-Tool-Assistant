@@ -119,7 +119,7 @@ export const BBM_BRACELETS_DATA: BBMBraceletSeal[] = [
     tier: 'SS',
     max: '30',
     category: 'Core Stats',
-    tierDescription: 'SS Tier - Absolute priority flat stat roll for physical red vocations',
+    tierDescription: 'SS Tier - Absolute priority flat stat roll for physical vocations',
     recommendedAction: 'Keep',
     explanation: 'Adds flat Physical Attack to weapons. Absolute top tier roll (SS) for all melee physical vocations (Fighter, Hunter, Seeker, Warrior, Alchemist, High Scepter). Never seal.',
     vocations: ['Fighter', 'Hunter', 'Seeker', 'Warrior', 'Alchemist', 'High Scepter']

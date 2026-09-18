@@ -84,6 +84,7 @@ async function ensureDbSchema() {
           id VARCHAR(120) PRIMARY KEY,
           title VARCHAR(200) NOT NULL,
           category VARCHAR(60) NOT NULL DEFAULT 'Progression',
+          server VARCHAR(30) DEFAULT 'All',
           author VARCHAR(100) NOT NULL DEFAULT 'Arisen',
           author_id VARCHAR(120),
           summary TEXT,
@@ -95,17 +96,22 @@ async function ensureDbSchema() {
           is_builtin BOOLEAN DEFAULT FALSE,
           created_at BIGINT NOT NULL
         );
+        ALTER TABLE ddon_adventure_guides ADD COLUMN IF NOT EXISTS server VARCHAR(30) DEFAULT 'All';
+        -- Delete test "x" guide
+        DELETE FROM ddon_adventure_guides WHERE LOWER(TRIM(title)) = 'x' OR id = 'x';
 
         CREATE TABLE IF NOT EXISTS ddon_leveling_routes (
           id VARCHAR(120) PRIMARY KEY,
           name VARCHAR(150) NOT NULL,
           level_range VARCHAR(50) NOT NULL,
           region VARCHAR(80) NOT NULL,
+          server VARCHAR(30) DEFAULT 'All',
           description TEXT,
           quests JSONB NOT NULL DEFAULT '[]'::jsonb,
           author VARCHAR(100) DEFAULT 'Community Arisen',
           created_at BIGINT NOT NULL
         );
+        ALTER TABLE ddon_leveling_routes ADD COLUMN IF NOT EXISTS server VARCHAR(30) DEFAULT 'All';
 
         CREATE TABLE IF NOT EXISTS ddon_feedback (
           id VARCHAR(120) PRIMARY KEY,
@@ -609,10 +615,13 @@ app.get('/api/guides', async (req, res) => {
       const result = await db.query('SELECT * FROM ddon_adventure_guides ORDER BY created_at DESC LIMIT 150');
       const delResult = await db.query("SELECT id FROM ddon_deleted_items WHERE item_type = 'guide'");
       deletedIds = delResult.rows.map(r => r.id);
-      remoteRows = result.rows.map(row => ({
+      remoteRows = result.rows
+        .filter(row => (row.title || '').trim().toLowerCase() !== 'x' && row.id !== 'x')
+        .map(row => ({
         id: row.id,
         title: row.title,
         category: row.category,
+        server: row.server || 'All',
         author: row.author,
         authorId: row.author_id,
         summary: row.summary,
@@ -627,7 +636,8 @@ app.get('/api/guides', async (req, res) => {
       return res.json({ guides: remoteRows, deletedIds });
     }
     deletedIds = memoryDeletedItems.filter(x => x.itemType === 'guide').map(x => x.id);
-    return res.json({ guides: memoryGuides, deletedIds });
+    const filteredMemory = memoryGuides.filter(g => (g.title || '').trim().toLowerCase() !== 'x' && g.id !== 'x');
+    return res.json({ guides: filteredMemory, deletedIds });
   } catch (err: any) {
     console.error('[Get Guides Error]', err);
     return res.json({ guides: memoryGuides, deletedIds: [] });
@@ -648,18 +658,19 @@ app.post('/api/guides', async (req, res) => {
     // Cache in memory
     const existingIdx = memoryGuides.findIndex(g => g.id === guide.id);
     if (existingIdx !== -1) {
-      memoryGuides[existingIdx] = { ...memoryGuides[existingIdx], ...guide };
+      memoryGuides[existingIdx] = { ...memoryGuides[existingIdx], ...guide, server: guide.server || 'All' };
     } else {
-      memoryGuides.unshift({ ...guide, createdAt: now });
+      memoryGuides.unshift({ ...guide, server: guide.server || 'All', createdAt: now });
     }
 
     if (db) {
       await db.query(
-        `INSERT INTO ddon_adventure_guides (id, title, category, author, author_id, summary, tags, content, last_updated, is_builtin, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        `INSERT INTO ddon_adventure_guides (id, title, category, server, author, author_id, summary, tags, content, last_updated, is_builtin, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
          ON CONFLICT (id) DO UPDATE SET
            title = EXCLUDED.title,
            category = EXCLUDED.category,
+           server = EXCLUDED.server,
            author = EXCLUDED.author,
            author_id = COALESCE(EXCLUDED.author_id, ddon_adventure_guides.author_id),
            summary = EXCLUDED.summary,
@@ -670,6 +681,7 @@ app.post('/api/guides', async (req, res) => {
           guide.id,
           guide.title,
           guide.category || 'Progression',
+          guide.server || 'All',
           guide.author || 'Community Arisen',
           guide.authorId || null,
           guide.summary || '',
@@ -989,6 +1001,7 @@ app.get('/api/routes', async (req, res) => {
         name: row.name,
         levelRange: row.level_range,
         region: row.region,
+        server: row.server || 'All',
         description: row.description,
         quests: typeof row.quests === 'string' ? JSON.parse(row.quests) : row.quests,
         author: row.author,
@@ -1006,7 +1019,7 @@ app.get('/api/routes', async (req, res) => {
 app.post('/api/routes', async (req, res) => {
   try {
     await ensureDbSchema();
-    const { id, name, levelRange, region, description, quests, author } = req.body;
+    const { id, name, levelRange, region, server, description, quests, author } = req.body;
     if (!name || !quests) {
       return res.status(400).json({ error: 'Route name and quests are required.' });
     }
@@ -1014,25 +1027,27 @@ app.post('/api/routes', async (req, res) => {
     const routeId = id || `custom-route-${Date.now()}`;
     const now = Date.now();
     const db = getDbPool();
+    const routeServer = server || 'All';
 
     if (db) {
       await db.query(
-        `INSERT INTO ddon_leveling_routes (id, name, level_range, region, description, quests, author, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `INSERT INTO ddon_leveling_routes (id, name, level_range, region, server, description, quests, author, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          ON CONFLICT (id) DO UPDATE SET
            name = EXCLUDED.name,
            level_range = EXCLUDED.level_range,
            region = EXCLUDED.region,
+           server = EXCLUDED.server,
            description = EXCLUDED.description,
            quests = EXCLUDED.quests,
            author = EXCLUDED.author`,
-        [routeId, name, levelRange || 'Lv 1 - 100', region || 'Hidell Plains', description || '', JSON.stringify(quests || []), author || 'Community Arisen', now]
+        [routeId, name, levelRange || 'Lv 1 - 100', region || 'Hidell Plains', routeServer, description || '', JSON.stringify(quests || []), author || 'Community Arisen', now]
       );
       await db.query("DELETE FROM ddon_deleted_items WHERE id = $1 AND item_type = 'route'", [routeId]);
       return res.json({ success: true, id: routeId });
     }
 
-    const routeObj = { id: routeId, name, levelRange, region, description, quests, author, createdAt: now };
+    const routeObj = { id: routeId, name, levelRange, region, server: routeServer, description, quests, author, createdAt: now };
     memoryRoutes.unshift(routeObj);
     return res.json({ success: true, id: routeId });
   } catch (err: any) {
@@ -1534,6 +1549,16 @@ app.get('/rising-map/resources/enemyPositions/:file', async (req, res) => {
 app.get('/rising-map/images/*', (req, res) => {
   const imageSubpath = req.params[0];
   return res.redirect(302, `https://edelarrow.github.io/ddo-map-viewer-normal-channels/images/${imageSubpath}`);
+});
+
+// Fallback proxy / redirect for any other resources in /rising-map/resources/*
+app.get('/rising-map/resources/*', (req, res) => {
+  const resourceSubpath = req.params[0];
+  const localPath = path.join(process.cwd(), 'public', 'rising-map', 'resources', resourceSubpath);
+  if (fs.existsSync(localPath)) {
+    return res.sendFile(localPath);
+  }
+  return res.redirect(302, `https://edelarrow.github.io/ddo-map-viewer-normal-channels/resources/${resourceSubpath}`);
 });
 
 // --- Vite / Static Serve ---

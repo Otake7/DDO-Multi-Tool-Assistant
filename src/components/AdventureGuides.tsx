@@ -30,15 +30,23 @@ import {
   ThumbsDown,
   MessageSquare,
   Filter,
-  ArrowUpDown
+  ArrowUpDown,
+  Server
 } from 'lucide-react';
-import { GuideSubPage, UserProfile, GuideSortOption, VoteDirection } from '../types';
+import { GuideSubPage, GuideServer, UserProfile, GuideSortOption, VoteDirection } from '../types';
 import { BUILTIN_GUIDES } from '../data/guidesData';
 import { isImageUrl, normalizeImageUrl, isImgurAlbum } from '../utils/imageHelper';
 import { getItemEngagementStats, getUserVotesMap, voteItem } from '../utils/communityStats';
 import { CommunityCommentsSection } from './CommunityCommentsSection';
 import { fetchRemoteGuides, saveRemoteGuide, deleteRemoteGuide } from '../utils/guidesApi';
 import { GuideImageRenderer } from './GuideImageRenderer';
+import { ServerBadge } from './ServerBadge';
+import { getServerBadgeTheme } from '../utils/serverBadgeStyles';
+
+const isXGuide = (g: { title?: string; id?: string }) => {
+  const t = (g.title || '').trim().toLowerCase();
+  return t === 'x' || t === '"x"' || g.id === 'x' || g.id === 'custom-guide-x';
+};
 
 interface AdventureGuidesProps {
   onNavigateToTab?: (tab: string) => void;
@@ -71,7 +79,7 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
             'guide-crafting-and-upgrades',
             'guide-combat-debuff-combos'
           ]);
-          const userCustomOnly = parsed.filter((g: any) => !g.isBuiltIn && !deletedBuiltinIds.has(g.id));
+          const userCustomOnly = parsed.filter((g: any) => !g.isBuiltIn && !deletedBuiltinIds.has(g.id) && !isXGuide(g));
           return [...BUILTIN_GUIDES, ...userCustomOnly];
         }
       } catch (e) {
@@ -82,11 +90,13 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
   });
 
   const [selectedGuideId, setSelectedGuideId] = useState<string>(() => {
-    return BUILTIN_GUIDES[0]?.id || 'guide-rising-server-rules';
+    return BUILTIN_GUIDES[0]?.id || 'guide-general-fighter-endgame-build';
   });
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedServer, setSelectedServer] = useState<string>('ALL');
+  const [includeUniversal, setIncludeUniversal] = useState<boolean>(true);
 
   const userVotes = useMemo(() => getUserVotesMap(), [engagementUpdateCounter]);
 
@@ -101,6 +111,7 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
   const [editingGuideId, setEditingGuideId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState<string>('');
   const [editCategory, setEditCategory] = useState<GuideSubPage['category']>('Progression');
+  const [editServer, setEditServer] = useState<GuideServer>('All');
   const [editAuthor, setEditAuthor] = useState<string>('');
   const [editSummary, setEditSummary] = useState<string>('');
   const [editTags, setEditTags] = useState<string>('');
@@ -157,13 +168,19 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
         // Remote cloud guides next (persisted on Aiven)
         if (remoteGuides && remoteGuides.length > 0) {
           remoteGuides.forEach((rg) => {
+            if (isXGuide(rg)) {
+              deleteRemoteGuide(rg.id).catch(() => {});
+              return;
+            }
             if (!deletedSet.has(rg.id)) {
               map.set(rg.id, rg);
             }
           });
         }
-        // Local custom guides that haven't synced yet (excluding deleted)
-        prev.filter((g) => !g.isBuiltIn && !map.has(g.id) && !deletedSet.has(g.id)).forEach((cg) => map.set(cg.id, cg));
+        // Local custom guides that haven't synced yet (excluding deleted and x)
+        prev
+          .filter((g) => !g.isBuiltIn && !map.has(g.id) && !deletedSet.has(g.id) && !isXGuide(g))
+          .forEach((cg) => map.set(cg.id, cg));
         return Array.from(map.values());
       });
     } catch (e) {
@@ -190,6 +207,16 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
     const list = guides.filter((g) => {
       const matchCat = selectedCategory === 'ALL' || g.category === selectedCategory;
       if (!matchCat) return false;
+
+      const guideServer = g.server || 'All';
+      const matchServer = (() => {
+        if (selectedServer === 'ALL') return true;
+        if (includeUniversal) {
+          return guideServer === selectedServer || guideServer === 'All';
+        }
+        return guideServer === selectedServer;
+      })();
+      if (!matchServer) return false;
 
       if (!searchQuery.trim()) return true;
       const q = searchQuery.toLowerCase().trim();
@@ -220,7 +247,7 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
       }
       return 0;
     });
-  }, [guides, selectedCategory, searchQuery, guideSortOption, engagementUpdateCounter]);
+  }, [guides, selectedCategory, selectedServer, includeUniversal, searchQuery, guideSortOption, engagementUpdateCounter]);
 
   const activeGuide = useMemo(() => {
     return guides.find((g) => g.id === selectedGuideId) || filteredGuides[0] || guides[0];
@@ -238,6 +265,7 @@ export const AdventureGuides: React.FC<AdventureGuidesProps> = ({
     setEditingGuideId(null);
     setEditTitle('');
     setEditCategory('Progression');
+    setEditServer('All');
     setEditAuthor(authorWithClan);
     setEditSummary('');
     setEditTags('Leveling, Guide, Strategy');
@@ -269,6 +297,7 @@ Explain the strategy or farming route in detail...
     setEditingGuideId(guide.id);
     setEditTitle(guide.title);
     setEditCategory(guide.category);
+    setEditServer(guide.server || 'All');
     setEditAuthor(guide.author);
     setEditSummary(guide.summary);
     setEditTags(guide.tags.join(', '));
@@ -295,6 +324,7 @@ Explain the strategy or farming route in detail...
         id: editingGuideId,
         title: editTitle.trim(),
         category: editCategory,
+        server: editServer,
         author: editAuthor.trim() || 'Arisen Scholar',
         authorId: existing?.authorId || currentUser?.id,
         summary: editSummary.trim() || editTitle.trim(),
@@ -317,6 +347,7 @@ Explain the strategy or farming route in detail...
         id: newId,
         title: editTitle.trim(),
         category: editCategory,
+        server: editServer,
         author: editAuthor.trim() || 'Arisen Scholar',
         authorId: currentUser?.id,
         summary: editSummary.trim() || editTitle.trim(),
@@ -656,6 +687,46 @@ Explain the strategy or farming route in detail...
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-between md:justify-end">
+            {/* Relevant Server Filter */}
+            {(() => {
+              const currentTheme = getServerBadgeTheme(selectedServer === 'ALL' ? 'All' : selectedServer);
+              return (
+                <div className={`flex items-center gap-1.5 border rounded-xl px-2.5 py-1 transition-all ${
+                  selectedServer === 'ALL' ? 'bg-slate-950 border-slate-800' : `${currentTheme.bgClass} ${currentTheme.borderClass}`
+                }`}>
+                  <Server className={`w-3.5 h-3.5 shrink-0 ${currentTheme.textClass}`} />
+                  <span className="text-xs text-slate-400 font-medium hidden sm:inline">Server:</span>
+                  <select
+                    id="select-server-filter"
+                    value={selectedServer}
+                    onChange={(e) => setSelectedServer(e.target.value)}
+                    className={`bg-transparent text-xs font-bold focus:outline-none cursor-pointer ${currentTheme.textClass}`}
+                    title="Filter guides by relevant server"
+                  >
+                    <option value="ALL" className="bg-slate-950 text-slate-200">🌐 All Servers</option>
+                    <option value="Rising" className="bg-[#2b1e09] text-[#facc15]">⚡ Rising</option>
+                    <option value="Revival" className="bg-[#2d0b0e] text-[#f87171]">🌿 Revival</option>
+                    <option value="Legacy" className="bg-[#1e232a] text-[#e2e8f0]">🏛️ Legacy</option>
+                  </select>
+                </div>
+              );
+            })()}
+
+            {selectedServer !== 'ALL' && (
+              <button
+                type="button"
+                onClick={() => setIncludeUniversal(!includeUniversal)}
+                className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${
+                  includeUniversal
+                    ? 'bg-amber-950/40 text-amber-300 border-amber-500/50 hover:bg-amber-900/40'
+                    : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+                }`}
+                title="Toggle including universal 'All' guides when filtering by server"
+              >
+                <span>{includeUniversal ? '✓ Incl. All' : 'Strict Only'}</span>
+              </button>
+            )}
+
             {/* Guide Sorting Filter */}
             <div className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1">
               <Filter className="w-3.5 h-3.5 text-amber-400" />
@@ -742,6 +813,7 @@ Explain the strategy or farming route in detail...
                               User Created
                             </span>
                           )}
+                          <ServerBadge server={guide.server || 'All'} size="xs" />
                         </div>
 
                         <h4 className={`text-sm font-bold leading-snug line-clamp-2 ${isSelected ? 'text-amber-300' : 'text-slate-200 group-hover:text-white'}`}>
@@ -809,6 +881,13 @@ Explain the strategy or farming route in detail...
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
                       {activeGuide.category}
                     </span>
+                    {!activeGuide.isBuiltIn && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 font-mono">
+                        User Created
+                      </span>
+                    )}
+                    <ServerBadge server={activeGuide.server || 'All'} size="sm" prefix="Server: " />
+                    <span className="text-slate-600">•</span>
                     <span className="text-xs text-slate-400 flex items-center gap-1">
                       <User className="w-3.5 h-3.5" />
                       <span>{activeGuide.author}</span>
@@ -1009,6 +1088,27 @@ Explain the strategy or farming route in detail...
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
+                  <label className="text-slate-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <Server className="w-3.5 h-3.5 text-amber-400" />
+                    Relevant Server
+                  </label>
+                  <ServerBadge server={editServer} size="xs" />
+                </div>
+                <select
+                  id="guide-edit-relevant-server"
+                  value={editServer}
+                  onChange={(e) => setEditServer(e.target.value as GuideServer)}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-xl focus:outline-none focus:border-amber-500 font-medium"
+                >
+                  <option value="All">🌐 All (Universal to all servers)</option>
+                  <option value="Rising">⚡ Rising Server</option>
+                  <option value="Revival">🌿 Revival Server</option>
+                  <option value="Legacy">🏛️ Legacy Server</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
                   <label className="text-slate-300 font-bold uppercase tracking-wider">Author Name</label>
                   <span className="text-[11px] text-amber-400 font-semibold flex items-center gap-1">
                     <Sparkles className="w-3 h-3" /> Arisen Profile
@@ -1023,7 +1123,7 @@ Explain the strategy or farming route in detail...
                 />
               </div>
 
-              <div className="space-y-1 sm:col-span-2">
+              <div className="space-y-1">
                 <label className="text-slate-300 font-bold uppercase tracking-wider">Tags (comma separated)</label>
                 <input
                   type="text"

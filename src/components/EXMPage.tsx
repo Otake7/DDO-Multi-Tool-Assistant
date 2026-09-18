@@ -475,7 +475,13 @@ export const EXMPage: React.FC<EXMPageProps> = ({ onNavigateToTab }) => {
                   </div>
                   <div className="flex items-center gap-2 pt-2 border-t border-slate-900 text-xs text-slate-400">
                     <Users className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                    <span>Party Format: <strong className="text-blue-300 font-semibold">4-Player Extreme Mission</strong> (Max 4 participants, Arisen & Pawns supported)</span>
+                    <span>
+                      Party Format:{' '}
+                      <strong className="text-blue-300 font-semibold">
+                        {currentExm.partySize?.includes('8') ? '8-Player Extreme Mission' : '4-Player Extreme Mission'}
+                      </strong>{' '}
+                      (Max {currentExm.partySize?.includes('8') ? '8' : '4'} participants, Arisen & Pawns supported)
+                    </span>
                   </div>
                 </div>
               </div>

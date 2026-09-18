@@ -892,6 +892,7 @@ export default function App() {
         {/* Tab 5: Find resources and enemies (Interactive Map & Spot Search) */}
         {activeTab === 'map' && (
           <FindResourcesAndEnemies
+            currentUser={currentUser}
             initialSearchQuery={spotSearchQuery}
             initialCategory={spotSearchCategory}
             initialStageScope={spotSearchStageScope}

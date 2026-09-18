@@ -20,11 +20,14 @@ import {
   Calendar,
   Image as ImageIcon,
   ZoomIn,
-  X
+  X,
+  Server
 } from 'lucide-react';
-import { JournalQuestion } from '../types';
+import { JournalQuestion, GuideServer } from '../types';
 import { INITIAL_JOURNAL_QUESTIONS, JOURNAL_CATEGORIES, searchJournalQuestions } from '../data/journalData';
 import { isImageUrl, normalizeImageUrl } from '../utils/imageHelper';
+import { ServerBadge } from './ServerBadge';
+import { getServerBadgeTheme } from '../utils/serverBadgeStyles';
 
 interface AskTheJournalProps {
   onNavigateToTab?: (tab: string) => void;
@@ -41,7 +44,11 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          const initialMap = new Map(INITIAL_JOURNAL_QUESTIONS.map(q => [q.id, q.server]));
+          return parsed.map((item: JournalQuestion) => ({
+            ...item,
+            server: item.server || initialMap.get(item.id) || (item.category === 'Installation & Setup' || item.category === 'Account & Login' ? 'Rising' : 'All')
+          }));
         }
       } catch (e) {
         console.error('Failed to load saved Dogma Rising Q&A questions', e);
@@ -52,6 +59,8 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [selectedServer, setSelectedServer] = useState<string>('ALL');
+  const [includeUniversal, setIncludeUniversal] = useState<boolean>(true);
   const [expandedId, setExpandedId] = useState<string | null>(() => INITIAL_JOURNAL_QUESTIONS[0]?.id || null);
   const [helpfulFeedback, setHelpfulFeedback] = useState<Record<string, boolean>>({});
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -61,6 +70,7 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
   const [newQuestionText, setNewQuestionText] = useState<string>('');
   const [newAnswerText, setNewAnswerText] = useState<string>('');
   const [newCategory, setNewCategory] = useState<JournalQuestion['category']>('Gameplay Basics');
+  const [newServer, setNewServer] = useState<GuideServer>('All');
   const [newTags, setNewTags] = useState<string>('');
   const [newSource, setNewSource] = useState<string>('');
 
@@ -98,6 +108,18 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
   // Filtered and Searched Questions
   const filteredQuestions = useMemo(() => {
     let list = questions;
+
+    // Server filtering
+    if (selectedServer !== 'ALL') {
+      list = list.filter((q) => {
+        const srv = q.server || 'All';
+        if (includeUniversal) {
+          return srv === selectedServer || srv === 'All';
+        }
+        return srv === selectedServer;
+      });
+    }
+
     if (selectedCategory !== 'ALL') {
       list = list.filter((q) => q.category === selectedCategory);
     }
@@ -116,12 +138,14 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
         const answerLower = item.answer.toLowerCase();
         const tagsLower = item.tags.map((t) => t.toLowerCase());
         const sourceLower = (item.source || '').toLowerCase();
+        const serverLower = (item.server || 'all').toLowerCase();
         const numberStr = item.number ? `${item.number}` : '';
 
         // Exact phrase match
         if (questionLower.includes(qLower)) score += 100;
         if (answerLower.includes(qLower)) score += 50;
         if (sourceLower.includes(qLower)) score += 40;
+        if (serverLower.includes(qLower)) score += 30;
         if (numberStr === qLower || `#${numberStr}` === qLower) score += 120;
 
         // Term matches
@@ -130,6 +154,7 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
           if (tagsLower.some((t) => t.includes(term))) score += 15;
           if (answerLower.includes(term)) score += 10;
           if (sourceLower.includes(term)) score += 8;
+          if (serverLower.includes(term)) score += 8;
         }
 
         return { item, score };
@@ -137,7 +162,7 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
       .filter((res) => res.score > 0)
       .sort((a, b) => b.score - a.score || (b.item.popularity || 0) - (a.item.popularity || 0))
       .map((res) => res.item);
-  }, [questions, selectedCategory, searchQuery]);
+  }, [questions, selectedServer, includeUniversal, selectedCategory, searchQuery]);
 
   const handleToggleExpand = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -171,6 +196,7 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
         newAnswerText.trim() ||
         'This inquiry has been logged into the Dogma Rising database. Community veterans will update verified server details shortly.',
       category: newCategory,
+      server: newServer,
       tags: tagArray.length > 0 ? tagArray : ['Community Question'],
       popularity: 50,
       source: newSource.trim() || 'Community Arisen',
@@ -181,6 +207,7 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
     setExpandedId(newEntry.id);
     setNewQuestionText('');
     setNewAnswerText('');
+    setNewServer('All');
     setNewTags('');
     setNewSource('');
     setIsAddingQuestion(false);
@@ -276,9 +303,62 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
           </div>
         </div>
 
-        {/* Category Filters Bar */}
-        <div className="pt-2 border-t border-slate-800 flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto py-1">
+        {/* Server & Category Filters Bar */}
+        <div className="pt-3 border-t border-slate-800 space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Relevant Server Filter */}
+              {(() => {
+                const currentTheme = getServerBadgeTheme(selectedServer === 'ALL' ? 'All' : selectedServer);
+                return (
+                  <div className={`flex items-center gap-1.5 border rounded-xl px-2.5 py-1.5 transition-all ${
+                    selectedServer === 'ALL' ? 'bg-slate-950 border-slate-800' : `${currentTheme.bgClass} ${currentTheme.borderClass}`
+                  }`}>
+                    <Server className={`w-3.5 h-3.5 shrink-0 ${currentTheme.textClass}`} />
+                    <span className="text-xs text-slate-400 font-medium hidden sm:inline">Server:</span>
+                    <select
+                      id="select-journal-server-filter"
+                      value={selectedServer}
+                      onChange={(e) => setSelectedServer(e.target.value)}
+                      className={`bg-transparent text-xs font-bold focus:outline-none cursor-pointer ${currentTheme.textClass}`}
+                      title="Filter questions by relevant server"
+                    >
+                      <option value="ALL" className="bg-slate-950 text-slate-200">🌐 All Servers</option>
+                      <option value="Rising" className="bg-[#2b1e09] text-[#facc15]">⚡ Rising</option>
+                      <option value="Revival" className="bg-[#2d0b0e] text-[#f87171]">🌿 Revival</option>
+                      <option value="Legacy" className="bg-[#1e232a] text-[#e2e8f0]">🏛️ Legacy</option>
+                    </select>
+                  </div>
+                );
+              })()}
+
+              {selectedServer !== 'ALL' && (
+                <button
+                  type="button"
+                  onClick={() => setIncludeUniversal(!includeUniversal)}
+                  className={`px-2 py-1.5 rounded-xl text-[11px] font-semibold border transition-all cursor-pointer flex items-center gap-1 ${
+                    includeUniversal
+                      ? 'bg-amber-950/40 text-amber-300 border-amber-500/50 hover:bg-amber-900/40'
+                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+                  }`}
+                  title="Toggle including universal 'All' questions when filtering by server"
+                >
+                  <span>{includeUniversal ? '✓ Incl. All' : 'Strict Only'}</span>
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => setIsAddingQuestion(!isAddingQuestion)}
+              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>{isAddingQuestion ? 'Close Form' : 'Add Custom Q&A'}</span>
+            </button>
+          </div>
+
+          {/* Categories horizontal scroll row */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full py-1">
             {JOURNAL_CATEGORIES.map((cat) => (
               <button
                 key={cat}
@@ -293,14 +373,6 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
               </button>
             ))}
           </div>
-
-          <button
-            onClick={() => setIsAddingQuestion(!isAddingQuestion)}
-            className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-xl text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <PlusCircle className="w-3.5 h-3.5" />
-            <span>{isAddingQuestion ? 'Close Form' : 'Add Custom Q&A'}</span>
-          </button>
         </div>
       </div>
 
@@ -338,7 +410,28 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
               </select>
             </div>
 
+            {/* Relevant Server */}
             <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-slate-300 font-bold uppercase flex items-center gap-1">
+                  <Server className="w-3 h-3 text-amber-400" />
+                  Relevant Server
+                </label>
+                <ServerBadge server={newServer} size="xs" />
+              </div>
+              <select
+                value={newServer}
+                onChange={(e) => setNewServer(e.target.value as GuideServer)}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 text-slate-200 rounded-xl focus:outline-none focus:border-amber-500"
+              >
+                <option value="All">🌐 All (Universal to all servers)</option>
+                <option value="Rising">⚡ Rising Server</option>
+                <option value="Revival">🌿 Revival Server</option>
+                <option value="Legacy">🏛️ Legacy Server</option>
+              </select>
+            </div>
+
+            <div className="space-y-1 sm:col-span-2">
               <label className="text-slate-300 font-bold uppercase">Tags (comma separated)</label>
               <input
                 type="text"
@@ -391,14 +484,15 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
       )}
 
       {/* Results Header */}
-      <div className="flex items-center justify-between px-1">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1">
         <h3 className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
           <Database className="w-4 h-4 text-amber-400" />
           <span>Dogma Rising Q&A Archive ({filteredQuestions.length} Entries)</span>
         </h3>
-        <span className="text-xs text-slate-500">
-          Filtered by: <strong className="text-amber-300">{selectedCategory}</strong>
-        </span>
+        <div className="flex items-center gap-3 text-xs text-slate-500">
+          <span>Server: <strong className="text-amber-300">{selectedServer === 'ALL' ? 'All' : selectedServer}</strong></span>
+          <span>Filtered by: <strong className="text-amber-300">{selectedCategory}</strong></span>
+        </div>
       </div>
 
       {/* List of Questions & Answers */}
@@ -444,6 +538,7 @@ export const AskTheJournal: React.FC<AskTheJournalProps> = ({ onNavigateToTab })
                           #{item.number}
                         </span>
                       )}
+                      <ServerBadge server={item.server || 'All'} size="xs" />
                       <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
                         {item.category}
                       </span>
