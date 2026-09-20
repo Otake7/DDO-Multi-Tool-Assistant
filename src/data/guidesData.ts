@@ -258,6 +258,184 @@ You won't kill faster, it's mostly already the fastest. But higher investment ca
 
 ### Any suggestion on a green to buff & accompany them?
 Any decent EA build. But honestly your pawns won't even need any help with stamina.`
+  },
+  {
+    id: 'guide-hunter-endgame-build-lea-decelle',
+    title: 'HUNTER BUILD',
+    category: 'Combat & Classes',
+    server: 'All',
+    author: 'Lea Decelle (Formatting @Dr. Aven)',
+    lastUpdated: 'Season 3.4',
+    tags: ['Hunter', 'Endgame', 'IR 105', 'Augments', 'Custom Skills', 'Main Palette', 'Secondary Palette', 'Triflip', 'Emblem'],
+    summary: 'Comprehensive endgame Hunter build by Lea Decelle with formatting by Dr. Aven. Covers build augments, core damage splits, crested augments, main and secondary skill palettes, backwards retreat mechanics, and accessories/emblems.',
+    isBuiltIn: true,
+    content: `# HUNTER BUILD
+
+This assumes full IR 105 armor as described in 📣ddon-guidesGeneral Late Game Gear Guide (3….
+
+### Credits
+* **Guide by**: @Lea Decelle
+* **Formatting**: @Dr. Aven
+
+Thanks to everyone producing/sharing information on this topic, this base knowledge formed by small individual action in the community did help a lot in getting started to work on this guide.
+
+For any detailed skill/augment description see The Knowledge Libary.
+
+---
+
+### Index
+* **Augments**
+  * Build Augments
+  * Core Damage Augments
+  * Crested Augments
+* **Custom Skills**
+  * Main Palette
+  * Secondary Palette + honorable mentions
+  * A Note on Backwards Retreat
+* **Accessories**
+  * Emblem
+  * Other
+* **Arrow type**
+
+======================================================================
+
+## Augments
+
+### Build Augments
+* **Attack Expansion(Hunter)** significantly eases the rather strict positioning requirements of the class by giving you far more range to deal full damage.
+* **Arrow Increase(Hunter)** is absolutely required as it extends the time between reloads with 13 more arrows per quiver.
+* **Decisive Shot(Hunter)** is roughly equivalent to +32 Strength when hitting weakpoints rather than the 30% damage it lists. Due to it lowering damage to non-weakpoints, consider swapping it out for a Proficiency augment whenever possible.
+* **Pleasant Attack(Hunter)** increases damage by 10% at perfect range. Does not affect arc fired shots such as Cloudburst Volley.
+* **Fire Attack(Sorcerer)** increases all damage when using a Burning crested weapon. While it’s still beneficial to make the other elemental weapons for enemy weaknesses, note that Crimson Arrow and any Explosive skills are always Fire damage.
+* **Relaxedness(Alchemist)** is used at lv6 due to the very high stamina costs of the class.
+
+Hunter is brutally tight on augment space leaving little room for Chance/Exhaust Attack augments, with only **Deep Aggression(Seeker:S3 HO tree)** as the cheapest source.
+
+Hunter will also seriously struggle to maintain high stamina without support from **Wall Glasta (T)** or critical hp augments, which has those otherwise staple augments lose a lot of value.
+
+![Hunter Build Augments](/images/guides/hunter-build-augments.png)
+[View Build Augments Screenshot](https://cdn.discordapp.com/attachments/1494111050541568235/1494111164433694831/image.png?ex=6ab06674&is=6aaf14f4&hm=c9a2eb60cc858f7493de2ed77f00f5b6f90f6a573668430b36966ed18c5fe374&)
+
+--------------------------------------------------------------------------------------------------------------------
+
+### Core Damage Augments
+Depending on if you face Chance Core or Elemental Core monsters you want to slot for Chance attack or Exhaust attack.
+
+Those core types are mutually exclusive mechanics, so unless you fight multiple types of monsters, only slot the one relevant type.
+
+#### Chance Core (Chance Atk)
+* **Deep Aggression**(Seeker:S2 BO tree)
+* **Brave Attack**(Warrior)
+* **Fighting Spirit**(Warrior)
+
+#### Elemental Core (Exhaust Atk)
+* **Courageous Suppression**(High Scepter)
+* **Vigorous Suppression**(High Scepter)
+
+--------------------------------------------------------------------------------------------------------------------
+
+### Crested Augments
+* **Inquiry** to increase stamina potion recovery. You’re going to need to drink these a lot, might as well make them count.
+* **Perfect Reload** is a purely comfort augment to ease the timing requirement of Perfect Reloads. If you prefer something like Self Feedback feel free to swap this out.
+* **Precision** lowers the crosshair bloom when moving.
+* The rest are standard crests as described in 📣ddon-guidesGeneral Late Game Gear Guide (3….
+* For more info on how to get such crests, see nieznane.
+
+![Hunter Crested Augments](/images/guides/hunter-crested-augments.png)
+[View Crested Augments Screenshot](https://cdn.discordapp.com/attachments/1494111050541568235/1494111487877451876/image.png?ex=6ab066c1&is=6aaf1541&hm=e3aaa00aed1b0f35b383fa2a2af9aa6974d078960d9d1d09ab54903a8a10b4ec&)
+
+TO THE TOP
+======================================================================
+
+## Custom Skills
+
+### Main Palette
+* **Backwards Retreat** has good iframes to avoid enemy attacks and can animation cancel most other skills resulting in dps gains, with the notable exceptions of Crimson Arrow and Reload.
+* **Cloudburst Volley** does good damage in a wide aoe. Semi-smart targeting means it consistently hits any weakpoints exposed to the sky. Is also your best damage skill in any situations where it’s impossible to maintain perfect range. Unfortunately struggles to target Golem weakpoints. Can cancel both the pre-cast and the firing animation for significantly more dps.
+* **Whirling Arrow (T)** does good damage to boss cores. Its damage and debilitation buildup are otherwise underwhelming. Can cancel the firing animation.
+* **Triad Shot** is your best down dps option in most situations. Can be instantly cancelled with Backwards Retreat on firing, commonly called a “triflip”. Can also cancel the initial pre-cast.
+
+* Consider using **Threefold Arrow** when the enemy weakpoint is too small to effectively land triflips.
+* Consider using **Demon Arrow** when the enemy is overleveled enough where the 9999 cap will not significantly reduce its damage.
+* Consider using **Cloudburst Volley** when the enemy is positioned in a way where you cannot maintain perfect range on weakpoints.
+
+![Hunter Main Palette](/images/guides/hunter-main-palette.png)
+[View Main Palette Screenshot](https://cdn.discordapp.com/attachments/1494111050541568235/1494111631935017000/image.png?ex=6ab066e4&is=6aaf1564&hm=16e4ba75bc6ca15890ed66522a96843bfbf82a79e94b47c44172eab87956c3cb&)
+
+--------------------------------------------------------------------------------------------------------------------
+
+### Secondary Palette & Honorable Mentions
+* **Threefold Arrow (P)** is your best damage source for enemies who are too difficult or have weakpoints too small to hit with triflips. Despite the EX skill doubling Crimson Arrow damage, it’s still a slight damage loss to apply due to how quickly this skill depletes your quiver. Can cancel the initial pre-cast, but attempting to cancel the firing animation will interrupt the arrows being fired.
+* **Demon Arrow** is a very high burst damage skill, especially effective when fired with perfect timing. Can be difficult to land effectively as you cannot move while casting, and the 9999 cap means it's not good on downs. Can cancel the firing animation.
+
+#### Other Notable Options:
+* **Crimson Arrow** adds an additional Fire damage hit to each arrow fired and is applied to the entire current quiver. Takes around 3s to activate and generally does not boost damage enough to be worth using for dps. The main benefit to this skill is its ability to automatically detonate Explosive Arrow Volley, and should always be carried when using that skill. Is also a notable gain to apply in situations where you can’t attack anything.
+* **Explosive Arrow Volley** does good damage to War Ready armor when fired at the first charge level. Second charge doesn’t increase damage, instead only adds the two outside arrows which are usually way too far apart to land effectively. Will be far more widely useful once we get access to the (T) EX version, which turns it into a strong DoT effect and removes the need for Crimson Arrow. Can cancel the firing animation.
+* **Whirling Arrow (P)** has good debilitation buildup and good damage, but is quite weak against boss cores.
+* **Full Bend** can function as an easier to use alternative to Demon Arrow, but has significantly less damage potential. Can cancel the firing animation.
+
+![Hunter Secondary Palette & Honorable Mentions](/images/guides/hunter-secondary-palette.png)
+[View Secondary Palette Screenshot](https://cdn.discordapp.com/attachments/1494111050541568235/1494111696875290645/image.png?ex=6ab066f3&is=6aaf1573&hm=e549dcd7369981edd340e6de2162d7ee6f007a60860620f1ef76457c7a614ec5&)
+
+--------------------------------------------------------------------------------------------------------------------
+
+### A Note on Backwards Retreat
+> **Credit**: Credit here goes to @MadMax. Thanks for bringing this to my attention.
+
+There is evidence to suggest the lv5 and below back hop version of Backwards Retreat has slightly less animation frames than the lv6 flip. Considering how often skills are animation cancelled this could result in noticeably higher dps output. The lv6 version still has more iframes and less stamina cost. Consider this tradeoff when leveling the skill, if you have not already leveled it to lv6.
+
+⚠️ **It is not possible to lower a skill’s level.**
+
+TO THE TOP
+======================================================================
+
+## Accessories
+
+### Emblem
+#### Upgrades
+For a more complete explanation go check Knowledge Libary.
+
+As most current endgame encounter have chance cores, the prefered split is:
+* **Chance attack**: 40
+* **Exhaust Attack**: 18
+* **Phys. Attack**: 5
+
+#### Slots
+Two viable strategies here:
+* **4x 13% Pierce Earrings**
+* **4x 30 Physical Attack Bracelets**
+
+Note that Explosive Arrow Volley and Crimson Arrow are always Fire damage. Explosive Arrow Volley (T) unlock is still a long ways away, but can become a significant part of Hunter’s damage once we get there.
+
+See Draven’s fantastic Attack Values & Damage guide for the tradeoffs of each.
+
+These can be farmed in BBM, % Damage earrings from Abyss and Phys./Magick bracelets from Normal.
+
+![Hunter Emblem Upgrades](/images/guides/hunter-emblem-upgrades.png)
+[View Emblem Upgrades Screenshot](https://cdn.discordapp.com/attachments/1494111050541568235/1494111981131534346/image.png?ex=6ab06737&is=6aaf15b7&hm=f09bd7cfd5b70478f9a8eed52a6642e98eae4ff559d9db9ef29e025d42f89395&)
+
+![Hunter Accessories Slots](/images/guides/hunter-accessories-slots.png)
+[View Accessories Slots Screenshot](https://cdn.discordapp.com/attachments/1494111050541568235/1494112004456321166/image.png?ex=6ab0673d&is=6aaf15bd&hm=7c9b70bee6adae51bc82c6a5c65ea2f86dc4231eaaf4393d1d66adcd4d3b9f5b&)
+
+--------------------------------------------------------------------------------------------------------------------
+
+### Other Accessories
+* **2x 13% Pierce Earrings**
+* **2x 30 Physical Attack Bracelets**
+
+These can be farmed in BBM, % Damage earrings from Abyss and Phys./Magick bracelets from Normal.
+
+TO THE TOP
+======================================================================
+
+## Arrow Type
+* **Poison Arrows** can be useful for some extra damage, especially on bosses with large health pools.
+* **Oil Arrows** can be useful when you need your lantern for Slayer damage and are running a fire bow.
+* **Asinity Arrows** can apply Slow. I’m not normally a fan of this debilitation, but Hunter uses it quite well to maneuver around enemy attacks and maintain perfect distance longer than other debilitations might allow.
+* **Sleep Arrows** can also create long openings on bosses.
+
+All of these arrows have low debilitation buildup on their own. Several skills will also burn through arrows at an absurd rate, make sure to keep a large stockpile if you want to use these anyways.
+`
   }
 ];
 

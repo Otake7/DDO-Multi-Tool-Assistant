@@ -407,7 +407,7 @@ Explain the strategy or farming route in detail...
           const trimmed = line.trim();
 
           // Markdown Image Syntax: ![Alt text](image_url)
-          const mdImgMatch = trimmed.match(/^!\[(.*?)\]\((https?:\/\/[^\s\)]+)\)$/i);
+          const mdImgMatch = trimmed.match(/^!\[(.*?)\]\(([^\s\)]+)\)$/i);
           if (mdImgMatch) {
             const altText = mdImgMatch[1] || 'Guide Illustration';
             const rawUrl = mdImgMatch[2];
@@ -421,8 +421,8 @@ Explain the strategy or farming route in detail...
             );
           }
 
-          // Direct Standalone Image URL on its own line (e.g. Imgur, PNG, JPG, BMP)
-          if (trimmed.startsWith('http') && isImageUrl(trimmed)) {
+          // Direct Standalone Image URL on its own line (e.g. Imgur, PNG, JPG, BMP, or local /images/)
+          if ((trimmed.startsWith('http') || trimmed.startsWith('/')) && isImageUrl(trimmed)) {
             return (
               <GuideImageRenderer
                 key={idx}
@@ -430,6 +430,24 @@ Explain the strategy or farming route in detail...
                 altText="Guide Screenshot"
                 onPreview={(url) => setPreviewImageUrl(url)}
               />
+            );
+          }
+
+          if (trimmed === 'TO THE TOP' || trimmed === '[TO THE TOP](#)' || trimmed === '↑ TO THE TOP') {
+            return (
+              <div key={idx} className="flex justify-end pt-2 pb-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById('guide-detail-top');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    else window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="text-xs font-semibold text-amber-400 hover:text-amber-300 hover:underline cursor-pointer inline-flex items-center gap-1.5 bg-slate-900/90 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-800 transition-all shadow-sm"
+                >
+                  <span>↑ TO THE TOP</span>
+                </button>
+              </div>
             );
           }
 
@@ -457,7 +475,15 @@ Explain the strategy or farming route in detail...
               </h3>
             );
           }
-          if (trimmed.startsWith('---')) {
+          if (trimmed.startsWith('#### ')) {
+            return (
+              <h4 key={idx} className="text-sm sm:text-base font-bold text-amber-200/90 pt-1.5 flex items-center gap-1.5">
+                <span className="text-amber-500/60">####</span>
+                <span>{trimmed.replace('#### ', '')}</span>
+              </h4>
+            );
+          }
+          if (trimmed.startsWith('---') || trimmed.startsWith('===') || trimmed.startsWith('___') || /^[-=]{4,}$/.test(trimmed)) {
             return <hr key={idx} className="border-slate-800 my-4" />;
           }
           if (trimmed.startsWith('> ')) {
@@ -499,7 +525,7 @@ Explain the strategy or farming route in detail...
   // Helper for bold, code, links and inline image links
   const renderFormattedInline = (text: string) => {
     // Match bold, italic, code, markdown link [text](url), or raw URLs
-    const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`|\[.*?\]\(https?:\/\/[^\s\)]+\)|https?:\/\/[^\s<>"']+)/g);
+    const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|`.*?`|\[.*?\]\([^\s\)]+\)|https?:\/\/[^\s<>"']+)/g);
     return parts.map((part, pIdx) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return <strong key={pIdx} className="text-white font-bold">{part.slice(2, -2)}</strong>;
@@ -512,7 +538,7 @@ Explain the strategy or farming route in detail...
       }
 
       // Markdown Link: [label](url)
-      const linkMatch = part.match(/^\[(.*?)\]\((https?:\/\/[^\s\)]+)\)$/);
+      const linkMatch = part.match(/^\[(.*?)\]\(([^\s\)]+)\)$/);
       if (linkMatch) {
         const label = linkMatch[1];
         const rawUrl = linkMatch[2];
@@ -872,7 +898,7 @@ Explain the strategy or farming route in detail...
         {/* Right Column: Active Sub-Page Reader (8 cols) */}
         <div className="lg:col-span-8">
           {activeGuide ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl space-y-6 p-6 sm:p-8">
+            <div id="guide-detail-top" className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl space-y-6 p-6 sm:p-8">
               
               {/* Reader Top Bar & Action Controls */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">

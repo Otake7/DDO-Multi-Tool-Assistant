@@ -248,7 +248,7 @@ export const BESTIARY_SPECIES: BestiarySpecies[] = [
     name: 'Ogre / Demonkin / Ogrekin',
     category: 'Ogre / Demonkin / Ogrekin',
     explanation: 'This category includes bipedal monsters that are somewhat more intelligent than Demihumans. It includes all Orc variants, Apes, Ghouls and Ogre types (except Infected and War-Ready variants). Also includes Spinebacks, Little Spines and Cragger types. The Dwarf Orcs in Season 3 are also Ogres, even though it\'s easy to think they\'d be War-Ready.',
-    strategy: 'Orcs are medium-sized enemies who are usually weak to Lightning. They are smart and use weapons, and are also strong even when alone. Apes and Ghouls are chaotic, but you can dodge their rushing attacks fairly easily. Spinebacks and Little Spines can spin like a wheel and go around wildly. All Ogre enemies have Elemental Cores, except for Progenitors who have Chance Cores instead.',
+    strategy: 'Orcs are medium-sized enemies who are usually weak to Lightning. They are smart and use weapons, and are also strong even when alone. Apes and Ghouls are chaotic, but you can dodge their rushing attacks fairly easily. Spinebacks and Little Spines can spin like a wheel and go around wildly. All Ogrekin enemies have Chance Cores (slot Chance Attack to deplete enrage).',
     includedEnemies: [
       'Orc Soldier',
       'Orc Chieftain',
@@ -264,13 +264,13 @@ export const BESTIARY_SPECIES: BestiarySpecies[] = [
       'Cragger',
       'Progenitor'
     ],
-    coreType: 'Elemental Core',
-    weaknesses: ['Lightning (Orcs)', 'Fire (Apes & Ogres)', 'Holy (Ghouls)'],
+    coreType: 'Chance Core',
+    weaknesses: ['Lightning (Orcs)', 'Fire (Apes & Ogres)', 'Holy (Ghouls)', 'Chance Attacks on Cores'],
     resistances: ['Physical Stagger during Berserk rushes'],
     keyDebilitations: ['Shock', 'Burn', 'Sleep'],
     dangerLevel: 'High',
     colorTheme: 'red',
-    loreNote: 'Orcs possess high intelligence and will coordinate shield blocks and ranged volleys.'
+    loreNote: 'Orcs possess high intelligence and will coordinate shield blocks and ranged volleys. All Ogrekin possess Chance Cores.'
   },
   {
     id: 'dragon',
@@ -641,7 +641,7 @@ export const SPECIFIC_ENEMIES: SpecificEnemyDetail[] = [
     speciesName: 'Ogre / Demonkin / Ogrekin',
     size: 'Medium',
     elementalWeakness: 'Lightning / Piercing',
-    coreInfo: 'Elemental Core on Belt/Back',
+    coreInfo: 'Chance Core on Belt/Back',
     strategyTip: 'Interrupt their war horn calls before they rally backup. High Shock accumulation is very effective.',
     locations: ['Mergoda Frontlines', 'Volden Border Fortress']
   },

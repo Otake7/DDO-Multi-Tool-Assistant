@@ -146,7 +146,7 @@ export const EXM_MISSIONS: EXMMission[] = [
         name: 'General Orc',
         speciesType: 'Ogrekin (Ogre / Demonkin)',
         weakness: 'Lightning / Piercing',
-        coreType: 'Elemental Core',
+        coreType: 'Chance Core',
         notes: 'Intelligent bipedal commander; coordinates shield blocks and call-outs. High Shock accumulation interrupts them.'
       },
       {
@@ -319,7 +319,7 @@ export const EXM_MISSIONS: EXMMission[] = [
         name: 'General Orc',
         speciesType: 'Ogrekin (Ogre / Demonkin)',
         weakness: 'Lightning / Piercing',
-        coreType: 'Elemental Core',
+        coreType: 'Chance Core',
         notes: 'Several times tougher than the Cyclops; bait and fight near starting point to avoid chaotic aggro.'
       },
       {
@@ -463,21 +463,21 @@ export const EXM_MISSIONS: EXMMission[] = [
         name: '1st Guard Silver Roar',
         speciesType: 'Ogrekin (Ogre / Demonkin)',
         weakness: 'Fire / Ice / Rain (Sorcerer)',
-        coreType: 'Elemental Core',
+        coreType: 'Chance Core',
         notes: 'Chaotic ape beast with heavy rolling charges. Sorcerer\'s Rain spell inflicts continuous stagger and damage.'
       },
       {
         name: '1st Guard Ghouls (x2)',
         speciesType: 'Ogrekin (Ogre / Demonkin / Undead)',
         weakness: 'Holy / Fire / Sleep Debilitation',
-        coreType: 'Elemental Core',
+        coreType: 'Chance Core',
         notes: 'Violent rush attacks. Shield Sage should run to the back right, taunt both ghouls, and put them to sleep.'
       },
       {
         name: '1st & 2nd Guard Orc Bringer',
         speciesType: 'Ogrekin (Ogre / Demonkin)',
         weakness: 'Lightning / Piercing / Briarro (Sorcerer)',
-        coreType: 'Elemental Core',
+        coreType: 'Chance Core',
         notes: 'High threat bipedal orc commanders. Prioritize and eliminate first in both waves before larger foes.'
       },
       {
@@ -519,7 +519,7 @@ export const EXM_MISSIONS: EXMMission[] = [
         name: 'Vengeful Warrior Mogock',
         speciesType: 'Ogrekin (Ogre / Warlord)',
         weakness: 'Lightning / Meteor (Sorcerer)',
-        coreType: 'Elemental Core',
+        coreType: 'Chance Core',
         notes: 'Brutal orc warlord boss. Do not rush in initially! Sleep or kite at distance while party defeats Mistwyrm and Grimwargs.'
       },
       {
