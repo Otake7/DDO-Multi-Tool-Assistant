@@ -3,7 +3,7 @@ import {
   X, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, 
   PackageCheck, Library, Skull, Compass, BookOpen, Table, 
   Monitor, Smartphone, User, Sparkles, Coffee, Layers, ChevronRight,
-  MessageSquarePlus
+  MessageSquarePlus, Calculator
 } from 'lucide-react';
 import { BoosterSettings, GameVersion, UserProfile } from '../types';
 import { GAME_VERSIONS, getMaxLevelForVersion, XP_RING_CAP_LEVEL } from '../data/levelTable';
@@ -64,6 +64,14 @@ export const MobileDrawerMenu: React.FC<MobileDrawerMenuProps> = ({
       icon: Swords,
       color: 'text-cyan-400',
       bgColor: 'bg-cyan-500/10 border-cyan-500/30',
+    },
+    {
+      id: 'damage_calc',
+      title: 'Damage Calculator',
+      subtitle: 'Penetration rate, weapon mods & damage simulator',
+      icon: Calculator,
+      color: 'text-amber-400',
+      bgColor: 'bg-amber-500/10 border-amber-500/30',
     },
     {
       id: 'quests',

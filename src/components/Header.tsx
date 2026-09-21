@@ -3,7 +3,7 @@ import {
   Sparkles, Shield, Flame, RotateCcw, Award, Swords, Layers, Map, 
   PackageCheck, BookOpen, HelpCircle, Compass, Trophy, User, Coffee, 
   PanelLeft, PanelTop, Skull, Library, Menu, X, Smartphone, Monitor,
-  MessageSquarePlus, Download
+  MessageSquarePlus, Download, Calculator
 } from 'lucide-react';
 import { BoosterSettings, GameVersion, UserProfile } from '../types';
 import { GAME_VERSIONS, getMaxLevelForVersion, XP_RING_CAP_LEVEL } from '../data/levelTable';
@@ -58,6 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
     switch (tab) {
       case 'calculator': return 'Level Progress & Goal';
       case 'vocations': return 'Vocations & Targets';
+      case 'damage_calc': return 'Damage Calculator';
       case 'quests': return 'Quest Database';
       case 'planner': return `Planner (${plannedCount})`;
       case 'map': return 'Find Spots & Monsters';
@@ -462,6 +463,19 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Swords className="w-4 h-4" />
               <span>Vocations & Job Targets</span>
+            </button>
+
+            <button
+              id="tab-damage-calc"
+              onClick={() => setActiveTab('damage_calc')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'damage_calc'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Calculator className="w-4 h-4" />
+              <span>Damage Calculator</span>
             </button>
 
             <button

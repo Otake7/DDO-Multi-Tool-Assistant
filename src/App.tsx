@@ -23,12 +23,13 @@ import { CommunityFarmSpotsBrowser } from './components/CommunityFarmSpotsBrowse
 import { GDPRConsentModal } from './components/GDPRConsentModal';
 import { MobileDrawerMenu } from './components/MobileDrawerMenu';
 import { StartupNoticeModal } from './components/StartupNoticeModal';
+import { DamageCalculator } from './components/DamageCalculator';
 import { BoosterSettings, CommunityFarmSpot, GameVersion, PlannedQuest, Quest, SpotSearchCategory, SpotSearchStageScope, UserProfile, VocationType } from './types';
 import { LEVELING_PRESETS } from './data/levelingPresets';
 import { ALL_QUESTS } from './data/quests';
 import { getMaxLevelForVersion } from './data/levelTable';
 import { incrementTimesPlanned } from './utils/communityStats';
-import { Check, Sparkles, AlertCircle, AlertTriangle, Coffee, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, PackageCheck, Compass, BookOpen, Table, PanelTop, PanelLeft, Skull, Library, Menu, MessageSquarePlus, Layers } from 'lucide-react';
+import { Check, Sparkles, AlertCircle, AlertTriangle, Coffee, Shield, Swords, Flame, Award, Trophy, HelpCircle, Map, PackageCheck, Compass, BookOpen, Table, PanelTop, PanelLeft, Skull, Library, Menu, MessageSquarePlus, Layers, Calculator } from 'lucide-react';
 
 export default function App() {
   // --- Account & User Profile State ---
@@ -575,6 +576,19 @@ export default function App() {
               </button>
 
               <button
+                id="sidebar-tab-damage-calc"
+                onClick={() => setActiveTab('damage_calc')}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
+                  activeTab === 'damage_calc'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <Calculator className="w-4 h-4 shrink-0" />
+                <span className="truncate">Damage Calculator</span>
+              </button>
+
+              <button
                 id="sidebar-tab-quests"
                 onClick={() => setActiveTab('quests')}
                 className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer text-left ${
@@ -887,6 +901,11 @@ export default function App() {
             completedTrials={completedTrials}
             onToggleTrial={handleToggleTrial}
           />
+        )}
+
+        {/* Tab: Damage Calculator (Penetration Rate, Modifiers & Multipliers) */}
+        {activeTab === 'damage_calc' && (
+          <DamageCalculator />
         )}
 
         {/* Tab 5: Find resources and enemies (Interactive Map & Spot Search) */}
