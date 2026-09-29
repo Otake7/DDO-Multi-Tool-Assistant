@@ -126,7 +126,7 @@ export interface EXMMission {
 export const EXM_MISSIONS: EXMMission[] = [
   {
     id: 'invitation-catacombs',
-    name: 'An invitation to the catacombs',
+    name: 'The Call of the Catacombs',
     japaneseName: '地下墓地の誘い (EM1)',
     badge: 'EXM 1 • 4-Player EXM',
     partySize: '4 Players',
@@ -136,7 +136,7 @@ export const EXM_MISSIONS: EXMMission[] = [
     clearRewards: ['Crystal of the Underworld x3'],
     orderConditions: 'Completed the personal quest < Dragon Power Vortex >.',
     preparationNotes: 
-      'Equip yourself with gear equivalent to level 58 or higher. (Minimum defense guideline: physical defense 1350 or higher, magic defense 1350 or higher). Specialize your skills and abilities for EM. In "Invitation to the Catacombs," monsters such as General Orc, Wight, Living Armor, Skull Lord, Shadow Chimera, Witch, Ghost Mail, and Death Knight will appear.',
+      'Equip yourself with gear equivalent to level 58 or higher. (Minimum defense guideline: physical defense 1350 or higher, magic defense 1350 or higher). Specialize your skills and abilities for EM. In "The Call of the Catacombs," monsters such as General Orc, Wight, Living Armor, Skull Lord, Shadow Chimera, Witch, Ghost Mail, and Death Knight will appear.',
     specialPreparationTips: [
       'Specialize your skills and abilities specifically for EM encounters.',
       'Because supplied items are strictly limited and resurrecting downed allies consumes tight party time, self-healing and crowd control are top priorities.'
@@ -261,7 +261,7 @@ export const EXM_MISSIONS: EXMMission[] = [
     ],
     referenceVideos: [
       {
-        title: 'Catacombs Clear Run (JP Community Archive)',
+        title: 'The Call of the Catacombs Clear Run (JP Community Archive)',
         perspective: 'Full Clear Perspective',
         youtubeVideoId: 'JotR8tp9hrw',
         youtubeUrl: 'https://www.youtube.com/watch?v=JotR8tp9hrw&source_ve_path=OTY3MTQ&embeds_referring_euri=https%3A%2F%2Fwww.h1g.jp%2F'
@@ -278,7 +278,7 @@ export const EXM_MISSIONS: EXMMission[] = [
     timeLimit: '25 minutes',
     minDefense: 'Physical Defense 1400+ / Magic Defense 1400+',
     clearRewards: ['Ancient Festival Crystal x3'],
-    orderConditions: 'Completed the Extreme Mission < Invitation to the Catacombs >.',
+    orderConditions: 'Completed the Extreme Mission < The Call of the Catacombs >.',
     preparationNotes: 
       'Equip yourself with a Lv60 weapon and Zuul armor (with a Guardian ability) or armor equivalent to Lv58 or higher. (Minimum defense guideline: Physical Defense 1400+, Magic Defense 1400+). Specialize your skills and abilities for EM. The damage dealt to Mist Drake can vary by several times depending on whether you can exploit its weakness to ice, so an ice-element weapon or enchantment is desirable. For abilities, "Spirit Striker" is good for increasing damage. Opportunity-boosting abilities like "Heavy Attack" are also effective for knocking it down.',
     specialPreparationTips: [
@@ -441,7 +441,7 @@ export const EXM_MISSIONS: EXMMission[] = [
   },
   {
     id: 'gift-ancient-capital',
-    name: 'A gift from the ancient capital',
+    name: "The Acient City's Legacy",
     japaneseName: 'いにしえの都よりの宝 (EM3)',
     badge: 'EXM 3 • 4-Player EXM',
     partySize: '4 Players',
@@ -999,7 +999,7 @@ export const EXM_MISSIONS: EXMMission[] = [
   },
   {
     id: 'distortion-enforcer',
-    name: 'The Distortion Enforcer',
+    name: 'Agent of Corruption',
     japaneseName: '歪みの執行人 (EXM)',
     badge: 'EXM 6 • 4-Player EXM',
     partySize: '4 Players',
@@ -1154,7 +1154,7 @@ export const EXM_MISSIONS: EXMMission[] = [
     ],
     referenceVideos: [
       {
-        title: 'The Distortion Enforcer (歪みの執行人) Clear Walkthrough',
+        title: 'Agent of Corruption (歪みの執行人) Clear Walkthrough',
         perspective: 'EXM 6 Scourge Walkthrough',
         youtubeVideoId: '_RjoafTLnZk',
         youtubeUrl: 'https://www.youtube.com/watch?v=_RjoafTLnZk'
@@ -1285,7 +1285,7 @@ export const EXM_MISSIONS: EXMMission[] = [
   },
   {
     id: 'wrath-of-the-earth',
-    name: 'Wrath of the Earth',
+    name: "Earth's Fury",
     japaneseName: '大地の怒り (EXM)',
     badge: 'EXM 8 • 4-Player EXM',
     partySize: '4 Players',
@@ -1438,7 +1438,7 @@ export const EXM_MISSIONS: EXMMission[] = [
     ],
     referenceVideos: [
       {
-        title: 'Wrath of the Earth (大地の怒り) Clear Walkthrough (Onset of darkness restricted stage)',
+        title: "Earth's Fury (大地の怒り) Clear Walkthrough (Onset of darkness restricted stage)",
         perspective: 'EXM 8 Adtarasque Walkthrough',
         note: 'This reference video comes from (Onset of darkness restricted stage)',
         youtubeVideoId: 'rAexYEAmLz0',
@@ -1448,7 +1448,7 @@ export const EXM_MISSIONS: EXMMission[] = [
   },
   {
     id: 'darkness-reawakened',
-    name: 'Darkness Reawakened (limited time events)',
+    name: 'Onset of Darkness',
     japaneseName: '黒き闇の再臨 (EXM / 期間限定)',
     badge: 'EXM 9 • 4-Player EXM',
     partySize: '4 Players',
@@ -1533,7 +1533,7 @@ export const EXM_MISSIONS: EXMMission[] = [
     ],
     referenceVideos: [
       {
-        title: 'Darkness Reawakened (黒き闇の再臨) Clear Walkthrough',
+        title: 'Onset of Darkness (黒き闇の再臨) Clear Walkthrough',
         perspective: 'EXM Clear Walkthrough',
         youtubeVideoId: 'gvORwXlUABw',
         youtubeUrl: 'https://www.youtube.com/watch?v=gvORwXlUABw'
@@ -1560,7 +1560,7 @@ export const EXM_MISSIONS: EXMMission[] = [
       'Greedy Mantle'
     ],
     orderConditions: 
-      'Completed the personal quest < Darkness Reawakened >.\nItem rank 72 or higher',
+      'Completed the personal quest < Onset of Darkness >.\nItem rank 72 or higher',
     preparationNotes: 
       'Be aware that the Black Knight is resistant to all attributes except Holy (and normal damage from ranged attacks).\nWhile physical classes are fine with holy weapons, Sarah should focus on dealing damage with ranged weapons like Icicle Pierce or Blizzard Arrow, which have the Ranged attribute enhanced by Ranged Specialization.\nI don\'t have any buff items in my inventory, so I don\'t need any effect extension items.\nThe enemy\'s attack power is very high, they are tough, and they have few items, so it\'s a good idea to prepare for healing/defense or situations where you\'re near death.\nWith support from Puri\'s Solid Riser , you can dodge the Black Knight\'s consecutive attacks, making both taking damage and surviving much easier.\nSince stamina tends to run low, green-class characters should make sure to provide stamina recovery support. If you have a Priest\'s Energy Spot , there won\'t be any problems at all.\nSince medicine is scarce, increasing your life force and healing ability is effective. If you have healing accessories, equipping them will make things much easier.\nFor draining stamina, Sarah\'s Black Haze and Ele\'s Weakening Magic Bow are effective.　←Select skills that have a high chance of success and are easy to land for each job.\nWhile all status ailments are effective, it\'s best to limit the number of times you inflict the same status ailment to two and then aim for a different debuff.\nWhen enraged, apply some kind of debuff ⇒ weakening magic bow ⇒ stack up on attack power with Haze and you can instantly deplete the core.\nEven without debuffs, you can instantly whittle down their health with moves like the first hit of the deer\'s Agito Slash (with chain effect stacked) or the warrior\'s Great Windmill Slash .',
     specialPreparationTips: [
@@ -1825,7 +1825,7 @@ export const EXM_MISSIONS: EXMMission[] = [
   },
   {
     id: 'findhams-reminiscences',
-    name: "Findham's Reminiscences",
+    name: 'Phindym War Chronicles',
     japaneseName: 'フィンダムの追憶 (EXM)',
     badge: 'EXM 12 • Boss Gauntlet EXM',
     partySize: '4 Players (or Pawn Party)',
@@ -1975,7 +1975,7 @@ export const EXM_MISSIONS: EXMMission[] = [
     ],
     referenceVideos: [
       {
-        title: "Findham's Reminiscences (フィンダムの追憶) Clear Walkthrough",
+        title: "Phindym War Chronicles (フィンダムの追憶) Clear Walkthrough",
         perspective: 'Boss Gauntlet EXM Perspective',
         youtubeVideoId: 'Hi--f5A_fgw',
         youtubeUrl: 'https://www.youtube.com/watch?v=Hi--f5A_fgw'
@@ -2001,7 +2001,7 @@ export const EXM_MISSIONS: EXMMission[] = [
       'Random rewards (Upon clearing for the second time or later - one of the following): Green Tree Crystal x1, Mandragora Lantern [Gold] x1, Unidentified Flower-Carved Accessory [Emperor] x1, Unidentified Flower-Carved Accessory [King] x2, Premium Healing Potion x3, Panacea x3, High-Quality Gala Extract x3'
     ],
     orderConditions: 
-      'Completed the Extreme Mission < Wrath of the Earth >\nItem rank 57 or higher',
+      'Completed the Extreme Mission < Earth\'s Fury >\nItem rank 57 or higher',
     preparationNotes: 
       'Required abilities: Dragon Slayer , Fire Attack , Lightning Attack , Effect Extension ( Effect Extension Light )\nI have three amulets in my inventory, so if I have an effect extension , I can maintain the effect indefinitely as long as I don\'t die.\nRecommended abilities: Dragon Protection , and since you have few items, Medicinal Effect ( Mild Medicinal Effect )\nAbilities & Jewelry for people who die often: Protection , Ice Resistance , Lightning Resistance , Elemental Resistance\nEffective status effects: Stun, Golden, Sleep\nIneffective status effect: Petrification',
     specialPreparationTips: [
@@ -2040,7 +2040,7 @@ export const EXM_MISSIONS: EXMMission[] = [
       }
     },
     remarks: 
-      'Limit Zone Differences:\n• Unlike standard Wrath of the Earth where you rescue allies across different sectors, in the Limit Zone weaker enemies continuously spawn right around the Azure Armored Dragon Adtarasque from the very beginning.\n• Continuous enemy spawns: Wights, Skeletonbrute Lux, Grigori, Boltgrimwargs, etc.\n• With scarce healing items, equipping Medicinal Effect / Mild Medicinal Effect, Dragon Protection, and defensive resistances (Ice/Lightning/Elemental) will prevent party casualties.',
+      'Limit Zone Differences:\n• Unlike standard Earth\'s Fury where you rescue allies across different sectors, in the Limit Zone weaker enemies continuously spawn right around the Azure Armored Dragon Adtarasque from the very beginning.\n• Continuous enemy spawns: Wights, Skeletonbrute Lux, Grigori, Boltgrimwargs, etc.\n• With scarce healing items, equipping Medicinal Effect / Mild Medicinal Effect, Dragon Protection, and defensive resistances (Ice/Lightning/Elemental) will prevent party casualties.',
     monstersAppearing: [
       {
         name: 'The Azure Armored Dragon Adtarasque (Lv75)',
@@ -2239,7 +2239,7 @@ export const EXM_MISSIONS: EXMMission[] = [
   },
   {
     id: 'distortion-enforcer-restricted-stage',
-    name: 'Distortion Enforcer Restricted Stage',
+    name: 'Agent of Corruption Restricted Stage',
     japaneseName: '歪みの執行人 (限界域)',
     badge: 'EXM 15 • Restricted Stage',
     partySize: '4 Players',
@@ -2375,7 +2375,7 @@ export const EXM_MISSIONS: EXMMission[] = [
     ],
     referenceVideos: [
       {
-        title: 'Distortion Enforcer Restricted Stage (歪みの執行人 限界域) Clear Walkthrough',
+        title: 'Agent of Corruption Restricted Stage (歪みの執行人 限界域) Clear Walkthrough',
         perspective: 'Restricted Stage Clear Walkthrough',
         youtubeVideoId: 'PHTDJ3mKr5k',
         youtubeUrl: 'https://www.youtube.com/watch?v=PHTDJ3mKr5k'
@@ -2788,7 +2788,7 @@ export const EXM_MISSIONS: EXMMission[] = [
   },
   {
     id: 'lestanias-reminiscences',
-    name: "Lestania's Reminiscences",
+    name: 'Battle for Fort Gritten',
     japaneseName: 'レスタニア追想',
     badge: 'EXM 18 • Reminiscences',
     partySize: '4 Players',
@@ -3017,19 +3017,19 @@ export const EXM_MISSIONS: EXMMission[] = [
     ],
     referenceVideos: [
       {
-        title: "Lestania's Reminiscences (レスタニア追想) - Warrior Walkthrough",
+        title: 'Battle for Fort Gritten (レスタニア追想) - Warrior Walkthrough',
         perspective: 'Warrior Perspective',
         youtubeVideoId: '24IjFhy8kzg',
         youtubeUrl: 'https://www.youtube.com/watch?v=24IjFhy8kzg'
       },
       {
-        title: "Lestania's Reminiscences (レスタニア追想) - Priest Walkthrough",
+        title: 'Battle for Fort Gritten (レスタニア追想) - Priest Walkthrough',
         perspective: 'Priest Perspective',
         youtubeVideoId: 'sAZ1nOIlKCs',
         youtubeUrl: 'https://www.youtube.com/watch?v=sAZ1nOIlKCs'
       },
       {
-        title: "Lestania's Reminiscences (レスタニア追想) - Elemental Archer Walkthrough",
+        title: 'Battle for Fort Gritten (レスタニア追想) - Elemental Archer Walkthrough',
         perspective: 'Elemental Archer Perspective',
         youtubeVideoId: '54wk4kiMJ3U',
         youtubeUrl: 'https://www.youtube.com/watch?v=54wk4kiMJ3U'
@@ -3038,7 +3038,7 @@ export const EXM_MISSIONS: EXMMission[] = [
   },
   {
     id: 'awakened-dragon',
-    name: 'Awakened Dragon',
+    name: 'The Dragon Awakened',
     japaneseName: '覚醒せし竜',
     badge: 'EXM 19 • 8-Player Raid',
     partySize: '8 Players',
@@ -3127,8 +3127,9 @@ export const EXM_MISSIONS: EXMMission[] = [
         title: 'Phase 1: Enraged State & The "Growling Memory" Gimmick',
         enemies: ['Spirit Dragon Wilmia (Enraged)'],
         tactics: 
-          'You will fight one of the Tree\'s Memories (Spirit Dragon Wilmia).\nJust like in the main quest, when Wilmia enters its enraged state, destroy the "Growling Memory," and when Wilmia charges, hit the crystal that turns green.\nIf you don\'t hit it at the right time, you will have to destroy the crystal again, which will prolong the battle.\nThe light generated when you attack the crystal will deplete Wilmia\'s stamina, so everyone needs to understand the mechanics.\n*Attack with Dark and Creation are effective against the crystal, but Lightning is ineffective.\nHaving a Blue Mage who can guide the boss to trigger the "Memory of Groan" gimmick makes things easier. If there isn\'t one, everyone should stick together to guide the boss. If everyone doesn\'t understand the detonation gimmick, it will be activated by mistake and will hinder smooth progress.',
+          'You will fight one of the Tree\'s Memories (Spirit Dragon Wilmia).\n• Elemental Weakness: Spirit Dragon Wilmia is weak to FIRE (not Dark). Equip Fire weapons/spells or enchants for boss burn phases.\n• Crystal Mechanics: Dark and Creation attacks are effective against the summoned crystals, but Lightning is ineffective.\n\nJust like in the main quest, when Wilmia enters its enraged state, destroy the "Growling Memory," and when Wilmia charges, hit the crystal that turns green.\nIf you don\'t hit it at the right time, you will have to destroy the crystal again, which will prolong the battle.\nThe light generated when you attack the crystal will deplete Wilmia\'s stamina, so everyone needs to understand the mechanics.\nHaving a Blue Mage who can guide the boss to trigger the "Memory of Groan" gimmick makes things easier. If there isn\'t one, everyone should stick together to guide the boss. If everyone doesn\'t understand the detonation gimmick, it will be activated by mistake and will hinder smooth progress.',
         keyTips: [
+          'Boss Weakness: Spirit Dragon Wilmia is weak to Fire (not Dark).',
           'Destroy "Growling Memory" during enraged state.',
           'Hit the green crystal when Wilmia charges to release light and drain stamina.',
           'Dark and Creation attacks damage the crystal; Lightning is ineffective.',
@@ -3155,7 +3156,7 @@ export const EXM_MISSIONS: EXMMission[] = [
     ],
     referenceVideos: [
       {
-        title: 'Awakened Dragon (覚醒せし竜) - Spirit Dragon Wilmia Walkthrough',
+        title: 'The Dragon Awakened (覚醒せし竜) - Spirit Dragon Wilmia Walkthrough',
         perspective: '8-Player Raid Perspective',
         youtubeVideoId: 'Ppgoi8lwBUM',
         youtubeUrl: 'https://www.youtube.com/watch?v=Ppgoi8lwBUM'

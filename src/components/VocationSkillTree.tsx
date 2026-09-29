@@ -123,9 +123,9 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
     type: 'skill' | 'aug',
     sourceId: string,
     targetRank: number,
-    targetEnemy: string
+    targetEnemy?: string
   ) => {
-    const slug = targetEnemy.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const slug = (targetEnemy || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
     return `${vocId}_${type}_${sourceId}_rank_${targetRank}_${slug}`;
   };
 
@@ -154,7 +154,7 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
     }[] = [];
 
     // From Custom Skills
-    selectedVocation.customSkills.forEach((skill) => {
+    (selectedVocation.customSkills || []).forEach((skill) => {
       if (skill.jobTraining) {
         skill.jobTraining.forEach((jt) => {
           const key = getTrialKey(selectedVocation.id, 'skill', skill.id, jt.targetRank, jt.targetEnemy);
@@ -164,22 +164,22 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
             legacyKey,
             sourceType: 'skill',
             sourceId: skill.id,
-            sourceName: skill.name,
-            sourceJpName: skill.jpName,
-            unlockLevel: skill.unlockLevel,
+            sourceName: skill.name || '',
+            sourceJpName: skill.jpName || '',
+            unlockLevel: skill.unlockLevel || 1,
             targetRank: jt.targetRank,
-            targetEnemy: jt.targetEnemy,
-            count: jt.count,
-            minEnemyLevel: jt.minEnemyLevel,
-            location: jt.location,
-            notes: jt.notes
+            targetEnemy: jt.targetEnemy || '',
+            count: jt.count || 1,
+            minEnemyLevel: jt.minEnemyLevel || 1,
+            location: jt.location || '',
+            notes: jt.notes || ''
           });
         });
       }
     });
 
     // From Augments
-    selectedVocation.augments.forEach((aug) => {
+    (selectedVocation.augments || []).forEach((aug) => {
       if (aug.jobTraining) {
         aug.jobTraining.forEach((jt) => {
           const key = getTrialKey(selectedVocation.id, 'aug', aug.id, jt.targetRank, jt.targetEnemy);
@@ -189,15 +189,15 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
             legacyKey,
             sourceType: 'augment',
             sourceId: aug.id,
-            sourceName: aug.name,
-            sourceJpName: aug.jpName,
-            unlockLevel: aug.unlockLevel,
+            sourceName: aug.name || '',
+            sourceJpName: aug.jpName || '',
+            unlockLevel: aug.unlockLevel || 1,
             targetRank: jt.targetRank,
-            targetEnemy: jt.targetEnemy,
-            count: jt.count,
-            minEnemyLevel: jt.minEnemyLevel,
-            location: jt.location,
-            notes: jt.notes
+            targetEnemy: jt.targetEnemy || '',
+            count: jt.count || 1,
+            minEnemyLevel: jt.minEnemyLevel || 1,
+            location: jt.location || '',
+            notes: jt.notes || ''
           });
         });
       }
@@ -217,11 +217,12 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
         if (selectedRankFilter === '10' && trial.targetRank !== 10) return false;
       }
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesName = trial.sourceName.toLowerCase().includes(q) || (trial.sourceJpName && trial.sourceJpName.includes(q));
-        const matchesEnemy = trial.targetEnemy.toLowerCase().includes(q);
-        const matchesLoc = trial.location.toLowerCase().includes(q);
-        return matchesName || matchesEnemy || matchesLoc;
+        const q = searchQuery.toLowerCase().trim();
+        const matchesName = (trial.sourceName || '').toLowerCase().includes(q) || ((trial.sourceJpName || '').toLowerCase().includes(q));
+        const matchesEnemy = (trial.targetEnemy || '').toLowerCase().includes(q);
+        const matchesLoc = (trial.location || '').toLowerCase().includes(q);
+        const matchesNotes = (trial.notes || '').toLowerCase().includes(q);
+        return matchesName || matchesEnemy || matchesLoc || matchesNotes;
       }
       return true;
     });
@@ -229,15 +230,22 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
 
   // Filtered Custom Skills
   const filteredCustomSkills = useMemo(() => {
-    return selectedVocation.customSkills.filter((s) => {
+    return (selectedVocation.customSkills || []).filter((s) => {
       if (filterUnlockedOnly && currentLevel < s.unlockLevel) return false;
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        return (
-          s.name.toLowerCase().includes(q) ||
-          (s.jpName && s.jpName.toLowerCase().includes(q)) ||
-          s.description.toLowerCase().includes(q)
+        const q = searchQuery.toLowerCase().trim();
+        const matchesSkill =
+          (s.name || '').toLowerCase().includes(q) ||
+          ((s.jpName || '').toLowerCase().includes(q)) ||
+          ((s.description || '').toLowerCase().includes(q)) ||
+          ((s.element || '').toLowerCase().includes(q));
+        const matchesTrials = (s.jobTraining || []).some(
+          (jt) =>
+            (jt.targetEnemy || '').toLowerCase().includes(q) ||
+            ((jt.location || '').toLowerCase().includes(q)) ||
+            ((jt.notes || '').toLowerCase().includes(q))
         );
+        return matchesSkill || matchesTrials;
       }
       return true;
     });
@@ -245,14 +253,14 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
 
   // Filtered Normal Skills
   const filteredNormalSkills = useMemo(() => {
-    return selectedVocation.normalSkills.filter((s) => {
+    return (selectedVocation.normalSkills || []).filter((s) => {
       if (filterUnlockedOnly && currentLevel < s.unlockLevel) return false;
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
+        const q = searchQuery.toLowerCase().trim();
         return (
-          s.name.toLowerCase().includes(q) ||
-          (s.jpName && s.jpName.toLowerCase().includes(q)) ||
-          s.description.toLowerCase().includes(q)
+          (s.name || '').toLowerCase().includes(q) ||
+          ((s.jpName || '').toLowerCase().includes(q)) ||
+          ((s.description || '').toLowerCase().includes(q))
         );
       }
       return true;
@@ -261,16 +269,22 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
 
   // Filtered Augments
   const filteredAugments = useMemo(() => {
-    return selectedVocation.augments.filter((a) => {
+    return (selectedVocation.augments || []).filter((a) => {
       if (filterUnlockedOnly && currentLevel < a.unlockLevel) return false;
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        return (
-          a.name.toLowerCase().includes(q) ||
-          (a.jpName && a.jpName.toLowerCase().includes(q)) ||
-          a.description.toLowerCase().includes(q) ||
-          a.effect.toLowerCase().includes(q)
+        const q = searchQuery.toLowerCase().trim();
+        const matchesAug =
+          (a.name || '').toLowerCase().includes(q) ||
+          ((a.jpName || '').toLowerCase().includes(q)) ||
+          ((a.description || '').toLowerCase().includes(q)) ||
+          ((a.effect || '').toLowerCase().includes(q));
+        const matchesTrials = (a.jobTraining || []).some(
+          (jt) =>
+            (jt.targetEnemy || '').toLowerCase().includes(q) ||
+            ((jt.location || '').toLowerCase().includes(q)) ||
+            ((jt.notes || '').toLowerCase().includes(q))
         );
+        return matchesAug || matchesTrials;
       }
       return true;
     });

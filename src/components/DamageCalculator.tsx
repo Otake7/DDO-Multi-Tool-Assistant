@@ -2,22 +2,23 @@ import React, { useState, useMemo } from 'react';
 import {
   Calculator,
   Swords,
-  Sparkles,
   ShieldAlert,
-  Flame,
-  Zap,
   Info,
   RotateCcw,
   Target,
   Skull,
   TrendingUp,
   Percent,
-  Layers,
-  ChevronRight,
+  Sliders,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Zap,
+  Sparkles,
+  Shield,
+  HelpCircle,
+  FlaskConical
 } from 'lucide-react';
-import { BESTIARY_SPECIES, SPECIFIC_ENEMIES } from '../data/bestiaryData';
+import { SPECIFIC_ENEMIES } from '../data/bestiaryData';
 
 export interface VocationModifierInfo {
   id: string;
@@ -37,16 +38,45 @@ export const VOCATION_MODIFIERS: VocationModifierInfo[] = [
   { id: 'priest', name: 'Priest', lv60: -72, lv93: -106 },
   { id: 'hunter', name: 'Hunter', lv60: -31, lv93: -33 },
   { id: 'alchemist', name: 'Alchemist', lv60: -22, lv93: -77 },
-  { id: 'warrior', name: 'Warrior', lv60: 108, lv93: 116 },
   { id: 'sorcerer', name: 'Sorcerer', lv60: 108, lv93: 116 },
+  { id: 'warrior', name: 'Warrior', lv60: 108, lv93: 116 },
 ];
+
+// Required Attack Table Lookup (Standard DDON benchmarks for V2)
+export const REQ_ATK_LOOKUP: Record<number, number> = {
+  1: 1,
+  10: 100,
+  20: 300,
+  30: 500,
+  40: 650,
+  50: 1034,
+  55: 1272,
+  58: 1415,
+  60: 1511,
+  65: 1749,
+  70: 1987,
+  75: 2225,
+  80: 2464,
+  83: 2607,
+  85: 2702,
+  88: 2845,
+  90: 2940,
+  93: 3083,
+  95: 3178,
+  96: 3226,
+  100: 3417,
+  105: 3655,
+  110: 3893,
+  115: 4131,
+  120: 4370,
+};
 
 // All enemy kinds sourced comprehensively from the game's Bestiary
 const ENEMY_KINDS: { label: string; value: string; description: string }[] = [
-  { label: 'None / Generic', value: 'None', description: 'Neutral / uncategorized target' },
-  { label: 'War-ready (Season 3)', value: 'War-ready', description: 'Armored Orcs, Dwarf Orcs & Season 3 frontline foes' },
+  { label: 'None', value: 'None', description: 'Neutral / uncategorized target' },
+  { label: 'War-ready', value: 'War-ready', description: 'Armored Orcs, Dwarf Orcs & Season 3 frontline foes' },
   { label: 'Spirit', value: 'Spirit', description: 'Ghosts, Specters, Wights, Phantom Knights & Ents' },
-  { label: 'Dragonkin (Dragon)', value: 'Dragonkin', description: 'Lesser & Grand Dragons, Drakes, Wyverns, Lindwurms' },
+  { label: 'Dragonkin', value: 'Dragonkin', description: 'Lesser & Grand Dragons, Drakes, Wyverns, Wilmia' },
   { label: 'Beast', value: 'Beast', description: 'Wolves, Grimwargs, Chimeras, Griffins, Behemoths' },
   { label: 'Demihuman', value: 'Demihuman', description: 'Goblins, Hobgoblins, Saurians, Pixies, Mandragoras' },
   { label: 'Human', value: 'Human', description: 'Bandits, Cultists, Rogue Pawns, Corrupted Arisen' },
@@ -65,24 +95,38 @@ const ENEMY_KINDS: { label: string; value: string; description: string }[] = [
 ];
 
 export const DamageCalculator: React.FC = () => {
+  // Calculator Version State: V2 is DEFAULT per user request
+  const [calcVersion, setCalcVersion] = useState<'v1' | 'v2'>('v2');
+
   // Form State
-  const [enemyLevel, setEnemyLevel] = useState<number>(85);
+  const [enemyLevel, setEnemyLevel] = useState<number>(96);
   const [enemyKind, setEnemyKind] = useState<string>('None');
   const [attackType, setAttackType] = useState<'Physical' | 'Magick'>('Physical');
 
   // Modifier Version: 'lv60' | 'lv93'
-  const [modVersion, setModVersion] = useState<'lv60' | 'lv93'>('lv60');
+  const [modVersion, setModVersion] = useState<'lv60' | 'lv93'>('lv93');
   // Track selected job by unique ID so swapping versions never shifts or resets the chosen vocation
   const [selectedJobId, setSelectedJobId] = useState<string>('fighter');
 
-  const [baseAtk, setBaseAtk] = useState<number>(2000);
+  const [baseAtk, setBaseAtk] = useState<number>(3000);
   const [flatAtk, setFlatAtk] = useState<number>(0);
   const [flatSlayer, setFlatSlayer] = useState<number>(0);
-  const [magicWeak, setMagicWeak] = useState<boolean>(false);
   const [baseSkill, setBaseSkill] = useState<number>(100);
 
-  // Priest staff exception toggle (from formula comment: if job is priest)
-  const [priestStaffException, setPriestStaffException] = useState<boolean>(false);
+  // V2 Specific: Manual Overrides (Leave blank to use formulas)
+  const [manualDiv, setManualDiv] = useState<string>('');
+  const [manualReqAtk, setManualReqAtk] = useState<string>('');
+  const [manualJobMod, setManualJobMod] = useState<string>('');
+
+  // Enemy Modifiers & Debuffs
+  const [priestStaffPenalty, setPriestStaffPenalty] = useState<boolean>(true);
+  const [priestPenaltyValue, setPriestPenaltyValue] = useState<number>(74);
+
+  const [magicWeak, setMagicWeak] = useState<boolean>(false);
+  const [magicWeakValue, setMagicWeakValue] = useState<number>(1.3);
+
+  const [debuffPercent, setDebuffPercent] = useState<number>(0);
+  const [elementalWeaknessValue, setElementalWeaknessValue] = useState<number>(1.1);
 
   // % Damage bonuses
   const [slash, setSlash] = useState<number>(0);
@@ -104,12 +148,17 @@ export const DamageCalculator: React.FC = () => {
     [selectedJobId]
   );
 
-  // Active weapon modifier based on version
-  const jobMod = modVersion === 'lv60' ? selectedJob.lv60 : selectedJob.lv93;
-  const isPriestJob = selectedJob.id === 'priest';
+  // Default weapon modifier from table based on version
+  const tableJobMod = modVersion === 'lv60' ? selectedJob.lv60 : selectedJob.lv93;
 
-  // Calculation Logic
+  // Active weapon modifier (manual override if provided in V2, else table value)
+  const isJobModOverridden = calcVersion === 'v2' && manualJobMod.trim() !== '' && !isNaN(Number(manualJobMod));
+  const activeJobMod = isJobModOverridden ? Number(manualJobMod) : tableJobMod;
+
+  // Calculation Logic (Supports both V1 and V2)
   const calcResult = useMemo(() => {
+    const level = Number(enemyLevel) || 1;
+
     // Sum all % damage fields
     const totalPercent =
       (Number(slash) || 0) +
@@ -124,68 +173,160 @@ export const DamageCalculator: React.FC = () => {
 
     // Effective ATK after job bloat correction
     // If JobMod is negative, subtracting it adds the correction (e.g. - (-135) = +135).
-    const effectiveAtk = (Number(baseAtk) || 0) + (Number(flatAtk) || 0) + (Number(flatSlayer) || 0) - jobMod;
+    const effectiveAtk =
+      (Number(baseAtk) || 0) +
+      (Number(flatAtk) || 0) +
+      (Number(flatSlayer) || 0) -
+      activeJobMod;
 
-    // Required ATK for 100% penetration (Fighter baseline)
-    let reqAtk = 47.65 * (Number(enemyLevel) || 1) - 1348.25;
+    if (calcVersion === 'v1') {
+      // ==================== V1 (Classic Wiki Formula) ====================
+      let baseReqAtk = 47.65 * level - 1348.25;
+      let reqAtk = baseReqAtk;
+      const priestPenaltyAdded = priestStaffPenalty ? 74 : 0;
+      reqAtk += priestPenaltyAdded;
 
-    // Priest staff exception (optional from formula comment)
-    if (isPriestJob && priestStaffException) {
-      reqAtk += 74;
+      const div = 149;
+      const exponent = (effectiveAtk - reqAtk) / div;
+      let penRate = Math.pow(2, exponent);
+      penRate = Math.min(1, Math.max(0.03125, penRate));
+
+      const wasMagicWeakBoosted = attackType === 'Magick' && magicWeak;
+      if (wasMagicWeakBoosted) {
+        penRate = Math.min(1, penRate * 1.3);
+      }
+
+      const percentMultiplier = 1 + totalPercent / 100;
+      const damageMultiplier = penRate * percentMultiplier;
+      const finalDamage = (Number(baseSkill) || 0) * damageMultiplier;
+      const atkDiff = effectiveAtk - reqAtk;
+
+      return {
+        enemyLevel: level,
+        enemyKind,
+        attackType,
+        selectedJob,
+        modVersion,
+        tableJobMod,
+        activeJobMod,
+        isJobModOverridden: false,
+        baseAtk: Number(baseAtk) || 0,
+        flatAtk: Number(flatAtk) || 0,
+        flatSlayer: Number(flatSlayer) || 0,
+        baseSkill: Number(baseSkill) || 0,
+        totalPercent,
+        effectiveAtk,
+        baseReqAtk,
+        priestPenaltyAdded,
+        reqAtk,
+        isReqAtkOverridden: false,
+        div,
+        autoDiv: 149,
+        isDivOverridden: false,
+        exponent,
+        penRate,
+        wasMagicWeakBoosted,
+        magicWeakValue: 1.3,
+        debuffPercent: 0,
+        debuffMultiplier: 1,
+        elemMultiplier: 1,
+        percentMultiplier,
+        damageMultiplier,
+        finalDamage,
+        atkDiff,
+      };
     }
 
-    // Penetration rate
-    const exponent = (effectiveAtk - reqAtk) / 149;
+    // ==================== V2 (Experimental Dynamic Divisor & Overrides) ====================
+    const isReqAtkOverridden = manualReqAtk.trim() !== '' && !isNaN(Number(manualReqAtk));
+    let baseReqAtk = 0;
+    if (isReqAtkOverridden) {
+      baseReqAtk = Number(manualReqAtk);
+    } else if (REQ_ATK_LOOKUP[level] !== undefined) {
+      baseReqAtk = REQ_ATK_LOOKUP[level];
+    } else {
+      baseReqAtk = Math.max(1, Math.round(47.65 * level - 1348.25));
+    }
+
+    let reqAtk = baseReqAtk;
+    const priestPenaltyAdded = priestStaffPenalty ? (Number(priestPenaltyValue) || 74) : 0;
+    reqAtk += priestPenaltyAdded;
+
+    const isDivOverridden = manualDiv.trim() !== '' && !isNaN(Number(manualDiv));
+    const autoDiv = 0.763 * level + 75.8;
+    const div = isDivOverridden ? Math.max(0.1, Number(manualDiv)) : Math.max(0.1, autoDiv);
+
+    const exponent = (effectiveAtk - reqAtk) / div;
     let penRate = Math.pow(2, exponent);
     penRate = Math.min(1, Math.max(0.03125, penRate));
 
-    // Magic-weak adjustment
     const wasMagicWeakBoosted = attackType === 'Magick' && magicWeak;
     if (wasMagicWeakBoosted) {
-      penRate = Math.min(1, penRate * 1.3);
+      penRate = Math.min(1, penRate * (Number(magicWeakValue) || 1.3));
     }
 
     const percentMultiplier = 1 + totalPercent / 100;
-    const damageMultiplier = penRate * percentMultiplier;
+    const debuffMultiplier = 1 + Math.max(0, Number(debuffPercent) || 0) / 100;
+    const elemMultiplier = Math.max(1.0, Number(elementalWeaknessValue) || 1.0);
+    const damageMultiplier = penRate * percentMultiplier * debuffMultiplier * elemMultiplier;
     const finalDamage = (Number(baseSkill) || 0) * damageMultiplier;
-
     const atkDiff = effectiveAtk - reqAtk;
 
     return {
-      enemyLevel: Number(enemyLevel) || 1,
+      enemyLevel: level,
       enemyKind,
       attackType,
       selectedJob,
       modVersion,
-      jobMod,
+      tableJobMod,
+      activeJobMod,
+      isJobModOverridden,
       baseAtk: Number(baseAtk) || 0,
       flatAtk: Number(flatAtk) || 0,
       flatSlayer: Number(flatSlayer) || 0,
       baseSkill: Number(baseSkill) || 0,
       totalPercent,
       effectiveAtk,
+      baseReqAtk,
+      priestPenaltyAdded,
       reqAtk,
+      isReqAtkOverridden,
+      div,
+      autoDiv,
+      isDivOverridden,
+      exponent,
       penRate,
       wasMagicWeakBoosted,
+      magicWeakValue: Number(magicWeakValue) || 1.3,
+      debuffPercent: Number(debuffPercent) || 0,
+      debuffMultiplier,
+      elemMultiplier,
       percentMultiplier,
       damageMultiplier,
       finalDamage,
       atkDiff,
     };
   }, [
+    calcVersion,
     enemyLevel,
     enemyKind,
     attackType,
     selectedJob,
     modVersion,
-    jobMod,
+    tableJobMod,
+    activeJobMod,
+    manualReqAtk,
+    manualDiv,
+    priestStaffPenalty,
+    priestPenaltyValue,
     baseAtk,
     flatAtk,
     flatSlayer,
-    isPriestJob,
-    priestStaffException,
-    magicWeak,
     baseSkill,
+    magicWeak,
+    magicWeakValue,
+    debuffPercent,
+    elementalWeaknessValue,
     slash,
     ice,
     fire,
@@ -205,17 +346,38 @@ export const DamageCalculator: React.FC = () => {
   };
 
   const handleReset = () => {
-    setEnemyLevel(85);
-    setEnemyKind('None');
-    setAttackType('Physical');
-    setModVersion('lv60');
-    setSelectedJobId('fighter');
-    setBaseAtk(2000);
-    setFlatAtk(0);
-    setFlatSlayer(0);
-    setMagicWeak(false);
-    setPriestStaffException(false);
-    setBaseSkill(100);
+    if (calcVersion === 'v1') {
+      setEnemyLevel(85);
+      setEnemyKind('None');
+      setAttackType('Physical');
+      setModVersion('lv60');
+      setSelectedJobId('fighter');
+      setBaseAtk(2000);
+      setFlatAtk(0);
+      setFlatSlayer(0);
+      setBaseSkill(100);
+      setPriestStaffPenalty(false);
+      setMagicWeak(false);
+    } else {
+      setEnemyLevel(96);
+      setEnemyKind('None');
+      setAttackType('Physical');
+      setModVersion('lv93');
+      setSelectedJobId('fighter');
+      setBaseAtk(3000);
+      setFlatAtk(0);
+      setFlatSlayer(0);
+      setBaseSkill(100);
+      setManualDiv('');
+      setManualReqAtk('');
+      setManualJobMod('');
+      setPriestStaffPenalty(true);
+      setPriestPenaltyValue(74);
+      setMagicWeak(false);
+      setMagicWeakValue(1.3);
+      setDebuffPercent(0);
+      setElementalWeaknessValue(1.1);
+    }
     setSlash(0);
     setIce(0);
     setFire(0);
@@ -253,6 +415,11 @@ export const DamageCalculator: React.FC = () => {
       else if (specLower.includes('infected')) targetKind = 'Season 2 Infected / Corrupted';
 
       setEnemyKind(targetKind);
+
+      // If Spirit Dragon Wilmia is chosen, note Fire weakness
+      if (monsterName.includes('Wilmia')) {
+        setFire(26);
+      }
     }
   };
 
@@ -265,21 +432,64 @@ export const DamageCalculator: React.FC = () => {
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-amber-500/30 rounded-2xl p-5 sm:p-7 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+          <div className="space-y-1.5 flex-1">
+            <div className="flex items-start sm:items-center gap-3 flex-wrap">
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
                 <Calculator className="w-6 h-6" />
               </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-                  Damage Calculator
-                  <span className="text-xs font-mono font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-md border border-amber-500/40">
-                    Penetration Rate
-                  </span>
-                </h1>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                    Damage Calculator
+                  </h1>
+
+                  {/* Interactive Version Swapper in place of the screenshot badge */}
+                  <div
+                    className="inline-flex items-center p-1 rounded-xl bg-slate-950 border border-amber-500/40 shadow-inner"
+                    title="Swap Calculator Version: V1 (Classic Wiki) or V2 (Experimental Dynamic Divisor)"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setCalcVersion('v1')}
+                      className={`px-3 py-1 text-xs font-mono font-bold rounded-lg transition-all cursor-pointer ${
+                        calcVersion === 'v1'
+                          ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/30 font-black'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                      aria-pressed={calcVersion === 'v1'}
+                    >
+                      V1
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCalcVersion('v2')}
+                      className={`px-3 py-1 text-xs font-mono font-bold rounded-lg transition-all cursor-pointer ${
+                        calcVersion === 'v2'
+                          ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/30 font-black'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                      aria-pressed={calcVersion === 'v2'}
+                    >
+                      V2
+                    </button>
+                  </div>
+                </div>
+
                 <p className="text-xs sm:text-sm text-slate-400">
-                  Calculate effective penetration rate, weapon modifiers, flat slayer, and percentage damage bonuses against all DDON monster species.
+                  {calcVersion === 'v2'
+                    ? 'Penetration Rate Damage Calculator V2 with scaling divisors (0.763×Lv+75.8), manual overrides, defense reduction debuffs, and elemental multipliers.'
+                    : 'Penetration Rate Damage Calculator V1 with classic Wiki values (fixed 149 divisor baseline).'}
                 </p>
+
+                {/* Requested V2 Annotation: Underneath on V2 page */}
+                {calcVersion === 'v2' && (
+                  <div className="pt-1.5">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-medium shadow-sm">
+                      <FlaskConical className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Experimental, should be more accurate, but require deeper testing to be 100% sure</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -370,10 +580,10 @@ export const DamageCalculator: React.FC = () => {
                 </div>
               </div>
 
-              {/* Enemy Kind (Comprehensive Bestiary Categories) */}
+              {/* Enemy Kind */}
               <div>
                 <label className="flex flex-col text-xs font-semibold text-slate-300 mb-1">
-                  <span>Enemy Kind (Bestiary Species)</span>
+                  <span>Enemy Kind</span>
                   <span className="text-[11px] text-slate-500 font-normal">Target species for Slayer bonuses</span>
                 </label>
                 <select
@@ -411,7 +621,9 @@ export const DamageCalculator: React.FC = () => {
               <div>
                 <label className="flex flex-col text-xs font-semibold text-slate-300 mb-1">
                   <span>Modifier Version</span>
-                  <span className="text-[11px] text-slate-500 font-normal">Swap between Level 60 and Level 93</span>
+                  <span className="text-[11px] text-slate-500 font-normal">
+                    {calcVersion === 'v2' ? 'Wiki values vs Season 3 ir105' : 'Level 60 Wiki vs Level 93 Estimated'}
+                  </span>
                 </label>
 
                 {/* Instant Tab Switcher Buttons */}
@@ -436,7 +648,7 @@ export const DamageCalculator: React.FC = () => {
                         : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    Level 93 (Estimated)
+                    {calcVersion === 'v2' ? 'Level 93 (ir105)' : 'Level 93 (Est.)'}
                   </button>
                 </div>
 
@@ -447,21 +659,24 @@ export const DamageCalculator: React.FC = () => {
                   className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-1.5 text-xs text-slate-300 font-semibold focus:outline-none transition-all cursor-pointer"
                 >
                   <option value="lv60">Level 60 (Wiki Values)</option>
-                  <option value="lv93">Level 93 (Estimated)</option>
+                  <option value="lv93">
+                    {calcVersion === 'v2' ? 'Level 93 (ir105)' : 'Level 93 (Estimated)'}
+                  </option>
                 </select>
               </div>
 
-              {/* Job Weapon Modifier (Same position for all vocations in both tabs) */}
+              {/* Job Weapon Modifier */}
               <div className="sm:col-span-2">
                 <div className="flex items-center justify-between mb-1">
                   <label className="flex flex-col text-xs font-semibold text-slate-300">
                     <span>Job Weapon Modifier</span>
                     <span className="text-[11px] text-slate-500 font-normal">
-                      Positions are identical in both versions — swap versions anytime without losing your vocation selection!
+                      Vocation order is locked identical in both tabs (swap freely without losing your choice)
                     </span>
                   </label>
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-slate-700">
-                    Mod: {jobMod > 0 ? `+${jobMod}` : `${jobMod}`}
+                    Active Mod: {activeJobMod > 0 ? `+${activeJobMod}` : `${activeJobMod}`}
+                    {isJobModOverridden && <span className="ml-1 text-amber-400 font-bold">(Override)</span>}
                   </span>
                 </div>
                 <select
@@ -481,51 +696,7 @@ export const DamageCalculator: React.FC = () => {
                   })}
                 </select>
               </div>
-            </div>
 
-            {/* Optional Toggles: Magic-weak & Priest Staff Exception */}
-            <div className="pt-2 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition-colors cursor-pointer select-none">
-                <input
-                  id="magicWeak"
-                  type="checkbox"
-                  checked={magicWeak}
-                  onChange={(e) => setMagicWeak(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer accent-amber-500"
-                />
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-slate-200">Enemy is magic-weak</span>
-                  <span className="text-[10px] text-slate-500">Applies ×1.3 to Magick penetration rate</span>
-                </div>
-              </label>
-
-              <label className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition-colors cursor-pointer select-none">
-                <input
-                  id="priestStaff"
-                  type="checkbox"
-                  checked={priestStaffException}
-                  disabled={!isPriestJob}
-                  onChange={(e) => setPriestStaffException(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer accent-amber-500 disabled:opacity-40"
-                />
-                <div className="flex flex-col">
-                  <span className={`text-xs font-bold ${isPriestJob ? 'text-slate-200' : 'text-slate-500'}`}>
-                    Priest Staff Penalty (+74)
-                  </span>
-                  <span className="text-[10px] text-slate-500">Adds +74 to required ATK when wielding Priest staff</span>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          {/* Section 2: Attack Power & Slayer Values */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-amber-400 flex items-center gap-2 border-b border-slate-800 pb-3">
-              <Swords className="w-4 h-4 text-amber-400" />
-              <span>Base Attack & Flat Stat Modifiers</span>
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Base Attack (displayed) */}
               <div>
                 <label className="flex flex-col text-xs font-semibold text-slate-300 mb-1">
@@ -569,7 +740,7 @@ export const DamageCalculator: React.FC = () => {
               <div>
                 <label className="flex flex-col text-xs font-semibold text-slate-300 mb-1">
                   <span>Flat Slayer vs Selected Kind</span>
-                  <span className="text-[11px] text-slate-500 font-normal">e.g. Beast Slayer, Spirit Slayer</span>
+                  <span className="text-[11px] text-slate-500 font-normal">e.g. Dragon Slayer, Beast Slayer</span>
                 </label>
                 <div className="relative">
                   <input
@@ -588,7 +759,7 @@ export const DamageCalculator: React.FC = () => {
               <div>
                 <label className="flex flex-col text-xs font-semibold text-slate-300 mb-1">
                   <span>Base Skill Power</span>
-                  <span className="text-[11px] text-slate-500 font-normal">Default baseline is 100</span>
+                  <span className="text-[11px] text-slate-500 font-normal">Standard baseline is 100</span>
                 </label>
                 <div className="relative">
                   <input
@@ -606,7 +777,240 @@ export const DamageCalculator: React.FC = () => {
             </div>
           </div>
 
-          {/* Section 3: % Damage Bonuses */}
+          {/* Section 2: Manual Overrides (V2 Exclusive) */}
+          {calcVersion === 'v2' && (
+            <div className="bg-slate-900 border-l-4 border-amber-500 border-y border-r border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-amber-400 flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-amber-400" />
+                  <span>Manual Overrides (Optional - leave blank for auto formulas)</span>
+                </h2>
+                {(manualDiv || manualReqAtk || manualJobMod) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setManualDiv('');
+                      setManualReqAtk('');
+                      setManualJobMod('');
+                    }}
+                    className="text-[11px] text-amber-400 hover:text-amber-300 font-mono cursor-pointer"
+                  >
+                    Clear Overrides
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Manual Div */}
+                <div>
+                  <label className="flex flex-col text-xs font-semibold text-slate-300 mb-1">
+                    <span>Manual Div</span>
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      Default: 0.763×Lv+75.8 ({calcResult.autoDiv.toFixed(1)})
+                    </span>
+                  </label>
+                  <input
+                    id="manualDiv"
+                    type="number"
+                    placeholder="Leave blank for auto"
+                    step="0.1"
+                    value={manualDiv}
+                    onChange={(e) => setManualDiv(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white font-mono focus:outline-none placeholder:text-slate-600"
+                  />
+                </div>
+
+                {/* Manual Req ATK */}
+                <div>
+                  <label className="flex flex-col text-xs font-semibold text-slate-300 mb-1">
+                    <span>Manual Req ATK</span>
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      Default: table lookup ({calcResult.baseReqAtk})
+                    </span>
+                  </label>
+                  <input
+                    id="manualReqAtk"
+                    type="number"
+                    placeholder="Leave blank for auto"
+                    step="1"
+                    value={manualReqAtk}
+                    onChange={(e) => setManualReqAtk(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white font-mono focus:outline-none placeholder:text-slate-600"
+                  />
+                </div>
+
+                {/* Manual Job Mod */}
+                <div>
+                  <label className="flex flex-col text-xs font-semibold text-slate-300 mb-1">
+                    <span>Manual Job Mod</span>
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      Overrides dropdown (e.g. -135)
+                    </span>
+                  </label>
+                  <input
+                    id="manualJobMod"
+                    type="number"
+                    placeholder="e.g. -135"
+                    step="1"
+                    value={manualJobMod}
+                    onChange={(e) => setManualJobMod(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white font-mono focus:outline-none placeholder:text-slate-600"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Section 3: Enemy Modifiers & Debuffs */}
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-amber-400 flex items-center gap-2 border-b border-slate-800 pb-3">
+              <ShieldAlert className="w-4 h-4 text-amber-400" />
+              <span>Enemy Modifiers & Debuffs</span>
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Priest Staff Penalty Checkbox */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+                <input
+                  id="priestStaffPenalty"
+                  type="checkbox"
+                  checked={priestStaffPenalty}
+                  onChange={(e) => setPriestStaffPenalty(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer accent-amber-500"
+                />
+                <label htmlFor="priestStaffPenalty" className="text-xs font-semibold text-slate-200 cursor-pointer">
+                  Apply Priest Staff Penalty
+                  <span className="block text-[11px] text-slate-500 font-normal">
+                    Adds required attack threshold (+74)
+                  </span>
+                </label>
+              </div>
+
+              {/* Priest Penalty Value (V2 customizable input, V1 fixed note) */}
+              <div>
+                <label className="flex flex-col text-xs font-semibold text-slate-300 mb-1">
+                  <span>Penalty Amount (default 74)</span>
+                  <span className="text-[11px] text-slate-500 font-normal">Added to required ATK</span>
+                </label>
+                <input
+                  id="priestPenaltyValue"
+                  type="number"
+                  step="1"
+                  disabled={!priestStaffPenalty || calcVersion === 'v1'}
+                  value={calcVersion === 'v1' ? 74 : priestPenaltyValue}
+                  onChange={(e) => setPriestPenaltyValue(parseFloat(e.target.value) || 0)}
+                  className="w-full bg-slate-950 border border-slate-700 focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white font-mono focus:outline-none disabled:opacity-40"
+                />
+              </div>
+
+              {/* Enemy is magic-weak Checkbox */}
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+                <input
+                  id="magicWeak"
+                  type="checkbox"
+                  checked={magicWeak}
+                  onChange={(e) => setMagicWeak(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer accent-amber-500"
+                />
+                <label htmlFor="magicWeak" className="text-xs font-semibold text-slate-200 cursor-pointer">
+                  Enemy is magic-weak (Magick only)
+                  <span className="block text-[11px] text-slate-500 font-normal">
+                    Boosts penetration rate for Magick attacks
+                  </span>
+                </label>
+              </div>
+
+              {/* Magic Weak Multiplier (Slider in V2, fixed 1.3x in V1) */}
+              <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <span className="text-slate-300">Magic Weak Multiplier:</span>
+                  <span id="magicWeakDisplay" className="text-amber-400 font-mono font-bold">
+                    {calcVersion === 'v1' ? '1.30x' : `${magicWeakValue.toFixed(2)}x`}
+                  </span>
+                </div>
+                {calcVersion === 'v2' ? (
+                  <>
+                    <input
+                      id="magicWeakValue"
+                      type="range"
+                      min="1.0"
+                      max="1.5"
+                      step="0.05"
+                      value={magicWeakValue}
+                      onChange={(e) => setMagicWeakValue(parseFloat(e.target.value))}
+                      className="w-full accent-amber-500 cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                      <span>1.0x</span>
+                      <span>1.3x (Default)</span>
+                      <span>1.5x</span>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-[11px] text-slate-500">
+                    V1 uses standard fixed 1.30× multiplier when magic-weak is checked.
+                  </p>
+                )}
+              </div>
+
+              {/* V2 Exclusive Sliders: Defense Debuff & Elemental Weakness */}
+              {calcVersion === 'v2' && (
+                <>
+                  {/* Debuff (Defense Reduction) Slider */}
+                  <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <span className="text-slate-300">Debuff (Defense Reduction):</span>
+                      <span id="debuffDisplay" className="text-amber-400 font-mono font-bold">
+                        {debuffPercent}%
+                      </span>
+                    </div>
+                    <input
+                      id="debuffSlider"
+                      type="range"
+                      min="0"
+                      max="50"
+                      step="1"
+                      value={debuffPercent}
+                      onChange={(e) => setDebuffPercent(parseInt(e.target.value, 10))}
+                      className="w-full accent-amber-500 cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                      <span>0%</span>
+                      <span>25%</span>
+                      <span>50%</span>
+                    </div>
+                  </div>
+
+                  {/* Elemental Weakness Slider */}
+                  <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <span className="text-slate-300">Elemental Weakness:</span>
+                      <span id="elementalWeaknessDisplay" className="text-amber-400 font-mono font-bold">
+                        {elementalWeaknessValue.toFixed(2)}x
+                      </span>
+                    </div>
+                    <input
+                      id="elementalWeaknessValue"
+                      type="range"
+                      min="1.0"
+                      max="1.3"
+                      step="0.05"
+                      value={elementalWeaknessValue}
+                      onChange={(e) => setElementalWeaknessValue(parseFloat(e.target.value))}
+                      className="w-full accent-amber-500 cursor-pointer"
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                      <span>1.0x</span>
+                      <span>1.1x (Default)</span>
+                      <span>1.3x</span>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Section 4: % Damage Bonuses */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
               <h2 className="text-sm font-bold uppercase tracking-wider font-mono text-amber-400 flex items-center gap-2">
@@ -627,21 +1031,21 @@ export const DamageCalculator: React.FC = () => {
                     setImpact(0);
                     setOther(0);
                   }}
-                  className="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors"
+                  className="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors cursor-pointer"
                 >
                   Clear %
                 </button>
                 <button
                   type="button"
                   onClick={() => handleApplyEarringsPreset(26)}
-                  className="text-[11px] text-amber-300 hover:text-amber-200 px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-colors"
+                  className="text-[11px] text-amber-300 hover:text-amber-200 px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-colors cursor-pointer"
                 >
                   2x 13% Earrings (+26%)
                 </button>
                 <button
                   type="button"
                   onClick={() => handleApplyEarringsPreset(52)}
-                  className="text-[11px] text-amber-300 hover:text-amber-200 px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-colors"
+                  className="text-[11px] text-amber-300 hover:text-amber-200 px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-colors cursor-pointer"
                 >
                   4x 13% Earrings (+52%)
                 </button>
@@ -781,8 +1185,11 @@ export const DamageCalculator: React.FC = () => {
                   <TrendingUp className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-black text-white tracking-tight">
+                  <h3 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2">
                     Calculation Results
+                    <span className="text-xs font-mono font-bold bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/40 uppercase">
+                      {calcVersion}
+                    </span>
                   </h3>
                   <p className="text-xs text-slate-400">
                     Penetration rate & multiplier breakdown
@@ -862,7 +1269,7 @@ export const DamageCalculator: React.FC = () => {
               </div>
             </div>
 
-            {/* Detailed Results (Exact matching structure from user snippet) */}
+            {/* Detailed Results */}
             <div id="output" className="space-y-3 text-xs bg-slate-950/80 p-4 rounded-xl border border-slate-800 text-slate-300 leading-relaxed font-sans">
               <div className="pb-2 border-b border-slate-800 flex justify-between items-center">
                 <span className="text-slate-400">Target Profile:</span>
@@ -877,7 +1284,7 @@ export const DamageCalculator: React.FC = () => {
                   <span className="font-semibold text-amber-300">
                     {calcResult.selectedJob.name}{' '}
                     <span className="text-slate-400 font-normal">
-                      ({calcResult.modVersion === 'lv60' ? 'Lv 60 Wiki' : 'Lv 93 Estimated'})
+                      ({calcResult.modVersion === 'lv60' ? 'Lv 60 Wiki' : calcVersion === 'v2' ? 'Lv 93 ir105' : 'Lv 93 Estimated'})
                     </span>
                   </span>
                 </div>
@@ -889,15 +1296,32 @@ export const DamageCalculator: React.FC = () => {
                       {calcResult.effectiveAtk.toFixed(1)}
                     </span>
                     <div className="text-[10px] text-slate-500 font-mono">
-                      (Base {calcResult.baseAtk} + Flat {calcResult.flatAtk} + Slayer {calcResult.flatSlayer} − JobMod {calcResult.jobMod})
+                      (Base {calcResult.baseAtk} + Flat {calcResult.flatAtk} + Slayer {calcResult.flatSlayer} − JobMod {calcResult.activeJobMod})
                     </div>
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400">Required ATK for 100% Pen:</span>
-                  <span className="text-white font-mono font-bold">
-                    {calcResult.reqAtk.toFixed(1)}
+                  <div className="text-right">
+                    <span className="text-white font-mono font-bold">
+                      {calcResult.reqAtk.toFixed(1)}
+                    </span>
+                    {calcResult.priestPenaltyAdded > 0 && (
+                      <div className="text-[10px] text-amber-400/80 font-mono">
+                        (Base {calcResult.baseReqAtk.toFixed(1)} + Priest Staff +{calcResult.priestPenaltyAdded})
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400">Divisor (Formula / Manual):</span>
+                  <span className="text-slate-200 font-mono">
+                    {calcResult.div.toFixed(2)}
+                    {calcResult.isDivOverridden && (
+                      <span className="text-amber-400 ml-1 text-[10px]">(Manual)</span>
+                    )}
                   </span>
                 </div>
 
@@ -907,7 +1331,7 @@ export const DamageCalculator: React.FC = () => {
                     {(calcResult.penRate * 100).toFixed(2)}%
                     {calcResult.wasMagicWeakBoosted && (
                       <span className="text-[10px] text-indigo-400 ml-1 font-sans">
-                        (magic-weak ×1.3 applied)
+                        (magic-weak ×{calcResult.magicWeakValue} applied)
                       </span>
                     )}
                   </span>
@@ -920,6 +1344,24 @@ export const DamageCalculator: React.FC = () => {
                     <strong className="text-amber-300">{calcResult.percentMultiplier.toFixed(3)}</strong>
                   </span>
                 </div>
+
+                {calcVersion === 'v2' && calcResult.debuffPercent > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Debuff (Defense Reduction):</span>
+                    <span className="text-emerald-400 font-mono">
+                      -{calcResult.debuffPercent}% → ×{calcResult.debuffMultiplier.toFixed(3)}
+                    </span>
+                  </div>
+                )}
+
+                {calcVersion === 'v2' && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Elemental Weakness:</span>
+                    <span className="text-indigo-300 font-mono">
+                      ×{calcResult.elemMultiplier.toFixed(2)}
+                    </span>
+                  </div>
+                )}
 
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400">Relative Damage Multiplier:</span>
@@ -943,14 +1385,25 @@ export const DamageCalculator: React.FC = () => {
             {/* Formula Reference Explainer */}
             <div className="text-[11px] text-slate-500 space-y-1.5 pt-2 border-t border-slate-800">
               <p className="font-bold text-slate-400 font-mono text-[10px] uppercase tracking-wider">
-                Penetration Math Rules:
+                Penetration Math Rules ({calcVersion.toUpperCase()}):
               </p>
-              <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-400">
-                <li><code className="text-slate-300">Req ATK = 47.65 × EnemyLv − 1348.25</code></li>
-                <li><code className="text-slate-300">Effective ATK = Base + Flat + Slayer − JobMod</code></li>
-                <li><code className="text-slate-300">Penetration Rate = 2^((Effective − Req) / 149)</code> (Clamped 3.125% to 100%)</li>
-                <li><code className="text-slate-300">Final Damage = Base Skill × PenRate × (1 + Total% / 100)</code></li>
-              </ul>
+              {calcVersion === 'v2' ? (
+                <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-400">
+                  <li><code className="text-slate-300">Divisor = 0.763 × Lv + 75.8</code> (or manual override)</li>
+                  <li><code className="text-slate-300">Req ATK = Table Lookup (or 47.65 × Lv − 1348.25) + Priest Staff Penalty</code></li>
+                  <li><code className="text-slate-300">Effective ATK = Base + Flat + Slayer − JobMod</code></li>
+                  <li><code className="text-slate-300">Penetration Rate = 2^((Effective ATK − Req ATK) / Divisor)</code> (Clamped 3.125% to 100%)</li>
+                  <li><code className="text-slate-300">Final Damage = Skill × PenRate × %Bonus × Debuff × ElemWeakness</code></li>
+                </ul>
+              ) : (
+                <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-400">
+                  <li><code className="text-slate-300">Divisor = Fixed 149</code></li>
+                  <li><code className="text-slate-300">Req ATK = 47.65 × EnemyLv − 1348.25 (+74 Priest Penalty)</code></li>
+                  <li><code className="text-slate-300">Effective ATK = Base + Flat + Slayer − JobMod</code></li>
+                  <li><code className="text-slate-300">Penetration Rate = 2^((Effective − Req) / 149)</code> (Clamped 3.125% to 100%)</li>
+                  <li><code className="text-slate-300">Final Damage = Base Skill × PenRate × (1 + Total% / 100)</code></li>
+                </ul>
+              )}
             </div>
           </div>
         </div>

@@ -276,8 +276,8 @@ export const BESTIARY_SPECIES: BestiarySpecies[] = [
     id: 'dragon',
     name: 'Dragon / Dragonkin',
     category: 'Dragon / Dragonkin',
-    explanation: 'Includes Lindwurms, Lotus Fins, Dagons, Behemoths, Drakes, Elder Dragons, Angules, Wyrms, Cursed Dragons, Phantasmic Great Dragon, Tarasque and its variants, Spirit Dragon Willmia and Golgorran. Also includes the Black Dragon and the Evil Dragon.',
-    strategy: 'For Lindwurm types, break their wings to remove the aura. Behemoths\' weak spot is usually in their tailbone region, but you can also break the tusks. Angules is weak to Dark and will stop casting magick if you break the horn, and the weak spot is in the dorsal region. Drakes and Wyrms can breathe elemental flames and cast magick, and the weak spot is usually in the chest. Cursed Dragons can not be damaged outside of their weak spots until you break the crystals. Phantasmic Great Dragon is weak to Sleep, Poison and Dark damage, but immune to Frozen Solid. Tarasque is a tortoise-like Dragon, and requires you to break the legs first before you can attack the weak spot which is on its back. Golgorran has the same pseudo-armor mechanic as other Alchemized enemies and can inflict Golden. Elder Dragons are always angry and have breakable spikes on their bodies, with the final weak spot is on the chest.',
+    explanation: 'Includes Lindwurms, Lotus Fins, Dagons, Behemoths, Drakes, Elder Dragons, Angules, Wyrms, Cursed Dragons, Phantasmic Great Dragon, Tarasque and its variants, Spirit Dragon Wilmia and Golgorran. Also includes the Black Dragon and the Evil Dragon.',
+    strategy: 'For Lindwurm types, break their wings to remove the aura. Behemoths\' weak spot is usually in their tailbone region, but you can also break the tusks. Angules is weak to Dark and will stop casting magick if you break the horn, and the weak spot is in the dorsal region. Drakes and Wyrms can breathe elemental flames and cast magick, and the weak spot is usually in the chest. Cursed Dragons can not be damaged outside of their weak spots until you break the crystals. Phantasmic Great Dragon is weak to Sleep, Poison and Dark damage, but immune to Frozen Solid. Spirit Dragon Wilmia is weak to Fire (not Dark), and vulnerable to Sleep debilitation during enrage. Tarasque is a tortoise-like Dragon, and requires you to break the legs first before you can attack the weak spot which is on its back. Golgorran has the same pseudo-armor mechanic as other Alchemized enemies and can inflict Golden. Elder Dragons are always angry and have breakable spikes on their bodies, with the final weak spot is on the chest.',
     includedEnemies: [
       'Drake (Fire)',
       'Wyrm (Ice)',
@@ -291,14 +291,14 @@ export const BESTIARY_SPECIES: BestiarySpecies[] = [
       'Cursed Dragon',
       'Tarasque',
       'Elder Dragon',
-      'Spirit Dragon Willmia',
+      'Spirit Dragon Wilmia',
       'Phantasmic Great Dragon',
       'Golgorran',
       'Black Dragon',
       'Evil Dragon'
     ],
     coreType: 'Elemental Core',
-    weaknesses: ['Ice (Drake/Fire Dragons)', 'Fire (Wyrms)', 'Dark (Angules/Cursed)', 'Holy (Evil Dragon)'],
+    weaknesses: ['Ice (Drake/Fire Dragons)', 'Fire (Wyrms / Spirit Dragon Wilmia)', 'Dark (Angules/Cursed)', 'Holy (Evil Dragon)'],
     resistances: ['Opposing elements (Immune to matching elements)'],
     keyDebilitations: ['Sleep (Willmia/Phantasmic)', 'Poison', 'Elemental Burst'],
     dangerLevel: 'Extreme',
@@ -666,13 +666,13 @@ export const SPECIFIC_ENEMIES: SpecificEnemyDetail[] = [
     locations: ['Dinar Estuary', 'Phindym Lake']
   },
   {
-    name: 'Spirit Dragon Willmia',
+    name: 'Spirit Dragon Wilmia',
     speciesId: 'dragon',
     speciesName: 'Dragon / Dragonkin',
     size: 'Raid / EXM Boss',
-    elementalWeakness: 'Dark / Sleep Debilitation',
+    elementalWeakness: 'Fire (Weak to Fire, NOT Dark) / Sleep Debilitation',
     coreInfo: 'Spirit Pylons & Tail Base Core',
-    strategyTip: 'Inflict Sleep during heavy enrage phase. Destroy surrounding dragon crystals to expose main heart.',
+    strategyTip: 'Weak to Fire element (not Dark). Inflict Sleep during heavy enrage phase. Destroy surrounding dragon crystals to expose main heart.',
     locations: ['Season 2 Grand Raid: Tree of Life']
   },
   {
