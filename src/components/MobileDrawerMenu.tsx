@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { BoosterSettings, GameVersion, UserProfile } from '../types';
 import { GAME_VERSIONS, getMaxLevelForVersion, XP_RING_CAP_LEVEL } from '../data/levelTable';
+import { XpUpIcon, JpIcon } from './CustomIcons';
 
 interface MobileDrawerMenuProps {
   isOpen: boolean;
@@ -53,7 +54,7 @@ export const MobileDrawerMenu: React.FC<MobileDrawerMenuProps> = ({
       id: 'calculator',
       title: 'Level Progress & Goal',
       subtitle: 'XP calculator, level simulator & farm spots',
-      icon: Shield,
+      icon: XpUpIcon,
       color: 'text-amber-400',
       bgColor: 'bg-amber-500/10 border-amber-500/30',
     },
@@ -61,7 +62,7 @@ export const MobileDrawerMenu: React.FC<MobileDrawerMenuProps> = ({
       id: 'vocations',
       title: 'Vocations & Job Targets',
       subtitle: 'Skills, augments & training checklist',
-      icon: Swords,
+      icon: JpIcon,
       color: 'text-cyan-400',
       bgColor: 'bg-cyan-500/10 border-cyan-500/30',
     },
@@ -306,7 +307,7 @@ export const MobileDrawerMenu: React.FC<MobileDrawerMenuProps> = ({
                 : 'bg-slate-900 border-slate-800 text-slate-400'
             }`}
           >
-            <Sparkles className="w-3 h-3 text-amber-400" />
+            <XpUpIcon className="w-3.5 h-3.5 text-amber-400" />
             <span>50% Ring: {boosters.useExpRing50 ? 'ON' : 'OFF'}</span>
           </button>
         </div>

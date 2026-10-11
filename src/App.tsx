@@ -24,6 +24,7 @@ import { GDPRConsentModal } from './components/GDPRConsentModal';
 import { MobileDrawerMenu } from './components/MobileDrawerMenu';
 import { StartupNoticeModal } from './components/StartupNoticeModal';
 import { DamageCalculator } from './components/DamageCalculator';
+import { XpUpIcon, JpIcon } from './components/CustomIcons';
 import { BoosterSettings, CommunityFarmSpot, GameVersion, PlannedQuest, Quest, SpotSearchCategory, SpotSearchStageScope, UserProfile, VocationType } from './types';
 import { LEVELING_PRESETS } from './data/levelingPresets';
 import { ALL_QUESTS } from './data/quests';
@@ -558,7 +559,7 @@ export default function App() {
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <Shield className="w-4 h-4 shrink-0" />
+                <XpUpIcon className="w-4 h-4 shrink-0" />
                 <span className="truncate">Level Progress & Goal</span>
               </button>
 
@@ -571,7 +572,7 @@ export default function App() {
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <Swords className="w-4 h-4 shrink-0" />
+                <JpIcon className="w-4 h-4 shrink-0" />
                 <span className="truncate">Vocations & Job Targets</span>
               </button>
 
@@ -1039,7 +1040,7 @@ export default function App() {
               activeTab === 'calculator' ? 'text-amber-400 font-bold scale-105' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Shield className="w-4 h-4" />
+            <XpUpIcon className="w-4 h-4" />
             <span className="text-[10px] mt-0.5">Progress</span>
           </button>
 
@@ -1052,7 +1053,7 @@ export default function App() {
               activeTab === 'vocations' ? 'text-amber-400 font-bold scale-105' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Swords className="w-4 h-4" />
+            <JpIcon className="w-4 h-4" />
             <span className="text-[10px] mt-0.5">Vocations</span>
           </button>
 

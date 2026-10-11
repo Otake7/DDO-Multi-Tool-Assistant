@@ -28,6 +28,7 @@ import {
   List
 } from 'lucide-react';
 import { GameVersion, VocationData, VocationId, VocationType } from '../types';
+import { JpIcon } from './CustomIcons';
 import { ALL_VOCATIONS } from '../data/vocations';
 import {
   getMaxLevelForVersion,
@@ -468,7 +469,7 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
           <div>
             <h2 className="text-base sm:text-lg font-bold text-slate-100 flex items-center gap-2">
-              <Swords className="w-5 h-5 text-amber-400" />
+              <JpIcon className="w-6 h-6 text-amber-400 shrink-0" />
               <span>DDON Vocations, Skills & Job Points (JP) System</span>
             </h2>
             <p className="text-xs text-slate-400">
@@ -652,7 +653,7 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Award className="w-3.5 h-3.5" />
+              <JpIcon className="w-3.5 h-3.5" />
               <span>Job Targets ({allVocationTrials.length})</span>
             </button>
 

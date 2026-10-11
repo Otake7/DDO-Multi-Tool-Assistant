@@ -19,6 +19,7 @@ import {
   FlaskConical
 } from 'lucide-react';
 import { SPECIFIC_ENEMIES } from '../data/bestiaryData';
+import { FantasySlider } from './FantasySlider';
 
 export interface VocationModifierInfo {
   id: string;
@@ -930,15 +931,13 @@ export const DamageCalculator: React.FC = () => {
                 </div>
                 {calcVersion === 'v2' ? (
                   <>
-                    <input
+                    <FantasySlider
                       id="magicWeakValue"
-                      type="range"
                       min="1.0"
                       max="1.5"
                       step="0.05"
                       value={magicWeakValue}
                       onChange={(e) => setMagicWeakValue(parseFloat(e.target.value))}
-                      className="w-full accent-amber-500 cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-slate-500 font-mono">
                       <span>1.0x</span>
@@ -964,15 +963,13 @@ export const DamageCalculator: React.FC = () => {
                         {debuffPercent}%
                       </span>
                     </div>
-                    <input
+                    <FantasySlider
                       id="debuffSlider"
-                      type="range"
                       min="0"
                       max="50"
                       step="1"
                       value={debuffPercent}
                       onChange={(e) => setDebuffPercent(parseInt(e.target.value, 10))}
-                      className="w-full accent-amber-500 cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-slate-500 font-mono">
                       <span>0%</span>
@@ -989,15 +986,13 @@ export const DamageCalculator: React.FC = () => {
                         {elementalWeaknessValue.toFixed(2)}x
                       </span>
                     </div>
-                    <input
+                    <FantasySlider
                       id="elementalWeaknessValue"
-                      type="range"
                       min="1.0"
                       max="1.3"
                       step="0.05"
                       value={elementalWeaknessValue}
                       onChange={(e) => setElementalWeaknessValue(parseFloat(e.target.value))}
-                      className="w-full accent-amber-500 cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-slate-500 font-mono">
                       <span>1.0x</span>

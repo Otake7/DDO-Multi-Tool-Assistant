@@ -8,6 +8,7 @@ import {
 import { BoosterSettings, GameVersion, UserProfile } from '../types';
 import { GAME_VERSIONS, getMaxLevelForVersion, XP_RING_CAP_LEVEL } from '../data/levelTable';
 import { PWAInstallModal } from './PWAInstallModal';
+import { XpUpIcon, JpIcon } from './CustomIcons';
 
 interface HeaderProps {
   currentLevel: number;
@@ -144,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400'
                 }`}
               >
-                <Sparkles className="w-4 h-4" />
+                <XpUpIcon className="w-4 h-4" />
               </button>
 
               {/* Install / Download App Button */}
@@ -314,7 +315,7 @@ export const Header: React.FC<HeaderProps> = ({
                     : 'bg-slate-800 border-slate-700 text-slate-400'
                 }`}
               >
-                <Sparkles className="w-4 h-4" />
+                <XpUpIcon className="w-4 h-4" />
               </button>
               <button
                 onClick={onReset}
@@ -378,7 +379,7 @@ export const Header: React.FC<HeaderProps> = ({
                     : '50% Level Up Speed XP Ring (Active for Lv 1 to 89)'
                 }
               >
-                <Sparkles className={`w-3.5 h-3.5 ${boosters.useExpRing50 ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} />
+                <XpUpIcon className={`w-3.5 h-3.5 ${boosters.useExpRing50 ? 'text-amber-400 animate-pulse' : 'text-slate-400'}`} />
                 <span className="hidden sm:inline">50% Ring (Lv 1–89)</span>
                 <span className="sm:hidden">50% Ring</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
@@ -392,7 +393,7 @@ export const Header: React.FC<HeaderProps> = ({
 
               {/* Level Range Badge */}
               <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300">
-                <Shield className="w-3.5 h-3.5 text-amber-400" />
+                <XpUpIcon className="w-3.5 h-3.5 text-amber-400" />
                 <span>Lv <strong className="text-white font-mono">{currentLevel}</strong> → <strong className="text-amber-300 font-mono">{targetLevel}</strong></span>
               </div>
             </div>
@@ -448,7 +449,7 @@ export const Header: React.FC<HeaderProps> = ({
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              <Shield className="w-4 h-4" />
+              <XpUpIcon className="w-4 h-4" />
               <span>Level Progress & Goal</span>
             </button>
 
@@ -461,7 +462,7 @@ export const Header: React.FC<HeaderProps> = ({
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              <Swords className="w-4 h-4" />
+              <JpIcon className="w-4 h-4" />
               <span>Vocations & Job Targets</span>
             </button>
 

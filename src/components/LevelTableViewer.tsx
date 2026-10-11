@@ -9,6 +9,7 @@ import {
 } from '../data/levelTable';
 import { Search, Sparkles, Award, Shield, Zap, Info } from 'lucide-react';
 import { GameVersion } from '../types';
+import { XpUpIcon, JpIcon } from './CustomIcons';
 
 interface LevelTableViewerProps {
   currentLevel: number;
@@ -92,7 +93,7 @@ export const LevelTableViewer: React.FC<LevelTableViewerProps> = ({
       {/* Info Pills */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-slate-950/70 border border-slate-800 rounded-lg p-3 flex items-center gap-3">
-          <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
+          <XpUpIcon className="w-5 h-5 text-amber-400 shrink-0" />
           <div>
             <div className="text-xs font-bold text-slate-200">50% XP Ring Active Zone</div>
             <div className="text-[11px] text-slate-400">Level 1 → Level 89 (+50% bonus)</div>
@@ -100,7 +101,7 @@ export const LevelTableViewer: React.FC<LevelTableViewerProps> = ({
         </div>
 
         <div className="bg-slate-950/70 border border-slate-800 rounded-lg p-3 flex items-center gap-3">
-          <Zap className="w-5 h-5 text-yellow-400 shrink-0" />
+          <JpIcon className="w-5 h-5 text-yellow-400 shrink-0" />
           <div>
             <div className="text-xs font-bold text-slate-200">Leveling JP Pool (Lv 1–70)</div>
             <div className="text-[11px] text-slate-400">
@@ -110,7 +111,7 @@ export const LevelTableViewer: React.FC<LevelTableViewerProps> = ({
         </div>
 
         <div className="bg-slate-950/70 border border-slate-800 rounded-lg p-3 flex items-center gap-3">
-          <Shield className="w-5 h-5 text-purple-400 shrink-0" />
+          <XpUpIcon className="w-5 h-5 text-purple-400 shrink-0" />
           <div>
             <div className="text-xs font-bold text-slate-200">JP Leveling Gain Cap</div>
             <div className="text-[11px] text-slate-400">

@@ -25,6 +25,7 @@ import {
   ArrowUpDown
 } from 'lucide-react';
 import { BoosterSettings, GameVersion, PlannedQuest, Quest, UserProfile, PlannerSortOption, VoteDirection } from '../types';
+import { XpUpIcon } from './CustomIcons';
 import { ALL_QUESTS } from '../data/quests';
 import { simulateQuestPlan, getSingleQuestXp } from '../utils/calculator';
 import { LEVELING_PRESETS } from '../data/levelingPresets';
@@ -327,7 +328,7 @@ export const QuestPlanner: React.FC<QuestPlannerProps> = ({
         {/* 50% XP Ring Mechanic Notice Banner */}
         <div className="bg-slate-950/90 border border-amber-500/20 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+            <XpUpIcon className="w-4 h-4 text-amber-400 shrink-0" />
             <span className="text-slate-300">
               50% XP Ring is{' '}
               {boosters.useExpRing50 ? (

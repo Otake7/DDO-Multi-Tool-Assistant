@@ -19,6 +19,7 @@ import {
   Compass
 } from 'lucide-react';
 import { BoosterSettings, PlannedQuest, Quest, QuestType, Region } from '../types';
+import { XpUpIcon } from './CustomIcons';
 import { ALL_QUESTS, REGIONS } from '../data/quests';
 import { WORLD_QUEST_SUBCATEGORIES } from '../data/worldQuests';
 import { PERSONAL_QUEST_SUBCATEGORIES } from '../data/personalQuests';
@@ -455,7 +456,7 @@ export const QuestDatabase: React.FC<QuestDatabaseProps> = ({
           {personalSubcategory !== 'ALL' && <span> • Personal: <strong className="text-cyan-300">{personalSubcategory}</strong></span>}
         </div>
         <div className="text-xs text-slate-400 flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <XpUpIcon className="w-3.5 h-3.5 text-amber-400" />
           <span>
             XP Ring Status: {isRingActiveAtCurrentLevel ? (
               <strong className="text-emerald-400">+50% Active (Lv {currentLevel})</strong>
