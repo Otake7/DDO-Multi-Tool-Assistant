@@ -237,19 +237,19 @@ export const skillNameMap: Record<string, string> = {
   "7_205": "SparkSlashT",
   // Element Archer (Job 8)
   "8_1": "HealingBolt",
-  "8_2": "CuringBolt",
-  "8_3": "FlamingBow",
-  "8_4": "FourfoldBolt",
-  "8_5": "RicochetSeeker",
+  "8_2": "WardArrow",
+  "8_3": "FourfoldBolt",
+  "8_4": "RicochetSeeker",
+  "8_5": "ExplosiveBolt",
   "8_6": "MagickalFlare",
-  "8_7": "EnfeeblingBow",
-  "8_8": "CripplingBow",
-  "8_9": "EnergizingBolt",
-  "8_10": "ExhaustingBow",
-  "8_11": "WeakeningBow",
-  "8_12": "GambleDraw",
+  "8_7": "AttackDownMagicArrow",
+  "8_8": "DefenseDownMagicArrow",
+  "8_9": "StaminaMagicArrow",
+  "8_10": "EnduranceReduceArrow",
+  "8_11": "ExhaustArrow",
+  "8_12": "FullSpiritBow",
   "8_13": "HealingFlash",
-  "8_14": "TearingTentacleArrow",
+  "8_14": "TactileMayaArrow",
   "8_105": "FlamingBowP",
   "8_205": "FlamingBowT",
   "8_110": "ExhaustingBowP",
@@ -463,31 +463,31 @@ export const abilityNameMap: Record<number, string> = {
   148: "CursedProficiency",
   149: "HumanSafeguard",
   150: "HumanoidProficiency",
-  151: "UnitedEnergy",
+  151: "Issei",
   152: "LengthyAssistance",
   153: "QuickArrow",
-  154: "AidExtension",
+  154: "AidExpansion",
   155: "PersistentArrow",
-  156: "HealExtension",
+  156: "AidExtension",
   157: "HealThyself",
-  158: "QuickHealing0",
+  158: "QuickHealing",
   159: "RecoveryBurst",
   160: "LifeEnergizer",
   161: "LifeSpark",
   162: "SelfFeedback",
   163: "Mending",
   164: "DeathlyDevour",
-  165: "QuickHealing1",
-  166: "VergeofDeath",
+  165: "CompleteRecovery",
+  166: "VergeOfDeath",
   167: "FireAffinity",
   168: "IceAffinity",
   169: "ThunderAffinity",
   170: "HolyAffinity",
-  171: "DarkAffinity",
+  171: "DarknessAffinity",
   172: "SpiritSafeguard",
   173: "SpiritProficiency",
-  174: "ConstructSafeguard",
-  175: "ConstructProficiency",
+  174: "RockSafeguard",
+  175: "RockProficiency",
   176: "Aggression",
   177: "OverflowingHatred",
   178: "Malice",
@@ -2723,7 +2723,7 @@ export function enrichVocationWithJobSkillData(voc: any): any {
     const skillNo = skill.skillNo || (idx + 1);
     const key = `${jobNo}_${skillNo}`;
     const mappedRawName = skillNameMap[key];
-    const formattedName = mappedRawName ? formatSkillName(mappedRawName) : skill.name;
+    const formattedName = skill.name || (mappedRawName ? formatSkillName(mappedRawName) : skill.name);
     const officialSkill = getOfficialSkillDef(jobNo, skillNo);
 
     let jpCostPerRank: number[];
@@ -2733,7 +2733,7 @@ export function enrichVocationWithJobSkillData(voc: any): any {
     if (officialSkill && officialSkill.Params && officialSkill.Params.length > 0) {
       jpCostPerRank = officialSkill.Params.map(p => p.RequireJobPoint);
       reqLevelPerRank = officialSkill.Params.map(p => p.RequireJobLevel);
-      unlockLevel = officialSkill.Params[0].RequireJobLevel || (skillNo === 1 ? 1 : (skill.unlockLevel || 1));
+      unlockLevel = skill.unlockLevel !== undefined ? skill.unlockLevel : (officialSkill.Params[0].RequireJobLevel || (skillNo === 1 ? 1 : (skill.unlockLevel || 1)));
     } else {
       const slotDef = SLOT_PROGRESSIONS[skillNo] || {
         unlockLevel: skill.unlockLevel || 1,
@@ -2742,7 +2742,7 @@ export function enrichVocationWithJobSkillData(voc: any): any {
       };
       jpCostPerRank = slotDef.jpCosts;
       reqLevelPerRank = slotDef.reqLevels;
-      unlockLevel = slotDef.unlockLevel;
+      unlockLevel = skill.unlockLevel !== undefined ? skill.unlockLevel : slotDef.unlockLevel;
     }
 
     const totalJpToMax = jpCostPerRank.reduce((a: number, b: number) => a + b, 0);
@@ -2751,7 +2751,7 @@ export function enrichVocationWithJobSkillData(voc: any): any {
       ...skill,
       id: skill.id || `${voc.id}_skill_${skillNo}`,
       skillNo,
-      name: formattedName,
+      name: skill.name || formattedName,
       jpName: skill.jpName || mappedRawName,
       type: 'custom' as const,
       unlockLevel,
@@ -2767,19 +2767,21 @@ export function enrichVocationWithJobSkillData(voc: any): any {
   const augments = (voc.augments || []).map((aug: any, idx: number) => {
     const abilityNo = aug.abilityNo || (startAbilityNo + idx);
     const rawAbilityName = abilityNameMap[abilityNo];
-    const formattedName = rawAbilityName ? formatSkillName(rawAbilityName) : aug.name;
+    const formattedName = aug.name || (rawAbilityName ? formatSkillName(rawAbilityName) : aug.name);
     const officialAbility = getOfficialAbilityDef(abilityNo);
 
-    let ppCost = aug.ppCost || 4;
+    let ppCost = aug.ppCost !== undefined ? aug.ppCost : 4;
     let jpCostPerRank = aug.jpCostPerRank || [300, 400, 500, 800, 1000, 2000];
     let reqLevelPerRank = aug.reqLevelPerRank || [1, 5, 10, 20, 30, 40];
     let unlockLevel = aug.unlockLevel || 1;
 
     if (officialAbility && officialAbility.Params && officialAbility.Params.length > 0) {
-      ppCost = officialAbility.Cost !== undefined ? officialAbility.Cost : ppCost;
+      if (aug.ppCost === undefined && officialAbility.Cost !== undefined) {
+        ppCost = officialAbility.Cost;
+      }
       jpCostPerRank = officialAbility.Params.map(p => p.RequireJobPoint);
       reqLevelPerRank = officialAbility.Params.map(p => p.RequireJobLevel);
-      unlockLevel = officialAbility.Params[0].RequireJobLevel || unlockLevel;
+      unlockLevel = aug.unlockLevel !== undefined ? aug.unlockLevel : (officialAbility.Params[0].RequireJobLevel || unlockLevel);
     }
 
     const totalJpToMax = jpCostPerRank.reduce((a: number, b: number) => a + b, 0);
@@ -2787,7 +2789,7 @@ export function enrichVocationWithJobSkillData(voc: any): any {
     return {
       ...aug,
       abilityNo,
-      name: formattedName,
+      name: aug.name || formattedName,
       jpName: aug.jpName || rawAbilityName,
       ppCost,
       unlockLevel,

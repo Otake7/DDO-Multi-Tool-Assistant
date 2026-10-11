@@ -166,6 +166,9 @@ export interface VocationSkill {
   staminaCost?: string;
   description: string;
   levelingNotes?: string;
+  lvUpChange?: string;
+  lv6Change?: string;
+  notes?: string;
   reqLevelPerRank?: number[]; // [lv1, lv2, lv3, lv4, lv5, lv6, lv7, lv8, lv9, lv10]
   jpCostPerRank?: number[]; // JP cost for each rank (e.g. Rank 1 to 10)
   totalJpToMax?: number;

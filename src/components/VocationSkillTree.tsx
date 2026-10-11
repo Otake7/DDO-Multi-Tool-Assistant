@@ -789,6 +789,30 @@ export const VocationSkillTree: React.FC<VocationSkillTreeProps> = ({
                           )}
                         </div>
                         <p className="text-xs text-slate-300 mt-1 leading-relaxed">{skill.description}</p>
+                        {(skill.lvUpChange || skill.lv6Change || skill.notes) && (
+                          <div className="mt-2.5 pt-2 border-t border-slate-800/60 space-y-2 text-xs">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {skill.lvUpChange && (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-[11px]">
+                                  <span className="font-bold text-emerald-400">LvUp Change:</span>
+                                  <span>{skill.lvUpChange}</span>
+                                </span>
+                              )}
+                              {skill.lv6Change && (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-950/40 border border-amber-500/30 text-amber-300 text-[11px]">
+                                  <span className="font-bold text-amber-400">Lv6 Change:</span>
+                                  <span>{skill.lv6Change}</span>
+                                </span>
+                              )}
+                            </div>
+                            {skill.notes && (
+                              <div className="text-[11px] text-slate-300 bg-slate-950/80 border border-slate-800/90 rounded-xl p-2.5 leading-relaxed whitespace-pre-line">
+                                <strong className="text-amber-400 font-semibold">Notes: </strong>
+                                <span>{skill.notes}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
 
